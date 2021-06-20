@@ -23,10 +23,11 @@ class LoginAPIView(views.APIView):
 
     def post(self, request):
         data = {'password': request.data.get('password')}
-        if '@' in request.data.get('login'):
-            data['email'] = request.data.get('login')
+        print(request.data)
+        if '@' in request.data:
+            data['email'] = request.data.get('email')
         else:
-            data['phone_number'] = request.data.get('login')
+            data['phone_number'] = request.data.get('phone_number')
         serializer = self.serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

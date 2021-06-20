@@ -2,10 +2,9 @@ from django.utils import timezone
 
 from django.contrib.auth import get_user_model
 from django.conf import settings
-from rest_framework import serializers, status
+from rest_framework import serializers
 
-from KnoxStorage.apps.ipfs_app.models import File, Folder
-from KnoxStorage.apps.users.models import RefreshToken, AccessFile, AccessFolder, User
+from users.models import RefreshToken
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -16,7 +15,8 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ('email', 'phone_number', 'password', 'name', 'surname', 'access', 'refresh', 'expires_in')
+        fields = ('email', 'phone_number', 'password', 'name', 'surname', 'fathers_name',
+                  'date_of_birth', 'access', 'refresh', 'expires_in')
 
     def create(self, validated_data):
         return get_user_model().objects.create_user(**validated_data)
@@ -80,81 +80,3 @@ class TokenObtainSerializer(serializers.Serializer):
         validate_data = old_refresh.user.generate_tokens()
         validate_data['full_name'] = old_refresh.user.get_full_name()
         return validate_data
-
-
-class AccessFileSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    file = serializers.IntegerField()
-    write = serializers.BooleanField()
-
-    def validate(self, data):
-        validated_data = super().validate(data)
-
-        try:
-            file = File.objects.get(id=validated_data['file'])
-        except File.DoesNotExist:
-            raise serializers.ValidationError('File not found')
-        validated_data['file'] = file
-
-        owner = self.context['request'].user
-        if file.user != owner:
-            raise serializers.ValidationError('No access')
-
-        try:
-            user = User.objects.get(email=validated_data['email'])
-        except User.DoesNotExist:
-            raise serializers.ValidationError('User not found')
-        validated_data['user'] = user
-
-        if user == owner:
-            raise serializers.ValidationError('User is invalid')
-
-        return validated_data
-
-    def create(self, validated_data):
-        access_file, created = AccessFile.objects.update_or_create(
-            user=validated_data['user'], file=validated_data['file'], defaults={'write': validated_data['write']})
-
-        return access_file
-
-    def delete(self, validated_data):
-        AccessFile.objects.filter(file=validated_data['file'], user=validated_data['user']).delete()
-
-
-class AccessFolderSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    folder = serializers.IntegerField()
-    write = serializers.BooleanField()
-
-    def validate(self, data):
-        validated_data = super().validate(data)
-
-        try:
-            folder = Folder.objects.get(id=validated_data['folder'])
-        except Folder.DoesNotExist:
-            raise serializers.ValidationError('File not found')
-        validated_data['folder'] = folder
-
-        owner = self.context['request'].user
-        if folder.user != owner:
-            raise serializers.ValidationError('No access')
-
-        try:
-            user = User.objects.get(email=validated_data['email'])
-        except User.DoesNotExist:
-            raise serializers.ValidationError('User not found')
-        validated_data['user'] = user
-
-        if user == owner:
-            raise serializers.ValidationError('User is invalid')
-
-        return validated_data
-
-    def create(self, validated_data):
-        access_file, created = AccessFolder.objects.update_or_create(
-            user=validated_data['user'], folder=validated_data['folder'], defaults={'write': validated_data['write']})
-
-        return access_file
-
-    def delete(self, validated_data):
-        AccessFolder.objects.filter(folder=validated_data['folder'], user=validated_data['user']).delete()

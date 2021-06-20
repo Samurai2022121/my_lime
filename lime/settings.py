@@ -69,6 +69,18 @@ DATABASES = {
 
 AUTH_USER_MODEL = 'users.User'
 
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'users.backends.JWTAuthentication',
+    ),
+    'DATETIME_FORMAT': '%H:%M %d/%m/%Y',
+    'DATE_FORMAT': '%d/%m/%Y',
+    'TIME_FORMAT': '%H:%M'
+}
+
 ACCESS_TOKEN_LIFETIME = timedelta(hours=15)
 REFRESH_TOKEN_LIFETIME = timedelta(days=1)
 
