@@ -1,14 +1,10 @@
 from rest_framework import viewsets, exceptions
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from products.models import Category, Product
-from products.serializers import CategorySerializer, ProductListSerializer, ProductSerializer
+from utils.views_utils import ProductPagination
 
-
-class ProductPagination(PageNumberPagination):
-    page_size = 10
-    page_size_query_param = 'page_size'
+from .models import Category, Product, Subcategory
+from .serializers import CategorySerializer, ProductListSerializer, ProductSerializer, SubCategorySerializer
 
 
 class ProductViewset(viewsets.ModelViewSet):
@@ -37,3 +33,17 @@ class ProductViewset(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         raise exceptions.ValidationError('DELETE is not supported')
+
+
+class CategoryViewset(viewsets.ModelViewSet):
+    permission_classes = (AllowAny,)
+    serializer_class = CategorySerializer
+    lookup_field = 'id'
+    queryset = Category.objects.all()
+
+
+class SubcategoryViewset(viewsets.ModelViewSet):
+    permission_classes = (AllowAny,)
+    serializer_class = SubCategorySerializer
+    lookup_field = 'id'
+    queryset = Subcategory.objects.all()

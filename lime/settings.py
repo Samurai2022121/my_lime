@@ -8,7 +8,7 @@ SECRET_KEY = 'django-insecure-09kwm1pabqdb#rm-%c_l5ud9jwtmeh&lvt6_oee_l@%rid4d1t
 
 DEBUG = True
 
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", default="127.0.0.1").split(" ")
+ALLOWED_HOSTS = (["127.0.0.1", "185.246.88.154"])
 CORS_ORIGIN_ALLOW_ALL = True
 
 
@@ -23,6 +23,9 @@ INSTALLED_APPS = [
     'rest_framework',
 
     'users',
+    'products',
+    'recipes',
+
 ]
 
 MIDDLEWARE = [
@@ -61,7 +64,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'fresh',
         'USER': 'bump',
-        'PASSWORD': 'SFsa@dfwefq$2@3221',
+        'PASSWORD': 'adfadfr@af24323422@',
         'HOST': '185.246.88.154',
         'PORT': '5432',
     }

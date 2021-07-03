@@ -1,13 +1,7 @@
 from django.contrib import admin
 
-from products.models import Category, Product
-
-
-class ListDisplayAllModelFieldsAdminMixin(object):
-
-    def __init__(self, model, admin_site):
-        self.list_display = [field.name for field in model._meta.fields if field.name != "id"]
-        super(ListDisplayAllModelFieldsAdminMixin, self).__init__(model, admin_site)
+from utils.models_utils import ListDisplayAllModelFieldsAdminMixin
+from .models import Category, Product, Subcategory
 
 
 @admin.register(Category)
@@ -17,4 +11,9 @@ class CategoryAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
+    pass
+
+
+@admin.register(Subcategory)
+class SubcategoryAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
     pass
