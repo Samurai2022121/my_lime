@@ -19,12 +19,13 @@ class RecipeCategory(models.Model):
 
 class Recipe(models.Model):
     name = models.CharField(max_length=150, verbose_name='Название')
-    author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Автор')
+    author = models.ForeignKey(User, related_name='recipes', on_delete=models.CASCADE, verbose_name='Автор')
     publication_date = models.DateTimeField(auto_now=True, verbose_name='Дата публикации')
-    ingredients_in_stock = models.ManyToManyField(Product, verbose_name='Ингриндиенты в наличии')
+    ingredients_in_stock = models.ManyToManyField(Product, related_name='recipes',
+                                                  verbose_name='Ингриндиенты в наличии')
     other_ingredients = models.TextField(null=True, blank=True, verbose_name='Прочие ингриндиенты')
-    recipe_category = models.ForeignKey(RecipeCategory, on_delete=models.SET_NULL, verbose_name='Категория',
-                                        blank=True, null=True)
+    recipe_category = models.ForeignKey(RecipeCategory, related_name='recipes', on_delete=models.SET_NULL,
+                                        verbose_name='Категория', blank=True, null=True)
     cook_time = models.IntegerField(verbose_name='Время приготовления')
     description = models.TextField(null=True, blank=True, verbose_name='Описание')
     image = models.ImageField(null=True, blank=True, verbose_name='Изображение')

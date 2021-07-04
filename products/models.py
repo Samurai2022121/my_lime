@@ -16,7 +16,8 @@ class Category(models.Model):
 
 class Subcategory(models.Model):
     name = models.CharField(max_length=150, unique=True, verbose_name='Название')
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name='Категория')
+    category = models.ForeignKey(Category, related_name='subcategories',
+                                 on_delete=models.CASCADE, verbose_name='Категория')
     description = models.TextField(blank=True, null=True, verbose_name='Описание')
 
     class Meta:
@@ -30,8 +31,8 @@ class Subcategory(models.Model):
 
 class Product(models.Model):
     name = models.CharField(max_length=250, verbose_name='Наименование')
-    subcategory = models.ForeignKey(Subcategory, on_delete=models.SET_NULL, null=True,
-                                    blank=True, verbose_name='Подкатегория')
+    subcategory = models.ForeignKey(Subcategory, related_name='products', on_delete=models.SET_NULL,
+                                    null=True, verbose_name='Подкатегория')
     description = models.TextField(blank=True, null=True, verbose_name='Описание')
     price = models.FloatField(verbose_name='Цена')
     creation_date = models.DateTimeField(auto_now_add=True, verbose_name='Дата добавления')
