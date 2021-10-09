@@ -3,8 +3,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from utils.views_utils import ProductPagination
 
-from .models import Category, Product, Subcategory
-from .serializers import CategorySerializer, ProductListSerializer, ProductSerializer, SubCategorySerializer
+from .models import Category, Product
+from .serializers import CategorySerializer, ProductListSerializer, ProductSerializer
 
 
 class ProductViewset(viewsets.ModelViewSet):
@@ -40,10 +40,3 @@ class CategoryViewset(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     lookup_field = 'id'
     queryset = Category.objects.all()
-
-
-class SubcategoryViewset(viewsets.ModelViewSet):
-    permission_classes = (AllowAny,)
-    serializer_class = SubCategorySerializer
-    lookup_field = 'id'
-    queryset = Subcategory.objects.all()

@@ -1,19 +1,15 @@
 from django.contrib import admin
+from mptt.admin import MPTTModelAdmin
 
 from utils.models_utils import ListDisplayAllModelFieldsAdminMixin
-from .models import Category, Product, Subcategory
+from .models import Category, Product
 
 
 @admin.register(Category)
-class CategoryAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
-    pass
+class CategoryAdmin(MPTTModelAdmin):
+    fields = ['name', 'parent', 'description']
 
 
 @admin.register(Product)
 class ProductAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
-    pass
-
-
-@admin.register(Subcategory)
-class SubcategoryAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
     pass
