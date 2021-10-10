@@ -42,9 +42,10 @@ class Product(models.Model):
     manufacturer = models.CharField(max_length=250, blank=True, null=True, verbose_name='Производитель')
     origin = models.CharField(max_length=50, blank=True, null=True, verbose_name='Страна происхождения')
     expiration_date = models.DateField(blank=True, null=True, verbose_name='Срок годности')
-    weight = models.FloatField(blank=True, null=True, verbose_name='Вес (грамм)')
+    weight = models.FloatField(blank=True, null=True, verbose_name='Вес, грамм')
     in_stock = models.BooleanField(verbose_name='Наличие')
     own_production = models.BooleanField(default=False, verbose_name='Собственное производство')
+    discount = models.IntegerField(blank=True, null=True, verbose_name='Скидка, %')
 
     class Meta:
         unique_together = ["manufacturer", "name"]

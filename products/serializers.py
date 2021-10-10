@@ -20,12 +20,13 @@ class ProductListSerializer(serializers.ModelSerializer):
     is_favourite = serializers.SerializerMethodField()
     favourite_count = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
+    discounted_price = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
         fields = ['name', 'category', 'price', 'main_image', 'in_stock', 'id',
                   'stars_count', 'stared', 'average_star', 'is_favourite',
-                  'favourite_count']
+                  'favourite_count', 'discount', 'discounted_price']
 
     def get_category(self, obj):
         return obj.category.get_ancestors(include_self=True).values('id', 'name')
@@ -55,6 +56,9 @@ class ProductListSerializer(serializers.ModelSerializer):
             object_id=obj.id,
             user=user
         ).exists()
+
+    def get_discounted_price(self, obj):
+        return round((obj.price * (1 - obj.discount/100)), 2) if obj.discount else None
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -64,13 +68,15 @@ class ProductSerializer(serializers.ModelSerializer):
     is_favourite = serializers.SerializerMethodField()
     favourite_count = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
+    discounted_price = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
         fields = ['name', 'description', 'price', 'creation_date', 'images', 'protein',
                   'carbohydrates', 'fats', 'calories', 'barcode', 'manufacturer', 'origin',
                   'expiration_date', 'weight', 'in_stock', 'id', 'stars_count', 'stared',
-                  'average_star', 'is_favourite', 'favourite_count', 'category', 'main_image']
+                  'average_star', 'is_favourite', 'favourite_count', 'category', 'main_image',
+                  'discount', 'discounted_price']
 
     def get_category(self, obj):
         return obj.category.get_ancestors(include_self=True).values('id', 'name')
@@ -100,3 +106,6 @@ class ProductSerializer(serializers.ModelSerializer):
             object_id=obj.id,
             user=user
         ).exists()
+
+    def get_discounted_price(self, obj):
+        return round((obj.price * (1 - obj.discount/100)), 2) if obj.discount else None
