@@ -21,7 +21,9 @@ class Category(MPTTModel):
 
 
 class ProductImages(models.Model):
-    image = models.ImageField(null=True, blank=True)
+    image_1000 = models.ImageField(null=True, blank=True)
+    image_500 = models.ImageField(null=True, blank=True)
+    image_150 = models.ImageField(null=True, blank=True)
 
 
 class Product(models.Model):
@@ -46,6 +48,7 @@ class Product(models.Model):
     in_stock = models.BooleanField(verbose_name='Наличие')
     own_production = models.BooleanField(default=False, verbose_name='Собственное производство')
     discount = models.IntegerField(blank=True, null=True, verbose_name='Скидка, %')
+    extra_info = models.JSONField(null=True, blank=True)
 
     class Meta:
         unique_together = ["manufacturer", "name"]
@@ -54,3 +57,6 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        super(Product, self).save()

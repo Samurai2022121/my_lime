@@ -1,4 +1,9 @@
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db.models import Func
+from PIL import Image
+
+import sys
+from io import BytesIO
 
 
 class ListDisplayAllModelFieldsAdminMixin(object):
@@ -10,4 +15,15 @@ class ListDisplayAllModelFieldsAdminMixin(object):
 
 class Round(Func):
     function = 'ROUND'
-    template='%(function)s(%(expressions)s, 2)'
+    template = '%(function)s(%(expressions)s, 2)'
+
+
+def compress_image(image, sizes, field):
+    im = Image.open(image)
+    output = BytesIO()
+    im = im.resize(sizes)
+    im.save(output, format='PNG', quality=80)
+    output.seek(0)
+    compressed_image = InMemoryUploadedFile(output, field, f"{image.name.split('.')[0]}_{sizes[0]}.png", 'image/png',
+                                            sys.getsizeof(output), None)
+    return compressed_image
