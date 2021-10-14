@@ -18,15 +18,15 @@ class ProductAdmin(admin.ModelAdmin):
 
     @admin.display(description='1000x1000 image')
     def get_1000_image(self, obj):
-        return obj.images.image_1000.path
+        return obj.images.image_1000
 
     @admin.display(description='500x500 image')
     def get_500_image(self, obj):
-        return obj.images.image_500.path
+        return obj.images.image_500
 
     @admin.display(description='150x150 image')
     def get_150_image(self, obj):
-        return obj.images.image_150.path
+        return obj.images.image_150
 
 
 @admin.register(ProductImages)
