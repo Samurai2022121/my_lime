@@ -22,8 +22,15 @@ def compress_image(image, sizes, field):
     im = Image.open(image)
     output = BytesIO()
     im = im.resize(sizes)
-    im.save(output, format='PNG', quality=80)
-    output.seek(0)
-    compressed_image = InMemoryUploadedFile(output, field, f"{image.name.split('.')[0]}_{sizes[0]}.png", 'image/png',
-                                            sys.getsizeof(output), None)
+    try:
+        im.save(output, format='JPG', quality=70)
+        output.seek(0)
+        compressed_image = InMemoryUploadedFile(output, field, f"{image.name.split('.')[0]}_{sizes[0]}.jpg",
+                                                'image/jpg', sys.getsizeof(output), None)
+    except Exception as e:
+        print(e)
+        im.save(output, format='PNG', quality=70)
+        output.seek(0)
+        compressed_image = InMemoryUploadedFile(output, field, f"{image.name.split('.')[0]}_{sizes[0]}.png",
+                                                'image/png', sys.getsizeof(output), None)
     return compressed_image
