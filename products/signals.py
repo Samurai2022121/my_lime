@@ -12,7 +12,8 @@ def create_student(sender, instance=None, created=False, **kwargs):
             image_1000=compress_image(instance.main_image, (1000, 1000), 'image_1000'),
             image_500=compress_image(instance.main_image, (500, 500), 'image_500'),
             image_150=compress_image(instance.main_image, (150, 150), 'image_150'),
+            product_name=instance.name
         )
-        images.product.add(instance)
+        instance.images = images
         instance.main_image = None
         instance.save()
