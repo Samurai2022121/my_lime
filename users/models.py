@@ -38,7 +38,8 @@ class User(AbstractUser):
 
     def save(self, *args, **kwargs):
         self.phone_number = self.phone_number.replace("+", "")
-        self.avatar = compress_image(self.avatar, (500, 500), "avatar", ("jpeg", "jpg"))
+        if self.avatar:
+            self.avatar = compress_image(self.avatar, (500, 500), "avatar", ("jpeg", "jpg"))
         super(User, self).save()
 
     def get_full_name(self):

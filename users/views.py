@@ -1,5 +1,6 @@
 from datetime import timedelta
 import requests
+import uuid
 
 from django.conf import settings
 from django.utils import timezone
@@ -59,7 +60,7 @@ class GeneratePasswordAPIView(views.APIView):
         phone_number = serializer.data['phone_number'].replace("+", "")
         user = User.objects.filter(phone_number=phone_number)
         if not user:
-            user = User.objects.create_user(phone_number=phone_number, password=generate_new_password())
+            user = User.objects.create_user(phone_number=phone_number, password=str(uuid.uuid4()))
         else:
             user = user.first()
         expiry_date = timezone.now() - timedelta(minutes=10)
@@ -77,12 +78,11 @@ class GeneratePasswordAPIView(views.APIView):
         else:
             if "password" not in serializer.data:
                 return Response(status=200, data={"message": "Введите пароль."})
-            password.attempts += 1
             if password.password == serializer.data["password"]:
-                user.set_password(serializer.data["password"])
                 password.delete()
                 data = user.generate_tokens()
                 return Response(data, status=status.HTTP_200_OK)
             else:
+                password.attempts += 1
                 return Response(status=200, data={"message": "Неверный пароль"})
 
