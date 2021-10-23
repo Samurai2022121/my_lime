@@ -9,14 +9,22 @@ from users.models import RefreshToken
 
 class RegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(max_length=128, min_length=8, write_only=True)
+    confirm_password = serializers.CharField(max_length=128, min_length=8, write_only=True)
     access = serializers.CharField(max_length=255, read_only=True)
     expires_in = serializers.IntegerField(read_only=True)
     refresh = serializers.UUIDField(read_only=True)
 
     class Meta:
         model = get_user_model()
-        fields = ('email', 'phone_number', 'password', 'name', 'surname', 'fathers_name',
-                  'date_of_birth', 'access', 'refresh', 'expires_in')
+        fields = ('email', 'phone_number', 'password', 'confirm_password',
+                  'access', 'refresh', 'expires_in')
+
+    def validate(self, data):
+        if not data.get('password') or not data.get('confirm_password'):
+            raise serializers.ValidationError("Пожалуйста, введите пароль и подтвердите его.")
+        if data.get('password') != data.pop('confirm_password'):
+            raise serializers.ValidationError("Пароли не совпадают.")
+        return data
 
     def create(self, validated_data):
         return get_user_model().objects.create_user(**validated_data)
@@ -33,29 +41,29 @@ class LoginSerializer(serializers.Serializer):
 
     def validate(self, data):
         email = data.get('email')
-        phone_number = data.get('phone_number')
+        phone_number = data.get('phone_number').replace("+", "")
         password = data.get('password')
 
         if email is None and phone_number is None:
-            raise serializers.ValidationError('Email or phone number must be set')
+            raise serializers.ValidationError('Введите номер телефона.')
 
         if password is None:
-            raise serializers.ValidationError('Password must be set')
+            raise serializers.ValidationError('Введите пароль.')
 
         try:
             model = get_user_model()
             user = model.objects.get(email=email) if email else model.objects.get(phone_number=phone_number)
         except get_user_model().DoesNotExist:
-            raise serializers.ValidationError('No such user')
+            raise serializers.ValidationError('Такого пользователя не существует.')
 
         if not user.is_active:
-            raise serializers.ValidationError('This user has been deactivated.')
+            raise serializers.ValidationError('Пользователь был деактивирован.')
 
         if not user.check_password(password):
-            raise serializers.ValidationError('Wrong login or password')
+            raise serializers.ValidationError('Неверный логин или пароль.')
 
         validate_data = user.generate_tokens()
-        validate_data['full_name'] = user.get_full_name()
+        validate_data['full_name'] = user.phone_number
         return validate_data
 
 
@@ -78,5 +86,10 @@ class TokenObtainSerializer(serializers.Serializer):
             raise serializers.ValidationError('Refresh token is invalid')
 
         validate_data = old_refresh.user.generate_tokens()
-        validate_data['full_name'] = old_refresh.user.get_full_name()
+        validate_data['phone_number'] = old_refresh.user.phone_number
         return validate_data
+
+
+class GeneratePasswordSerializer(serializers.Serializer):
+    phone_number = serializers.CharField()
+    password = serializers.CharField(required=False)

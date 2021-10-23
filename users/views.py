@@ -1,7 +1,15 @@
+from datetime import timedelta
+import requests
+
+from django.conf import settings
+from django.utils import timezone
 from rest_framework import views, status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from users.serializers import LoginSerializer, RegistrationSerializer, TokenObtainSerializer
+from users.serializers import (LoginSerializer, RegistrationSerializer, TokenObtainSerializer,
+                               GeneratePasswordSerializer, )
+from users.models import User, GeneratedPassword
+from utils.models_utils import generate_new_password
 
 
 class RegistrationAPIView(views.APIView):
@@ -13,7 +21,6 @@ class RegistrationAPIView(views.APIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         data = user.generate_tokens()
-        data['full_name'] = user.get_full_name()
         return Response(data, status=status.HTTP_201_CREATED)
 
 
@@ -23,7 +30,6 @@ class LoginAPIView(views.APIView):
 
     def post(self, request):
         data = {'password': request.data.get('password')}
-        print(request.data)
         if '@' in request.data:
             data['email'] = request.data.get('email')
         else:
@@ -41,3 +47,42 @@ class TokenObtainAPIView(views.APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class GeneratePasswordAPIView(views.APIView):
+    permission_classes = (AllowAny, )
+    serializer_class = GeneratePasswordSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        phone_number = serializer.data['phone_number'].replace("+", "")
+        user = User.objects.filter(phone_number=phone_number)
+        if not user:
+            user = User.objects.create_user(phone_number=phone_number, password=generate_new_password())
+        else:
+            user = user.first()
+        expiry_date = timezone.now() - timedelta(minutes=10)
+        password, created = GeneratedPassword.objects.get_or_create(user=user, is_active=True, attempts__lt=3,
+                                                                    date__gte=expiry_date)
+        if created:
+            sms_params = {"token": settings.SMS_API_KEY, "message": f"Ваш новый пароль: {password.password}",
+                          "phone": f'+{phone_number}'}
+            sms = requests.get("https://app.sms.by/api/v1/sendQuickSMS", params=sms_params)
+            if sms.status_code == 200:
+                return Response(status=200, data={"message": "Пароль отправлен на указанный мобильный номер."})
+            else:
+                print(sms.json())
+                return Response(status=200, data={"message": "Произошла внутренняя ошибка, попробуйте позже."})
+        else:
+            if "password" not in serializer.data:
+                return Response(status=200, data={"message": "Введите пароль."})
+            password.attempts += 1
+            if password.password == serializer.data["password"]:
+                user.set_password(serializer.data["password"])
+                password.delete()
+                data = user.generate_tokens()
+                return Response(data, status=status.HTTP_200_OK)
+            else:
+                return Response(status=200, data={"message": "Неверный пароль"})
+

@@ -4,6 +4,7 @@ from PIL import Image
 
 import sys
 from io import BytesIO
+from random import randint
 
 
 class ListDisplayAllModelFieldsAdminMixin(object):
@@ -18,15 +19,15 @@ class Round(Func):
     template = '%(function)s(%(expressions)s, 2)'
 
 
-def compress_image(image, sizes, field):
+def compress_image(image, sizes, field, image_format):
     im = Image.open(image)
     output = BytesIO()
     im = im.resize(sizes)
     try:
-        im.save(output, format='JPEG', quality=70)
+        im.save(output, format=image_format[0], quality=70)
         output.seek(0)
-        compressed_image = InMemoryUploadedFile(output, field, f"{image.name.split('.')[0]}_{sizes[0]}.jpeg",
-                                                'image/jpg', sys.getsizeof(output), None)
+        compressed_image = InMemoryUploadedFile(output, field, f"{image.name.split('.')[0]}_{sizes[0]}.{image_format[0]}",
+                                                f'image/{image_format[1]}', sys.getsizeof(output), None)
     except Exception as e:
         print(e)
         im.save(output, format='PNG', quality=70)
@@ -34,3 +35,7 @@ def compress_image(image, sizes, field):
         compressed_image = InMemoryUploadedFile(output, field, f"{image.name.split('.')[0]}_{sizes[0]}.png",
                                                 'image/png', sys.getsizeof(output), None)
     return compressed_image
+
+
+def generate_new_password():
+    return str(randint(10000, 99999))

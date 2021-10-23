@@ -10,6 +10,7 @@ from django.utils.translation import ugettext_lazy as _
 
 import jwt
 
+from utils.models_utils import generate_new_password, compress_image
 from .managers import CustomUserManager
 
 
@@ -17,7 +18,7 @@ class User(AbstractUser):
     first_name = None
     last_name = None
     username = None
-    phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
+    phone_regex = RegexValidator(regex=r'^\+?\d{9,15}$',
                                  message='Phone number must be entered in the format: "+999999999". '
                                          'Up to 15 digits allowed.')
     phone_number = models.CharField(validators=[phone_regex], max_length=17, unique=True, verbose_name='Телефон')
@@ -26,6 +27,7 @@ class User(AbstractUser):
     surname = models.CharField(max_length=40, null=True, blank=True, verbose_name='Фамилия')
     fathers_name = models.CharField(max_length=40, null=True,  blank=True, verbose_name='Отчество')
     date_of_birth = models.DateField(null=True,  blank=True, verbose_name='День рождения')
+    avatar = models.ImageField(null=True,  blank=True, verbose_name='Аватар')
 
     USERNAME_FIELD = 'phone_number'
     REQUIRED_FIELDS = []
@@ -33,6 +35,11 @@ class User(AbstractUser):
 
     def __str__(self):
         return f'{self.get_full_name()}'
+
+    def save(self, *args, **kwargs):
+        self.phone_number = self.phone_number.replace("+", "")
+        self.avatar = compress_image(self.avatar, (500, 500), "avatar", ("jpeg", "jpg"))
+        super(User, self).save()
 
     def get_full_name(self):
         if self.name:
@@ -48,7 +55,7 @@ class User(AbstractUser):
         access = jwt.encode({'id': self.pk, 'expires_in': expires_in}, settings.SECRET_KEY, algorithm='HS256')
         refresh = RefreshToken(user=self)
         refresh.save()
-        return {'access': access, 'refresh': refresh.uuid, 'expires_in': expires_in}
+        return {'access': access, 'refresh': refresh.uuid, 'expires_in': expires_in, 'phone': self.phone_number}
 
 
 class RefreshToken(models.Model):
@@ -61,3 +68,14 @@ class RefreshToken(models.Model):
 
     def __str__(self):
         return f'Refresh {str(self.user)}'
+
+
+class GeneratedPassword(models.Model):
+    date = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    password = models.CharField(default=generate_new_password, editable=False, max_length=8)
+    attempts = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f'Generated password for {str(self.user)}'
