@@ -10,7 +10,6 @@ from rest_framework.response import Response
 from users.serializers import (LoginSerializer, RegistrationSerializer, TokenObtainSerializer,
                                GeneratePasswordSerializer, )
 from users.models import User, GeneratedPassword
-from utils.models_utils import generate_new_password
 
 
 class RegistrationAPIView(views.APIView):
@@ -34,7 +33,7 @@ class LoginAPIView(views.APIView):
         if '@' in request.data:
             data['email'] = request.data.get('email')
         else:
-            data['phone_number'] = request.data.get('phone_number')
+            data['phone_number'] = request.data.get('phone_number').replace("+", "")
         serializer = self.serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

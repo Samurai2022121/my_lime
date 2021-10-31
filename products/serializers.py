@@ -14,6 +14,9 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class ProductListSerializer(serializers.ModelSerializer):
+    image_150 = serializers.ImageField(source="images.image_150")
+    image_1000 = serializers.ImageField(source="images.image_1000")
+    image_500 = serializers.ImageField(source="images.image_500")
     stars_count = serializers.SerializerMethodField()
     stared = serializers.SerializerMethodField()
     average_star = serializers.SerializerMethodField()
@@ -26,7 +29,8 @@ class ProductListSerializer(serializers.ModelSerializer):
         model = Product
         fields = ['name', 'category', 'price', 'main_image', 'in_stock', 'id',
                   'stars_count', 'stared', 'average_star', 'is_favourite',
-                  'favourite_count', 'discount', 'discounted_price']
+                  'favourite_count', 'discount', 'discounted_price', 'image_150',
+                  'image_500', 'image_1000']
 
     def get_category(self, obj):
         return obj.category.get_ancestors(include_self=True).values('id', 'name')
@@ -62,6 +66,8 @@ class ProductListSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    image_1000 = serializers.ImageField(source="images.image_1000")
+    image_500 = serializers.ImageField(source="images.image_500")
     stars_count = serializers.SerializerMethodField()
     stared = serializers.SerializerMethodField()
     average_star = serializers.SerializerMethodField()
@@ -76,7 +82,7 @@ class ProductSerializer(serializers.ModelSerializer):
                   'carbohydrates', 'fats', 'calories', 'barcode', 'manufacturer', 'origin',
                   'expiration_date', 'weight', 'in_stock', 'id', 'stars_count', 'stared',
                   'average_star', 'is_favourite', 'favourite_count', 'category', 'main_image',
-                  'discount', 'discounted_price']
+                  'discount', 'discounted_price', 'image_500', 'image_1000']
 
     def get_category(self, obj):
         return obj.category.get_ancestors(include_self=True).values('id', 'name')
