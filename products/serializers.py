@@ -82,7 +82,7 @@ class ProductSerializer(serializers.ModelSerializer):
                   'carbohydrates', 'fats', 'calories', 'barcode', 'manufacturer', 'origin',
                   'expiration_date', 'weight', 'in_stock', 'id', 'stars_count', 'stared',
                   'average_star', 'is_favourite', 'favourite_count', 'category', 'main_image',
-                  'discount', 'discounted_price', 'image_500', 'image_1000']
+                  'discount', 'discounted_price', 'image_500', 'image_1000', 'extra_info']
 
     def get_category(self, obj):
         return obj.category.get_ancestors(include_self=True).values('id', 'name')
