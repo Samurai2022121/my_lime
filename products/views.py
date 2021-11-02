@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from utils.views_utils import ProductPagination
 
 from .models import Category, Product
-from .serializers import CategorySerializer, ProductListSerializer, ProductSerializer
+from .serializers import ProductListSerializer, ProductSerializer, CategoryListSerializer, CategorySerializer
 
 
 class ProductViewset(viewsets.ModelViewSet):
@@ -39,4 +39,16 @@ class CategoryViewset(viewsets.ModelViewSet):
     permission_classes = (AllowAny,)
     serializer_class = CategorySerializer
     lookup_field = 'id'
+    serializer_action_classes = {
+        'list': CategoryListSerializer
+    }
     queryset = Category.objects.all()
+
+    def get_serializer_class(self):
+        return self.serializer_action_classes.get(self.action, super().get_serializer_class())
+
+    def get_object(self):
+        return self.queryset.get(id=self.kwargs['id'])
+
+    def get_queryset(self):
+        return self.queryset.get_cached_trees()

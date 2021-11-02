@@ -7,10 +7,28 @@ from utils.models_utils import Round
 from .models import Category, Product
 
 
-class CategorySerializer(serializers.ModelSerializer):
+class CategoryListSerializer(serializers.ModelSerializer):
+    children = serializers.SerializerMethodField()
+
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ['id', 'name', 'description', 'children']
+
+    def get_children(self, obj):
+        serializer = CategoryListSerializer(instance=obj.get_children(), many=True)
+        return serializer.data
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    parents = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Category
+        fields = ['id', 'name', 'parents']
+
+    def get_parents(self, obj):
+        serializer = CategorySerializer(instance=obj.parent)
+        return serializer.data
 
 
 class ProductListSerializer(serializers.ModelSerializer):
@@ -22,18 +40,15 @@ class ProductListSerializer(serializers.ModelSerializer):
     average_star = serializers.SerializerMethodField()
     is_favourite = serializers.SerializerMethodField()
     favourite_count = serializers.SerializerMethodField()
-    category = serializers.SerializerMethodField()
+    category = CategorySerializer()
     discounted_price = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = ['name', 'category', 'price', 'main_image', 'in_stock', 'id',
+        fields = ['name', 'category', 'price', 'in_stock', 'id', 'protein',
                   'stars_count', 'stared', 'average_star', 'is_favourite',
                   'favourite_count', 'discount', 'discounted_price', 'image_150',
-                  'image_500', 'image_1000']
-
-    def get_category(self, obj):
-        return obj.category.get_ancestors(include_self=True).values('id', 'name')
+                  'image_500', 'image_1000', 'carbohydrates', 'fats', 'calories', 'energy']
 
     def get_stars_count(self, obj):
         return Star.objects.filter(content_type=ContentType.objects.get_for_model(obj), object_id=obj.id).count()
@@ -73,19 +88,16 @@ class ProductSerializer(serializers.ModelSerializer):
     average_star = serializers.SerializerMethodField()
     is_favourite = serializers.SerializerMethodField()
     favourite_count = serializers.SerializerMethodField()
-    category = serializers.SerializerMethodField()
+    category = CategorySerializer()
     discounted_price = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
         fields = ['name', 'description', 'price', 'creation_date', 'images', 'protein',
-                  'carbohydrates', 'fats', 'calories', 'barcode', 'manufacturer', 'origin',
+                  'carbohydrates', 'fats', 'calories', 'energy', 'barcode', 'manufacturer',
                   'expiration_date', 'weight', 'in_stock', 'id', 'stars_count', 'stared',
-                  'average_star', 'is_favourite', 'favourite_count', 'category', 'main_image',
+                  'average_star', 'is_favourite', 'favourite_count', 'category', 'origin',
                   'discount', 'discounted_price', 'image_500', 'image_1000', 'extra_info']
-
-    def get_category(self, obj):
-        return obj.category.get_ancestors(include_self=True).values('id', 'name')
 
     def get_average_star(self, obj):
         return Star.objects.filter(content_type=ContentType.objects.get_for_model(obj), object_id=obj.id
