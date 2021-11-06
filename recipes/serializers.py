@@ -25,7 +25,7 @@ class RecipeListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        exclude = ['protein', 'carbohydrates', 'fats', 'calories', 'servings']
+        exclude = ['protein', 'carbohydrates', 'fats', 'calories']
 
     def get_stars_count(self, obj):
         return Star.objects.filter(content_type=ContentType.objects.get_for_model(obj), object_id=obj.id).count()
