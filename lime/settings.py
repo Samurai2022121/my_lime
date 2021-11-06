@@ -8,7 +8,7 @@ SECRET_KEY = 'django-insecure-09kwm1pabqdb#rm-%c_l5ud9jwtmeh&lvt6_oee_l@%rid4d1t
 
 DEBUG = True
 
-ALLOWED_HOSTS = (["127.0.0.1", "185.246.88.154"])
+ALLOWED_HOSTS = (["127.0.0.1", "185.246.88.154", "test.thefresh.by:8000"])
 CORS_ORIGIN_ALLOW_ALL = True
 
 
