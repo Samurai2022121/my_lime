@@ -28,11 +28,12 @@ class Recipe(models.Model):
                                         verbose_name='Категория', blank=True, null=True)
     cook_time = models.IntegerField(verbose_name='Время приготовления')
     description = models.TextField(null=True, blank=True, verbose_name='Описание')
-    image = models.ImageField(null=True, blank=True, verbose_name='Изображение')
+    image = models.ImageField(null=True, blank=True, verbose_name='Изображение', upload_to="recipe/")
     protein = models.FloatField(blank=True, null=True, verbose_name='Белки')
     carbohydrates = models.FloatField(blank=True, null=True, verbose_name='Углеводы')
     fats = models.FloatField(blank=True, null=True, verbose_name='Жиры')
     calories = models.FloatField(blank=True, null=True, verbose_name='Калорийность')
+    servings = models.IntegerField(verbose_name='Порции')
 
     class Meta:
         ordering = ['name']

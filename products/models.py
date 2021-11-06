@@ -37,7 +37,7 @@ class Product(models.Model):
     description = models.TextField(blank=True, null=True, verbose_name='Описание')
     price = models.FloatField(verbose_name='Цена')
     creation_date = models.DateTimeField(auto_now_add=True, verbose_name='Дата добавления')
-    main_image = models.ImageField(verbose_name='Основное изображение', blank=True, null=True)
+    main_image = models.ImageField(verbose_name='Основное изображение', blank=True, null=True, upload_to="products/")
     images = models.ForeignKey(ProductImages, on_delete=models.CASCADE, null=True, blank=True,
                                related_name='product', verbose_name='Изображения товара')
     protein = models.FloatField(blank=True, null=True, verbose_name='Белки')

@@ -22,6 +22,7 @@ class News(models.Model):
                                 default='Общее', verbose_name='Новостной раздел')
     publication_date = models.DateTimeField(auto_now=True, verbose_name='Дата публикации')
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Автор')
+    image = models.ImageField(null=True, blank=True, verbose_name='Изображение', upload_to="news/")
 
     class Meta:
         verbose_name = 'новость'
