@@ -73,7 +73,7 @@ class ProductImages(models.Model):
         return self.product.name
 
     def save(self, *args, **kwargs):
-        if self.main:
+        if self.main and not self.pk:
             if ProductImages.objects.filter(product=self.product, main=True).exists():
                 raise ValidationError("У товара уже есть основное изображение.")
         super(ProductImages, self).save()
