@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from reviews.models import Star, Favourite
 from utils.models_utils import Round
-from .models import Category, Product
+from .models import Category, Product, ProductImages
 
 
 class CategoryListSerializer(serializers.ModelSerializer):
@@ -31,24 +31,29 @@ class CategorySerializer(serializers.ModelSerializer):
         return serializer.data
 
 
+class ProductImagesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImages
+        fields = ('image_1000', 'image_500', 'image_150', 'main', 'description')
+
+
 class ProductListSerializer(serializers.ModelSerializer):
-    image_150 = serializers.ImageField(source="images.image_150")
-    image_1000 = serializers.ImageField(source="images.image_1000")
-    image_500 = serializers.ImageField(source="images.image_500")
     stars_count = serializers.SerializerMethodField()
     stared = serializers.SerializerMethodField()
     average_star = serializers.SerializerMethodField()
     is_favourite = serializers.SerializerMethodField()
     favourite_count = serializers.SerializerMethodField()
-    category = CategorySerializer()
     discounted_price = serializers.SerializerMethodField()
+    category = CategorySerializer()
+    images = ProductImagesSerializer(many=True)
 
     class Meta:
         model = Product
-        fields = ['name', 'category', 'price', 'in_stock', 'id', 'protein',
+        fields = ['name', 'category', 'price', 'in_stock', 'id', 'weight',
                   'stars_count', 'stared', 'average_star', 'is_favourite',
-                  'favourite_count', 'discount', 'discounted_price', 'image_150',
-                  'image_500', 'image_1000', 'carbohydrates', 'fats', 'calories', 'energy']
+                  'favourite_count', 'discount', 'discounted_price',
+                  'carbohydrates', 'fats', 'calories', 'energy', 'protein',
+                  'description', 'expiration_date', 'production_date', 'images']
 
     def get_stars_count(self, obj):
         return Star.objects.filter(content_type=ContentType.objects.get_for_model(obj), object_id=obj.id).count()
@@ -81,23 +86,22 @@ class ProductListSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    image_1000 = serializers.ImageField(source="images.image_1000")
-    image_500 = serializers.ImageField(source="images.image_500")
     stars_count = serializers.SerializerMethodField()
     stared = serializers.SerializerMethodField()
     average_star = serializers.SerializerMethodField()
     is_favourite = serializers.SerializerMethodField()
     favourite_count = serializers.SerializerMethodField()
-    category = CategorySerializer()
     discounted_price = serializers.SerializerMethodField()
+    category = CategorySerializer()
+    images = ProductImagesSerializer(many=True)
 
     class Meta:
         model = Product
-        fields = ['name', 'description', 'price', 'creation_date', 'images', 'protein',
+        fields = ['name', 'description', 'price', 'production_date', 'images', 'protein',
                   'carbohydrates', 'fats', 'calories', 'energy', 'barcode', 'manufacturer',
                   'expiration_date', 'weight', 'in_stock', 'id', 'stars_count', 'stared',
                   'average_star', 'is_favourite', 'favourite_count', 'category', 'origin',
-                  'discount', 'discounted_price', 'image_500', 'image_1000', 'extra_info']
+                  'discount', 'discounted_price', 'extra_info', 'images']
 
     def get_average_star(self, obj):
         return Star.objects.filter(content_type=ContentType.objects.get_for_model(obj), object_id=obj.id
