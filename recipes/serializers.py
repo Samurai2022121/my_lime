@@ -49,7 +49,7 @@ class RecipeListSerializer(serializers.ModelSerializer):
         return {'id': obj.recipe_category.id, 'name': obj.recipe_category.name}
 
     def get_ingredients_in_stock(self, obj):
-        return obj.ingredients_in_stock.values_list('id', 'name')
+        return obj.recipe_products.values('product', 'quantity')
 
     def get_favourite_count(self, obj):
         return Favourite.objects.filter(content_type=ContentType.objects.get_for_model(obj), object_id=obj.id).count()
@@ -99,7 +99,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         return {'id': obj.recipe_category.id, 'name': obj.recipe_category.name}
 
     def get_ingredients_in_stock(self, obj):
-        return obj.ingredients_in_stock.values_list('id', 'name')
+        return obj.recipe_products.values('product', 'quantity')
 
     def get_favourite_count(self, obj):
         return Favourite.objects.filter(content_type=ContentType.objects.get_for_model(obj), object_id=obj.id).count()

@@ -21,8 +21,7 @@ class Recipe(models.Model):
     name = models.CharField(max_length=150, verbose_name='Название')
     author = models.ForeignKey(User, related_name='recipes', on_delete=models.CASCADE, verbose_name='Автор')
     publication_date = models.DateTimeField(auto_now=True, verbose_name='Дата публикации')
-    ingredients_in_stock = models.ManyToManyField(Product, related_name='recipes',
-                                                  verbose_name='Ингриндиенты в наличии')
+    ingredients = models.ManyToManyField(Product, through='RecipeProducts', verbose_name='Ингриндиенты в наличии')
     other_ingredients = models.TextField(null=True, blank=True, verbose_name='Прочие ингриндиенты')
     recipe_category = models.ForeignKey(RecipeCategory, related_name='recipes', on_delete=models.SET_NULL,
                                         verbose_name='Категория', blank=True, null=True)
@@ -43,3 +42,13 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class RecipeProducts(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name='Ингриндиенты')
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, verbose_name='рецепт', related_name='recipe_products')
+    quantity = models.FloatField(default=1)
+
+    class Meta:
+        verbose_name = 'ингриндиент для рецепта'
+        verbose_name_plural = 'ингриндиенты для рецепта'
