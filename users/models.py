@@ -46,7 +46,7 @@ class User(AbstractUser):
         if self.name:
             return f'{self.name} {self.surname}' if self.surname else self.name
         else:
-            return 'Anonymous user'
+            return self.phone_number
 
     def get_short_name(self):
         return self.name if self.name else 'Anonymous user'
