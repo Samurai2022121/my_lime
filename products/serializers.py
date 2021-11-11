@@ -12,7 +12,7 @@ class CategoryListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ['id', 'name', 'description', 'children']
+        fields = ['id', 'name', 'description', 'children', 'image']
 
     def get_children(self, obj):
         serializer = CategoryListSerializer(instance=obj.get_children(), many=True)
