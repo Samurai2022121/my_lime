@@ -4,7 +4,7 @@ from news.models import News
 
 
 CONTENT_TYPES = dict(
-    PRD=Product,
-    RCP=Recipe,
+    PD=Product,
+    RP=Recipe,
     NW=News
 )
