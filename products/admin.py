@@ -7,7 +7,7 @@ from .models import Category, Product, ProductImages
 
 @admin.register(Category)
 class CategoryAdmin(MPTTModelAdmin):
-    fields = ['name', 'parent', 'description']
+    fields = ['name', 'parent', 'description', 'image']
 
 
 @admin.register(Product)
