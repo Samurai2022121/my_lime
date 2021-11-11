@@ -78,5 +78,10 @@ class GeneratedPassword(models.Model):
     attempts = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
 
+    class Meta:
+        ordering = ['-date', 'is_active']
+        verbose_name = 'временный пароль'
+        verbose_name_plural = 'временные пароли'
+
     def __str__(self):
         return f'Generated password for {str(self.user)}'

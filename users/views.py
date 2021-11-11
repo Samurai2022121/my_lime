@@ -1,5 +1,6 @@
 from datetime import timedelta
 import requests
+import json
 import uuid
 
 from django.conf import settings
@@ -8,8 +9,9 @@ from rest_framework import views, status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from users.serializers import (LoginSerializer, RegistrationSerializer, TokenObtainSerializer,
-                               GeneratePasswordSerializer, )
+                               GenerateRegistrationCodeSerializer, ValidateRegistrationCodeSerializer)
 from users.models import User, GeneratedPassword
+from utils.models_utils import generate_new_password
 
 
 class RegistrationAPIView(views.APIView):
@@ -49,9 +51,9 @@ class TokenObtainAPIView(views.APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class GeneratePasswordAPIView(views.APIView):
+class GenerateLoginCodeAPIView(views.APIView):
     permission_classes = (AllowAny, )
-    serializer_class = GeneratePasswordSerializer
+    serializer_class = GenerateRegistrationCodeSerializer
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -62,26 +64,48 @@ class GeneratePasswordAPIView(views.APIView):
             user = User.objects.create_user(phone_number=phone_number, password=str(uuid.uuid4()))
         else:
             user = user.first()
-        expiry_date = timezone.now() - timedelta(minutes=10)
-        password, created = GeneratedPassword.objects.get_or_create(user=user, is_active=True, attempts__lt=3,
-                                                                    date__gte=expiry_date)
-        if created:
-            sms_params = {"token": settings.SMS_API_KEY, "message": f"Ваш новый пароль: {password.password}",
-                          "phone": f'+{phone_number}'}
-            sms = requests.get("https://app.sms.by/api/v1/sendQuickSMS", params=sms_params)
-            if sms.status_code == 200:
-                return Response(status=200, data={"message": "Пароль отправлен на указанный мобильный номер."})
-            else:
-                print(sms.json())
-                return Response(status=200, data={"message": "Произошла внутренняя ошибка, попробуйте позже."})
-        else:
-            if "password" not in serializer.data:
-                return Response(status=200, data={"message": "Введите пароль."})
-            if password.password == serializer.data["password"]:
-                password.delete()
-                data = user.generate_tokens()
-                return Response(data, status=status.HTTP_200_OK)
-            else:
-                password.attempts += 1
-                return Response(status=200, data={"message": "Неверный пароль"})
+        expiry_date = timezone.now() - timedelta(minutes=62)
 
+        password, created = GeneratedPassword.objects.get_or_create(user=user, date__gte=expiry_date)
+
+        if not created:
+            if password.attempts == 2:
+                return Response(status=405, data={"message": "Превышен лимит на отправку сообщений, попробуйте позже."})
+            password.attempts += 1
+            password.password = generate_new_password()
+            password.save()
+
+        sms_params = {"token": settings.SMS_API_KEY, "message": f"Ваш новый пароль: {password.password}",
+                      "phone": f'+{phone_number}'}
+        sms = requests.get("https://app.sms.by/api/v1/sendQuickSMS", params=sms_params)
+        if sms.status_code == 200 and 'error' not in json.loads(sms.content):
+            return Response(status=200, data={"message": "Пароль отправлен на указанный мобильный номер."})
+        else:
+            print(sms.json())
+            return Response(status=200, data={"message": "Произошла ошибка, попробуйте позже."})
+
+
+class ValidateLoginCodeAPIView(views.APIView):
+    permission_classes = (AllowAny, )
+    serializer_class = ValidateRegistrationCodeSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        phone_number = serializer.data['phone_number'].replace("+", "")
+        submitted_password = serializer.data['password']
+
+        user = User.objects.filter(phone_number=phone_number).first()
+        expiry_date = timezone.now() - timedelta(minutes=62)
+
+        password = GeneratedPassword.objects.filter(user=user, attempts__lt=2, date__gte=expiry_date)
+
+        if not password:
+            return Response(status=200, data={"message": "Необходимо сгенерировать новый пароль."})
+
+        if submitted_password != password.first().password:
+            return Response(status=200, data={"message": "Неверный пароль."})
+        else:
+            password.first().delete()
+            data = user.generate_tokens()
+            return Response(data, status=status.HTTP_200_OK)

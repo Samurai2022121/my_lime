@@ -90,6 +90,10 @@ class TokenObtainSerializer(serializers.Serializer):
         return validate_data
 
 
-class GeneratePasswordSerializer(serializers.Serializer):
+class GenerateRegistrationCodeSerializer(serializers.Serializer):
     phone_number = serializers.CharField()
-    password = serializers.CharField(required=False)
+
+
+class ValidateRegistrationCodeSerializer(serializers.Serializer):
+    phone_number = serializers.CharField()
+    password = serializers.CharField()

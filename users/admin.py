@@ -2,7 +2,8 @@ from django.contrib import admin
 
 from django.contrib.auth.models import Group
 from django.contrib.auth import get_user_model
-from .models import RefreshToken
+from .models import RefreshToken, GeneratedPassword
+from utils.models_utils import ListDisplayAllModelFieldsAdminMixin
 
 
 @admin.register(RefreshToken)
@@ -22,6 +23,11 @@ class UserAdmin(admin.ModelAdmin):
                            'date_of_birth', 'date_joined')}),
         ('Permissions', {'fields': ('is_staff', 'is_active', 'is_superuser')}),
     )
+
+
+@admin.register(GeneratedPassword)
+class GeneratedPasswordAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
+    pass
 
 
 admin.site.unregister(Group)
