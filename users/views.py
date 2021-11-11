@@ -82,7 +82,7 @@ class GenerateLoginCodeAPIView(views.APIView):
             return Response(status=200, data={"message": "Пароль отправлен на указанный мобильный номер."})
         else:
             print(sms.json())
-            return Response(status=200, data={"message": "Произошла ошибка, попробуйте позже."})
+            return Response(status=405, data={"message": "Произошла ошибка, попробуйте позже."})
 
 
 class ValidateLoginCodeAPIView(views.APIView):
@@ -101,10 +101,10 @@ class ValidateLoginCodeAPIView(views.APIView):
         password = GeneratedPassword.objects.filter(user=user, attempts__lt=2, date__gte=expiry_date)
 
         if not password:
-            return Response(status=200, data={"message": "Необходимо сгенерировать новый пароль."})
+            return Response(status=405, data={"message": "Необходимо сгенерировать новый пароль."})
 
         if submitted_password != password.first().password:
-            return Response(status=200, data={"message": "Неверный пароль."})
+            return Response(status=405, data={"message": "Неверный пароль."})
         else:
             password.first().delete()
             data = user.generate_tokens()
