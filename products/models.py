@@ -8,7 +8,7 @@ class Category(MPTTModel):
     parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True,
                             related_name='children', verbose_name='Родительская категория')
     description = models.TextField(blank=True, null=True, verbose_name='Описание')
-    image = models.ImageField(blank=True, null=True, verbose_name="Изображение категории",
+    image = models.FileField(blank=True, null=True, verbose_name="Изображение категории",
                               upload_to='products/categories/')
 
     class MPTTMeta:
