@@ -76,7 +76,7 @@ class GenerateLoginCodeAPIView(views.APIView):
             password.save()
 
         sms_params = {"token": settings.SMS_API_KEY, "message": f"Ваш новый пароль: {password.password}",
-                      "phone": f'+{phone_number}'}
+                      "phone": f'+{phone_number}', 'alphaname_id': settings.SMS_ALPHA_NAME}
         sms = requests.get("https://app.sms.by/api/v1/sendQuickSMS", params=sms_params)
         if sms.status_code == 200 and 'error' not in json.loads(sms.content):
             return Response(status=200, data={"message": "Пароль отправлен на указанный мобильный номер."})

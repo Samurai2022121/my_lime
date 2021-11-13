@@ -129,3 +129,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "mediafiles")
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SMS_API_KEY = "8a1e5e989559167df45adbda95890c8d"
+SMS_ALPHA_NAME = "1572"
