@@ -27,7 +27,7 @@ class FavouriteGenericAPIView(CreateAPIView, DestroyAPIView):
 class FavouriteObjectsListAPIView(APIView):
     def get(self, request, *args, **kwargs):
         user = request.user
-        favourite = Favourite.objects.filter(user=user)
+        favourites = Favourite.objects.filter(user=user)
         content_type_request_to_content_type_data = {
             'PD': ('product', 'product'),
             'RP': ('recipe', 'recipe')
@@ -36,7 +36,7 @@ class FavouriteObjectsListAPIView(APIView):
             content_type_app_label, content_type_model =\
                 content_type_request_to_content_type_data[request.query_params.get('content_type', None)]
 
-            favourites = favourite.filter(
+            favourites = favourites.filter(
                 content_type=ContentType.objects.filter(
                     app_label=content_type_app_label, model=content_type_model
                 ).first()
