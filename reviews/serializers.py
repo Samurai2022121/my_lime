@@ -21,6 +21,7 @@ class FavouriteSerializer(serializers.Serializer):
 class StarSerializer(serializers.Serializer):
     content_type = serializers.CharField(write_only=True)
     id = serializers.IntegerField(write_only=True)
+    mark = serializers.IntegerField(write_only=True)
 
     def create(self, validated_data):
         content_type = validated_data.get("content_type")
