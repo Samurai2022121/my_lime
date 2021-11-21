@@ -5,11 +5,13 @@ import uuid
 
 from django.conf import settings
 from django.utils import timezone
-from rest_framework import views, status
+from django.db.models import Q
+from rest_framework import views, status, viewsets
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from users.serializers import (LoginSerializer, RegistrationSerializer, TokenObtainSerializer,
-                               GenerateRegistrationCodeSerializer, ValidateRegistrationCodeSerializer)
+                               GenerateRegistrationCodeSerializer, ValidateRegistrationCodeSerializer,
+                               UserSerializer)
 from users.models import User, GeneratedPassword
 from utils.models_utils import generate_new_password
 
@@ -109,3 +111,17 @@ class ValidateLoginCodeAPIView(views.APIView):
             password.first().delete()
             data = user.generate_tokens()
             return Response(data, status=status.HTTP_200_OK)
+
+
+class UserView(viewsets.ModelViewSet):
+    permission_classes = (AllowAny,)
+    serializer_class = UserSerializer
+    lookup_field = 'id'
+    queryset = User.objects.filter(is_staff=False)
+
+    def get_queryset(self):
+        qs = self.queryset
+        if 's' in self.request.query_params:
+            search_value = self.request.query_params['s']
+            qs = qs.filter(Q(phone_number__icontains=search_value))
+        return qs

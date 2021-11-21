@@ -29,6 +29,8 @@ urlpatterns = [
     path('cookbook/', include(('recipes.urls', 'recipes'), namespace='recipes')),
     path('rating/', include(('reviews.urls', 'reviews'), namespace='reviews')),
     path('news/', include(('news.urls', 'news'), namespace='news')),
+    path('orders/', include(('orders.urls', 'orders'), namespace='orders')),
+    # path('supply/', include(('supply.urls', 'supply'), namespace='supply')),
     path('docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
 

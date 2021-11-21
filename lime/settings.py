@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'products',
     'recipes',
     'reviews',
+    'supply',
     'users',
 ]
 

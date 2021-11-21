@@ -28,6 +28,7 @@ class User(AbstractUser):
     fathers_name = models.CharField(max_length=40, null=True,  blank=True, verbose_name='Отчество')
     date_of_birth = models.DateField(null=True,  blank=True, verbose_name='День рождения')
     avatar = models.ImageField(null=True,  blank=True, verbose_name='Аватар')
+    registration_date = models.DateTimeField(auto_now=True)
 
     USERNAME_FIELD = 'phone_number'
     REQUIRED_FIELDS = []

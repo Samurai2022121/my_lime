@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 from rest_framework import serializers
 
+from orders.serializers import OrdersSerializer
 from users.models import RefreshToken
 
 
@@ -97,3 +98,11 @@ class GenerateRegistrationCodeSerializer(serializers.Serializer):
 class ValidateRegistrationCodeSerializer(serializers.Serializer):
     phone_number = serializers.CharField()
     password = serializers.CharField()
+
+
+class UserSerializer(serializers.ModelSerializer):
+    orders = OrdersSerializer(many=True)
+
+    class Meta:
+        model = get_user_model()
+        fields = ('name', 'surname', 'fathers_name', 'phone_number', 'date_of_birth', 'registration_date', 'orders')

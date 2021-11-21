@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import viewsets, exceptions
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
@@ -24,15 +25,19 @@ class ProductViewset(viewsets.ModelViewSet):
         return self.queryset.get(id=self.kwargs['id'])
 
     def get_queryset(self):
-        return self.queryset.order_by(
+        qs = self.queryset
+        if 's' in self.request.query_params:
+            search_value = self.request.query_params['s']
+            qs = qs.filter(Q(name__icontains=search_value) | Q(barcode__icontains=search_value))
+        return qs.order_by(
             'in_stock'
         )
 
-    def create(self, request, *args, **kwargs):
-        raise exceptions.ValidationError('CREATE is not supported')
-
-    def destroy(self, request, *args, **kwargs):
-        raise exceptions.ValidationError('DELETE is not supported')
+    # def create(self, request, *args, **kwargs):
+    #     raise exceptions.ValidationError('CREATE is not supported')
+    #
+    # def destroy(self, request, *args, **kwargs):
+    #     raise exceptions.ValidationError('DELETE is not supported')
 
 
 class CategoryViewset(viewsets.ModelViewSet):
