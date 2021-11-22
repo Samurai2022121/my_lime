@@ -105,4 +105,5 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ('name', 'surname', 'fathers_name', 'phone_number', 'date_of_birth', 'registration_date', 'orders')
+        fields = ('id', 'name', 'surname', 'fathers_name', 'phone_number', 'date_of_birth',
+                  'registration_date', 'orders', 'avatar')
