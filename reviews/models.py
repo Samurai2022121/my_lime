@@ -21,6 +21,9 @@ class Favourite(models.Model):
 
     objects = ContentTypeModelManager()
 
+    class Meta:
+        unique_together = ['content_type', 'object_id', 'user']
+
     def __str__(self):
         return self.user.name
 
@@ -34,6 +37,9 @@ class Star(models.Model):
     mark = models.PositiveIntegerField()
 
     objects = ContentTypeModelManager()
+
+    class Meta:
+        unique_together = ['content_type', 'object_id', 'user']
 
     def __str__(self):
         return self.user.name
