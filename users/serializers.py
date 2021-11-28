@@ -5,7 +5,7 @@ from django.conf import settings
 from rest_framework import serializers
 
 from orders.serializers import OrdersSerializer
-from users.models import RefreshToken
+from users.models import RefreshToken, CustomerDeliveryAddress
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -100,10 +100,45 @@ class ValidateRegistrationCodeSerializer(serializers.Serializer):
     password = serializers.CharField()
 
 
+class CustomerDeliveryAddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomerDeliveryAddress
+        fields = '__all__'
+
+
 class UserSerializer(serializers.ModelSerializer):
     orders = OrdersSerializer(many=True)
+    delivery_address = CustomerDeliveryAddressSerializer(many=True)
 
     class Meta:
         model = get_user_model()
         fields = ('id', 'name', 'surname', 'fathers_name', 'phone_number', 'date_of_birth',
-                  'registration_date', 'orders', 'avatar')
+                  'registration_date', 'orders', 'avatar', 'delivery_address')
+
+
+class UserListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = ('id', 'name', 'surname', 'fathers_name', 'phone_number', 'registration_date')
+
+
+class ChangeUserPasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField()
+    new_password = serializers.CharField()
+    new_password_confirm = serializers.CharField()
+
+    def validate(self, data):
+        user = self.context["request"].user
+        old_password = data.get('old_password')
+        new_password = data.get('new_password')
+
+        if not user.check_password(old_password):
+            raise serializers.ValidationError('Неверный пароль.')
+
+        if new_password is None:
+            raise serializers.ValidationError('Введите новый пароль.')
+
+        if new_password != data.pop('new_password_confirm'):
+            raise serializers.ValidationError("Пароли не совпадают.")
+
+        return data

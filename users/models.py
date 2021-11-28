@@ -1,7 +1,6 @@
 from datetime import datetime
 import uuid as uuid
 
-from django.core.validators import RegexValidator
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -10,7 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 
 import jwt
 
-from utils.models_utils import generate_new_password, compress_image
+from utils.models_utils import generate_new_password, compress_image, phone_regex
 from .managers import CustomUserManager
 
 
@@ -18,9 +17,6 @@ class User(AbstractUser):
     first_name = None
     last_name = None
     username = None
-    phone_regex = RegexValidator(regex=r'^\+?\d{9,15}$',
-                                 message='Phone number must be entered in the format: "+999999999". '
-                                         'Up to 15 digits allowed.')
     phone_number = models.CharField(validators=[phone_regex], max_length=17, unique=True, verbose_name='Телефон')
     email = models.EmailField(_('email address'), unique=True, null=True, blank=True)
     name = models.CharField(max_length=40, null=True,  blank=True, verbose_name='Имя')
@@ -86,3 +82,19 @@ class GeneratedPassword(models.Model):
 
     def __str__(self):
         return f'Generated password for {str(self.user)}'
+
+
+class CustomerDeliveryAddress(models.Model):
+    customer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='delivery_address')
+    locality = models.CharField(max_length=255)
+    street = models.CharField(max_length=255)
+    house = models.PositiveIntegerField()
+    block = models.CharField(max_length=255, null=True, blank=True)
+    entrance = models.PositiveIntegerField(null=True, blank=True)
+    floor = models.PositiveIntegerField(null=True, blank=True)
+    apartment = models.CharField(max_length=255, null=True, blank=True)
+    additional_information = models.CharField(max_length=255, null=True, blank=True)
+    name = models.CharField(max_length=255)
+    surname = models.CharField(max_length=255, null=True, blank=True)
+    phone_number = models.CharField(validators=[phone_regex], max_length=17)
+    email = models.EmailField()

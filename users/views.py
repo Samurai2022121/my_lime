@@ -7,12 +7,13 @@ from django.conf import settings
 from django.utils import timezone
 from django.db.models import Q
 from rest_framework import views, status, viewsets
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from users.serializers import (LoginSerializer, RegistrationSerializer, TokenObtainSerializer,
                                GenerateRegistrationCodeSerializer, ValidateRegistrationCodeSerializer,
-                               UserSerializer)
-from users.models import User, GeneratedPassword
+                               UserSerializer, ChangeUserPasswordSerializer, UserListSerializer,
+                               CustomerDeliveryAddressSerializer, )
+from users.models import User, GeneratedPassword, CustomerDeliveryAddress
 from utils.models_utils import generate_new_password
 
 
@@ -114,10 +115,16 @@ class ValidateLoginCodeAPIView(views.APIView):
 
 
 class UserView(viewsets.ModelViewSet):
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
     serializer_class = UserSerializer
     lookup_field = 'id'
     queryset = User.objects.filter(is_staff=False)
+    serializer_action_classes = {
+        'list': UserListSerializer
+    }
+
+    def get_serializer_class(self):
+        return self.serializer_action_classes.get(self.action, super().get_serializer_class())
 
     def get_queryset(self):
         qs = self.queryset
@@ -125,3 +132,26 @@ class UserView(viewsets.ModelViewSet):
             search_value = self.request.query_params['s']
             qs = qs.filter(Q(phone_number__icontains=search_value))
         return qs
+
+
+class ChangeUserPasswordAPIView(views.APIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ChangeUserPasswordSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = self.request.user
+        user.set_password(raw_password=serializer.data['new_password'])
+        user.save()
+        return Response(status=status.HTTP_202_ACCEPTED,  data={"message": "Пароль успешно изменен."})
+
+
+class CustomerDeliveryAddressViewset(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = CustomerDeliveryAddressSerializer
+    lookup_field = 'id'
+    queryset = CustomerDeliveryAddress.objects.none()
+
+    def get_queryset(self):
+        return self.request.user.delivery_address.all()

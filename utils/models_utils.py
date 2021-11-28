@@ -1,3 +1,4 @@
+from django.core.validators import RegexValidator
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db.models import Func
 from PIL import Image
@@ -5,6 +6,11 @@ from PIL import Image
 import sys
 from io import BytesIO
 from random import randint
+
+
+phone_regex = RegexValidator(regex=r'^\+?\d{9,15}$',
+                             message='Phone number must be entered in the format: "+999999999". '
+                                     'Up to 15 digits allowed.')
 
 
 class ListDisplayAllModelFieldsAdminMixin(object):
@@ -39,3 +45,4 @@ def compress_image(image, sizes, field, image_format):
 
 def generate_new_password():
     return str(randint(10000, 99999))
+
