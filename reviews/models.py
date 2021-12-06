@@ -1,28 +1,31 @@
-from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.db import models
 
 from users.models import User
 
 
 class ContentTypeModelManager(models.Manager):
     def delete_instance(self, obj, user):
-        instance = self.filter(content_type=ContentType.objects.get_for_model(obj),
-                               object_id=obj.id, user=user).first()
+        instance = self.filter(
+            content_type=ContentType.objects.get_for_model(obj),
+            object_id=obj.id,
+            user=user,
+        ).first()
         return instance.delete()
 
 
 class Favourite(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
-    user = models.ForeignKey(User, related_name='favourite', on_delete=models.CASCADE)
+    content_object = GenericForeignKey("content_type", "object_id")
+    user = models.ForeignKey(User, related_name="favourite", on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     objects = ContentTypeModelManager()
 
     class Meta:
-        unique_together = ['content_type', 'object_id', 'user']
+        unique_together = ["content_type", "object_id", "user"]
 
     def __str__(self):
         return self.user.name
@@ -31,15 +34,15 @@ class Favourite(models.Model):
 class Star(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
-    user = models.ForeignKey(User, related_name='star', on_delete=models.CASCADE)
+    content_object = GenericForeignKey("content_type", "object_id")
+    user = models.ForeignKey(User, related_name="star", on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     mark = models.PositiveIntegerField()
 
     objects = ContentTypeModelManager()
 
     class Meta:
-        unique_together = ['content_type', 'object_id', 'user']
+        unique_together = ["content_type", "object_id", "user"]
 
     def __str__(self):
         return self.user.name

@@ -6,18 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('products', '0007_alter_productimages_product_name'),
+        ("products", "0007_alter_productimages_product_name"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='product',
-            name='energy',
-            field=models.FloatField(blank=True, null=True, verbose_name='Энергетическая ценность'),
+            model_name="product",
+            name="energy",
+            field=models.FloatField(
+                blank=True, null=True, verbose_name="Энергетическая ценность"
+            ),
         ),
         migrations.AlterField(
-            model_name='product',
-            name='main_image',
-            field=models.ImageField(blank=True, null=True, upload_to='', verbose_name='Основное изображение'),
+            model_name="product",
+            name="main_image",
+            field=models.ImageField(
+                blank=True, null=True, upload_to="", verbose_name="Основное изображение"
+            ),
         ),
     ]

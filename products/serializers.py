@@ -2,8 +2,9 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Avg
 from rest_framework import serializers
 
-from reviews.models import Star, Favourite
+from reviews.models import Favourite, Star
 from utils.models_utils import Round
+
 from .models import Category, Product, ProductImages
 
 
@@ -12,7 +13,7 @@ class CategoryListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ['id', 'name', 'description', 'children', 'image']
+        fields = ["id", "name", "description", "children", "image"]
 
     def get_children(self, obj):
         serializer = CategoryListSerializer(instance=obj.get_children(), many=True)
@@ -24,17 +25,26 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ['id', 'name', 'parents']
+        fields = ["id", "name", "parents"]
 
     def get_parents(self, obj):
         serializer = CategorySerializer(instance=obj.parent)
         return serializer.data
 
 
+class EditProductImagesSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(source="image_1000")
+    # product_id = serializers.IntegerField(write_only=True)
+
+    class Meta:
+        model = ProductImages
+        fields = ("id", "image", "main", "description", "product")
+
+
 class ProductImagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImages
-        fields = ('image_1000', 'image_500', 'image_150', 'main', 'description')
+        fields = ("id", "image_1000", "image_500", "image_150", "main", "description")
 
 
 class ProductListSerializer(serializers.ModelSerializer):
@@ -49,40 +59,72 @@ class ProductListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['name', 'category', 'price', 'in_stock', 'id', 'weight',
-                  'stars_count', 'stared', 'average_star', 'is_favourite',
-                  'favourite_count', 'discount', 'discounted_price',
-                  'carbohydrates', 'fats', 'calories', 'energy', 'protein',
-                  'description', 'expiration_date', 'production_date', 'images']
+        fields = [
+            "name",
+            "category",
+            "price",
+            "in_stock",
+            "id",
+            "weight",
+            "stars_count",
+            "stared",
+            "average_star",
+            "is_favourite",
+            "favourite_count",
+            "discount",
+            "discounted_price",
+            "carbohydrates",
+            "fats",
+            "calories",
+            "energy",
+            "protein",
+            "description",
+            "expiration_date",
+            "production_date",
+            "images",
+        ]
 
     def get_stars_count(self, obj):
-        return Star.objects.filter(content_type=ContentType.objects.get_for_model(obj), object_id=obj.id).count()
+        return Star.objects.filter(
+            content_type=ContentType.objects.get_for_model(obj), object_id=obj.id
+        ).count()
 
     def get_average_star(self, obj):
-        return Star.objects.filter(content_type=ContentType.objects.get_for_model(obj), object_id=obj.id
-                                   ).aggregate(value=Round(Avg('mark')))['value']
+        return Star.objects.filter(
+            content_type=ContentType.objects.get_for_model(obj), object_id=obj.id
+        ).aggregate(value=Round(Avg("mark")))["value"]
 
     def get_stared(self, obj):
         user = self.context["request"].user
-        return user.is_authenticated and Star.objects.filter(
-            content_type=ContentType.objects.get_for_model(obj),
-            object_id=obj.id,
-            user=user
-        ).exists()
+        return (
+            user.is_authenticated
+            and Star.objects.filter(
+                content_type=ContentType.objects.get_for_model(obj),
+                object_id=obj.id,
+                user=user,
+            ).exists()
+        )
 
     def get_favourite_count(self, obj):
-        return Favourite.objects.filter(content_type=ContentType.objects.get_for_model(obj), object_id=obj.id).count()
+        return Favourite.objects.filter(
+            content_type=ContentType.objects.get_for_model(obj), object_id=obj.id
+        ).count()
 
     def get_is_favourite(self, obj):
         user = self.context["request"].user
-        return user.is_authenticated and Favourite.objects.filter(
-            content_type=ContentType.objects.get_for_model(obj),
-            object_id=obj.id,
-            user=user
-        ).exists()
+        return (
+            user.is_authenticated
+            and Favourite.objects.filter(
+                content_type=ContentType.objects.get_for_model(obj),
+                object_id=obj.id,
+                user=user,
+            ).exists()
+        )
 
     def get_discounted_price(self, obj):
-        return round((obj.price * (1 - obj.discount/100)), 2) if obj.discount else None
+        return (
+            round((obj.price * (1 - obj.discount / 100)), 2) if obj.discount else None
+        )
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -97,37 +139,82 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['name', 'description', 'price', 'production_date', 'images', 'protein',
-                  'carbohydrates', 'fats', 'calories', 'energy', 'barcode', 'manufacturer',
-                  'expiration_date', 'weight', 'in_stock', 'id', 'stars_count', 'stared',
-                  'average_star', 'is_favourite', 'favourite_count', 'category', 'origin',
-                  'discount', 'discounted_price', 'extra_info', 'images']
+        fields = [
+            "name",
+            "description",
+            "price",
+            "production_date",
+            "images",
+            "protein",
+            "carbohydrates",
+            "fats",
+            "calories",
+            "energy",
+            "barcode",
+            "manufacturer",
+            "expiration_date",
+            "weight",
+            "in_stock",
+            "id",
+            "stars_count",
+            "stared",
+            "average_star",
+            "is_favourite",
+            "favourite_count",
+            "category",
+            "origin",
+            "discount",
+            "discounted_price",
+            "extra_info",
+            "images",
+        ]
 
     def get_average_star(self, obj):
-        return Star.objects.filter(content_type=ContentType.objects.get_for_model(obj), object_id=obj.id
-                                   ).aggregate(value=Round(Avg('mark')))['value']
+        return Star.objects.filter(
+            content_type=ContentType.objects.get_for_model(obj), object_id=obj.id
+        ).aggregate(value=Round(Avg("mark")))["value"]
 
     def get_stars_count(self, obj):
-        return Star.objects.filter(content_type=ContentType.objects.get_for_model(obj), object_id=obj.id).count()
+        return Star.objects.filter(
+            content_type=ContentType.objects.get_for_model(obj), object_id=obj.id
+        ).count()
 
     def get_stared(self, obj):
         user = self.context["request"].user
-        return user.is_authenticated and Star.objects.filter(
-            content_type=ContentType.objects.get_for_model(obj),
-            object_id=obj.id,
-            user=user
-        ).exists()
+        return (
+            user.is_authenticated
+            and Star.objects.filter(
+                content_type=ContentType.objects.get_for_model(obj),
+                object_id=obj.id,
+                user=user,
+            ).exists()
+        )
 
     def get_favourite_count(self, obj):
-        return Favourite.objects.filter(content_type=ContentType.objects.get_for_model(obj), object_id=obj.id).count()
+        return Favourite.objects.filter(
+            content_type=ContentType.objects.get_for_model(obj), object_id=obj.id
+        ).count()
 
     def get_is_favourite(self, obj):
         user = self.context["request"].user
-        return user.is_authenticated and Favourite.objects.filter(
-            content_type=ContentType.objects.get_for_model(obj),
-            object_id=obj.id,
-            user=user
-        ).exists()
+        return (
+            user.is_authenticated
+            and Favourite.objects.filter(
+                content_type=ContentType.objects.get_for_model(obj),
+                object_id=obj.id,
+                user=user,
+            ).exists()
+        )
 
     def get_discounted_price(self, obj):
-        return round((obj.price * (1 - obj.discount/100)), 2) if obj.discount else None
+        return (
+            round((obj.price * (1 - obj.discount / 100)), 2) if obj.discount else None
+        )
+
+
+class BulkActionProductSerializer(serializers.Serializer):
+    product_ids = serializers.ListField(child=serializers.IntegerField(), required=True)
+
+
+class BulkChangeProductCategorySerializer(BulkActionProductSerializer):
+    new_category = serializers.IntegerField(required=True)

@@ -6,12 +6,16 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0007_alter_generatedpassword_password'),
+        ("users", "0007_alter_generatedpassword_password"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='generatedpassword',
-            options={'ordering': ['-date', 'is_active'], 'verbose_name': 'временный пароль', 'verbose_name_plural': 'временные пароли'},
+            name="generatedpassword",
+            options={
+                "ordering": ["-date", "is_active"],
+                "verbose_name": "временный пароль",
+                "verbose_name_plural": "временные пароли",
+            },
         ),
     ]

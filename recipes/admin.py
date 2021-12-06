@@ -1,7 +1,8 @@
 from django.contrib import admin
 
 from utils.models_utils import ListDisplayAllModelFieldsAdminMixin
-from .models import RecipeCategory, Recipe, RecipeProducts
+
+from .models import Recipe, RecipeCategory, RecipeProducts
 
 
 @admin.register(RecipeCategory)

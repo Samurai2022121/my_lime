@@ -1,7 +1,8 @@
 from django.contrib import admin
 
 from utils.models_utils import ListDisplayAllModelFieldsAdminMixin
-from .models import Section, News
+
+from .models import News, Section
 
 
 @admin.register(Section)

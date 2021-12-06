@@ -6,28 +6,36 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('products', '0009_alter_product_main_image'),
+        ("products", "0009_alter_product_main_image"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='product',
-            name='production_date',
-            field=models.DateField(blank=True, null=True, verbose_name='Дата производства'),
+            model_name="product",
+            name="production_date",
+            field=models.DateField(
+                blank=True, null=True, verbose_name="Дата производства"
+            ),
         ),
         migrations.AlterField(
-            model_name='productimages',
-            name='image_1000',
-            field=models.ImageField(blank=True, null=True, upload_to='products/image_1000/'),
+            model_name="productimages",
+            name="image_1000",
+            field=models.ImageField(
+                blank=True, null=True, upload_to="products/image_1000/"
+            ),
         ),
         migrations.AlterField(
-            model_name='productimages',
-            name='image_150',
-            field=models.ImageField(blank=True, null=True, upload_to='products/image_150/'),
+            model_name="productimages",
+            name="image_150",
+            field=models.ImageField(
+                blank=True, null=True, upload_to="products/image_150/"
+            ),
         ),
         migrations.AlterField(
-            model_name='productimages',
-            name='image_500',
-            field=models.ImageField(blank=True, null=True, upload_to='products/image_500/'),
+            model_name="productimages",
+            name="image_500",
+            field=models.ImageField(
+                blank=True, null=True, upload_to="products/image_500/"
+            ),
         ),
     ]

@@ -6,17 +6,20 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('recipes', '0003_auto_20211107_1626'),
+        ("recipes", "0003_auto_20211107_1626"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='recipeproducts',
-            options={'verbose_name': 'ингриндиент для рецепта', 'verbose_name_plural': 'ингриндиенты для рецепта'},
+            name="recipeproducts",
+            options={
+                "verbose_name": "ингриндиент для рецепта",
+                "verbose_name_plural": "ингриндиенты для рецепта",
+            },
         ),
         migrations.RenameField(
-            model_name='recipeproducts',
-            old_name='products',
-            new_name='product',
+            model_name="recipeproducts",
+            old_name="products",
+            new_name="product",
         ),
     ]

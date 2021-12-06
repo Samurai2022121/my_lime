@@ -8,17 +8,17 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('contenttypes', '0002_remove_content_type_name'),
-        ('reviews', '0001_initial'),
+        ("contenttypes", "0002_remove_content_type_name"),
+        ("reviews", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='favourite',
-            unique_together={('content_type', 'object_id', 'user')},
+            name="favourite",
+            unique_together={("content_type", "object_id", "user")},
         ),
         migrations.AlterUniqueTogether(
-            name='star',
-            unique_together={('content_type', 'object_id', 'user')},
+            name="star",
+            unique_together={("content_type", "object_id", "user")},
         ),
     ]

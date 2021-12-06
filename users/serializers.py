@@ -1,29 +1,39 @@
-from django.utils import timezone
-
-from django.contrib.auth import get_user_model
 from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.utils import timezone
 from rest_framework import serializers
 
 from orders.serializers import OrdersSerializer
-from users.models import RefreshToken, CustomerDeliveryAddress
+from users.models import CustomerDeliveryAddress, RefreshToken
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(max_length=128, min_length=8, write_only=True)
-    confirm_password = serializers.CharField(max_length=128, min_length=8, write_only=True)
+    confirm_password = serializers.CharField(
+        max_length=128, min_length=8, write_only=True
+    )
     access = serializers.CharField(max_length=255, read_only=True)
     expires_in = serializers.IntegerField(read_only=True)
     refresh = serializers.UUIDField(read_only=True)
 
     class Meta:
         model = get_user_model()
-        fields = ('email', 'phone_number', 'password', 'confirm_password',
-                  'access', 'refresh', 'expires_in')
+        fields = (
+            "email",
+            "phone_number",
+            "password",
+            "confirm_password",
+            "access",
+            "refresh",
+            "expires_in",
+        )
 
     def validate(self, data):
-        if not data.get('password') or not data.get('confirm_password'):
-            raise serializers.ValidationError("Пожалуйста, введите пароль и подтвердите его.")
-        if data.get('password') != data.pop('confirm_password'):
+        if not data.get("password") or not data.get("confirm_password"):
+            raise serializers.ValidationError(
+                "Пожалуйста, введите пароль и подтвердите его."
+            )
+        if data.get("password") != data.pop("confirm_password"):
             raise serializers.ValidationError("Пароли не совпадают.")
         return data
 
@@ -41,30 +51,34 @@ class LoginSerializer(serializers.Serializer):
     full_name = serializers.CharField(read_only=True, required=False)
 
     def validate(self, data):
-        email = data.get('email')
-        phone_number = data.get('phone_number').replace("+", "")
-        password = data.get('password')
+        email = data.get("email")
+        phone_number = data.get("phone_number").replace("+", "")
+        password = data.get("password")
 
         if email is None and phone_number is None:
-            raise serializers.ValidationError('Введите номер телефона.')
+            raise serializers.ValidationError("Введите номер телефона.")
 
         if password is None:
-            raise serializers.ValidationError('Введите пароль.')
+            raise serializers.ValidationError("Введите пароль.")
 
         try:
             model = get_user_model()
-            user = model.objects.get(email=email) if email else model.objects.get(phone_number=phone_number)
+            user = (
+                model.objects.get(email=email)
+                if email
+                else model.objects.get(phone_number=phone_number)
+            )
         except get_user_model().DoesNotExist:
-            raise serializers.ValidationError('Такого пользователя не существует.')
+            raise serializers.ValidationError("Такого пользователя не существует.")
 
         if not user.is_active:
-            raise serializers.ValidationError('Пользователь был деактивирован.')
+            raise serializers.ValidationError("Пользователь был деактивирован.")
 
         if not user.check_password(password):
-            raise serializers.ValidationError('Неверный логин или пароль.')
+            raise serializers.ValidationError("Неверный логин или пароль.")
 
         validate_data = user.generate_tokens()
-        validate_data['full_name'] = user.phone_number
+        validate_data["full_name"] = user.phone_number
         return validate_data
 
 
@@ -75,19 +89,21 @@ class TokenObtainSerializer(serializers.Serializer):
     full_name = serializers.CharField(read_only=True, required=False)
 
     def validate(self, data):
-        if 'refresh' not in data:
-            raise serializers.ValidationError('Refresh token must be set')
+        if "refresh" not in data:
+            raise serializers.ValidationError("Refresh token must be set")
 
         try:
-            old_refresh = RefreshToken.objects.select_related('user').get(uuid=data['refresh'])
+            old_refresh = RefreshToken.objects.select_related("user").get(
+                uuid=data["refresh"]
+            )
         except RefreshToken.DoesNotExist:
-            raise serializers.ValidationError('Refresh token is invalid')
+            raise serializers.ValidationError("Refresh token is invalid")
 
         if (old_refresh.date + settings.REFRESH_TOKEN_LIFETIME) < timezone.now():
-            raise serializers.ValidationError('Refresh token is invalid')
+            raise serializers.ValidationError("Refresh token is invalid")
 
         validate_data = old_refresh.user.generate_tokens()
-        validate_data['phone_number'] = old_refresh.user.phone_number
+        validate_data["phone_number"] = old_refresh.user.phone_number
         return validate_data
 
 
@@ -103,7 +119,7 @@ class ValidateRegistrationCodeSerializer(serializers.Serializer):
 class CustomerDeliveryAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomerDeliveryAddress
-        fields = '__all__'
+        fields = "__all__"
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -112,33 +128,49 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ('id', 'name', 'surname', 'fathers_name', 'phone_number', 'date_of_birth',
-                  'registration_date', 'orders', 'avatar', 'delivery_address')
+        fields = (
+            "id",
+            "name",
+            "surname",
+            "fathers_name",
+            "phone_number",
+            "date_of_birth",
+            "registration_date",
+            "orders",
+            "avatar",
+            "delivery_address",
+        )
 
 
 class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
-        fields = ('id', 'name', 'surname', 'fathers_name', 'phone_number', 'registration_date')
+        fields = (
+            "id",
+            "name",
+            "surname",
+            "fathers_name",
+            "phone_number",
+            "registration_date",
+            "date_of_birth",
+        )
 
 
 class ChangeUserPasswordSerializer(serializers.Serializer):
-    old_password = serializers.CharField()
-    new_password = serializers.CharField()
-    new_password_confirm = serializers.CharField()
+    new_password = serializers.CharField(required=True)
+    new_password_confirm = serializers.CharField(required=True)
 
     def validate(self, data):
-        user = self.context["request"].user
-        old_password = data.get('old_password')
-        new_password = data.get('new_password')
-
-        if not user.check_password(old_password):
-            raise serializers.ValidationError('Неверный пароль.')
+        new_password = data.get("new_password")
 
         if new_password is None:
-            raise serializers.ValidationError('Введите новый пароль.')
+            raise serializers.ValidationError("Введите новый пароль.")
 
-        if new_password != data.pop('new_password_confirm'):
+        if new_password != data.pop("new_password_confirm"):
             raise serializers.ValidationError("Пароли не совпадают.")
 
         return data
+
+
+class BulkActionUserSerializer(serializers.Serializer):
+    users_ids = serializers.ListField(child=serializers.IntegerField(), required=True)
