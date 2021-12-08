@@ -1,29 +1,46 @@
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
+from mptt.models import MPTTModel, TreeForeignKey
 
 from products.models import Product
 from users.models import User
+from utils.models_utils import Timestampable
 
 
-class RecipeCategory(models.Model):
+class RecipeCategory(MPTTModel):
     name = models.CharField(max_length=70, unique=True, verbose_name="Название")
     description = models.TextField(blank=True, null=True, verbose_name="Описание")
+    parent = TreeForeignKey(
+        "self",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="children",
+        verbose_name="Родительская категория",
+    )
+    image = models.FileField(
+        blank=True,
+        null=True,
+        verbose_name="Изображение категории рецепта",
+        upload_to="recipe/categories/",
+    )
 
     class Meta:
         ordering = ["name"]
         verbose_name = "категория рецептов"
         verbose_name_plural = "категории рецептов"
 
+    class MPTTMeta:
+        order_insertion_by = ["name"]
+
     def __str__(self):
         return self.name
 
 
-class Recipe(models.Model):
+class Recipe(Timestampable, models.Model):
     name = models.CharField(max_length=150, verbose_name="Название")
     author = models.ForeignKey(
         User, related_name="recipes", on_delete=models.CASCADE, verbose_name="Автор"
-    )
-    publication_date = models.DateTimeField(
-        auto_now=True, verbose_name="Дата публикации"
     )
     ingredients = models.ManyToManyField(
         Product, through="RecipeProducts", verbose_name="Ингриндиенты в наличии"
@@ -49,6 +66,8 @@ class Recipe(models.Model):
     fats = models.FloatField(blank=True, null=True, verbose_name="Жиры")
     calories = models.FloatField(blank=True, null=True, verbose_name="Калорийность")
     servings = models.IntegerField(verbose_name="Порции")
+    cooking_steps = ArrayField(models.TextField())
+    video = models.URLField(null=True, blank=True)
 
     class Meta:
         ordering = ["name"]

@@ -2,9 +2,10 @@ from django.db import models
 
 from products.models import Product
 from users.models import User
+from utils.models_utils import Timestampable
 
 
-class Order(models.Model):
+class Order(Timestampable, models.Model):
     PAYMENT_METHODS = (
         ("card_pre", "Картой на сайте"),
         ("card_post", "Картой курьеру"),
@@ -23,8 +24,9 @@ class Order(models.Model):
     )
     products = models.ManyToManyField(Product, verbose_name="Покупки")
     payment_status = models.CharField(max_length=75)
-    order_status = models.CharField(max_length=75, choices=ORDER_STATUS, default=ORDER_STATUS[0][0])
-    date_order_placed = models.DateTimeField(auto_now=True)
+    order_status = models.CharField(
+        max_length=75, choices=ORDER_STATUS, default=ORDER_STATUS[0][0]
+    )
     payment_method = models.CharField(max_length=10, choices=PAYMENT_METHODS)
 
     class Meta:

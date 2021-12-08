@@ -21,7 +21,7 @@ class ProductViewset(OrderingModelViewsetMixin, viewsets.ModelViewSet):
         "bulk_delete": serializers.BulkActionProductSerializer,
     }
     lookup_field = "id"
-    queryset = Product.objects.filter(is_archive=False)
+    queryset = Product.objects.all()
 
     def get_serializer_class(self):
         return self.serializer_action_classes.get(
@@ -32,7 +32,7 @@ class ProductViewset(OrderingModelViewsetMixin, viewsets.ModelViewSet):
         return self.queryset.get(id=self.kwargs["id"])
 
     def get_queryset(self):
-        qs = self.queryset
+        qs = self.queryset.filter(is_archive=False)
         if "s" in self.request.query_params:
             search_value = self.request.query_params["s"]
             qs = qs.filter(

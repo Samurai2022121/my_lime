@@ -123,8 +123,8 @@ class CustomerDeliveryAddressSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    orders = OrdersSerializer(many=True)
-    delivery_address = CustomerDeliveryAddressSerializer(many=True)
+    orders = OrdersSerializer(many=True, read_only=True)
+    delivery_address = CustomerDeliveryAddressSerializer(many=True, read_only=True)
 
     class Meta:
         model = get_user_model()

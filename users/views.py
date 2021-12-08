@@ -12,17 +12,13 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from users.models import CustomerDeliveryAddress, GeneratedPassword, User
-from users.serializers import (
-    ChangeUserPasswordSerializer,
-    CustomerDeliveryAddressSerializer,
-    GenerateRegistrationCodeSerializer,
-    LoginSerializer,
-    RegistrationSerializer,
-    TokenObtainSerializer,
-    UserListSerializer,
-    UserSerializer,
-    ValidateRegistrationCodeSerializer,
-)
+from users.serializers import (ChangeUserPasswordSerializer,
+                               CustomerDeliveryAddressSerializer,
+                               GenerateRegistrationCodeSerializer,
+                               LoginSerializer, RegistrationSerializer,
+                               TokenObtainSerializer, UserListSerializer,
+                               UserSerializer,
+                               ValidateRegistrationCodeSerializer)
 from utils.models_utils import generate_new_password
 from utils.views_utils import OrderingModelViewsetMixin
 
@@ -147,10 +143,10 @@ class ValidateLoginCodeAPIView(views.APIView):
 
 
 class UserView(OrderingModelViewsetMixin, viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
     serializer_class = UserSerializer
     lookup_field = "id"
-    queryset = User.objects.filter(is_staff=False)
+    queryset = User.objects.all()
     serializer_action_classes = {"list": UserListSerializer}
 
     def get_serializer_class(self):
@@ -159,7 +155,7 @@ class UserView(OrderingModelViewsetMixin, viewsets.ModelViewSet):
         )
 
     def get_queryset(self):
-        qs = self.queryset
+        qs = self.queryset.filter(is_staff=False)
         if "s" in self.request.query_params:
             search_value = self.request.query_params["s"]
             qs = qs.filter(Q(phone_number__icontains=search_value))

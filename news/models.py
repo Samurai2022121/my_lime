@@ -1,6 +1,7 @@
 from django.db import models
 
 from users.models import User
+from utils.models_utils import Timestampable
 
 
 class Section(models.Model):
@@ -15,7 +16,7 @@ class Section(models.Model):
         return self.name
 
 
-class News(models.Model):
+class News(Timestampable, models.Model):
     headline = models.CharField(max_length=255, unique=True, verbose_name="Заголовок")
     text = models.TextField(verbose_name="Текст")
     section = models.ForeignKey(
@@ -24,9 +25,6 @@ class News(models.Model):
         on_delete=models.SET_DEFAULT,
         default="Общее",
         verbose_name="Новостной раздел",
-    )
-    publication_date = models.DateTimeField(
-        auto_now=True, verbose_name="Дата публикации"
     )
     author = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, verbose_name="Автор"

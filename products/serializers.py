@@ -34,7 +34,6 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class EditProductImagesSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(source="image_1000")
-    # product_id = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = ProductImages
@@ -134,7 +133,7 @@ class ProductSerializer(serializers.ModelSerializer):
     is_favourite = serializers.SerializerMethodField()
     favourite_count = serializers.SerializerMethodField()
     discounted_price = serializers.SerializerMethodField()
-    category = CategorySerializer()
+    category_read = CategorySerializer(read_only=True, source="category")
     images = ProductImagesSerializer(many=True)
 
     class Meta:
@@ -167,7 +166,33 @@ class ProductSerializer(serializers.ModelSerializer):
             "discounted_price",
             "extra_info",
             "images",
+            "own_production",
+            "created_at",
+            "updated_at",
+            "category_read",
         ]
+
+    def create(self, validated_data):
+        images_data = validated_data.pop("images")
+        product = Product.objects.create(**validated_data)
+
+        for image in images_data:
+            image, created = ProductImages.objects.get_or_create(**image)
+            product.iamges.add(image)
+        return product
+
+    def update(self, instance, validated_data):
+        images_data = validated_data.pop("images")
+
+        images_list = []
+
+        for image in images_data:
+            image, created = ProductImages.objects.get_or_create(**image)
+            images_list.append(image)
+
+        instance.ingredients = images_list
+        super().update(instance, validated_data)
+        return instance
 
     def get_average_star(self, obj):
         return Star.objects.filter(

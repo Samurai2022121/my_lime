@@ -4,7 +4,7 @@ from random import randint
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.validators import RegexValidator
-from django.db.models import Func
+from django.db import models
 from PIL import Image
 
 phone_regex = RegexValidator(
@@ -12,6 +12,14 @@ phone_regex = RegexValidator(
     message='Phone number must be entered in the format: "+999999999". '
     "Up to 15 digits allowed.",
 )
+
+
+class Timestampable(models.Model):
+    created_at = models.DateTimeField(editable=False)
+    updated_at = models.DateTimeField(editable=False)
+
+    class Meta:
+        abstract = True
 
 
 class ListDisplayAllModelFieldsAdminMixin(object):
@@ -22,7 +30,7 @@ class ListDisplayAllModelFieldsAdminMixin(object):
         super(ListDisplayAllModelFieldsAdminMixin, self).__init__(model, admin_site)
 
 
-class Round(Func):
+class Round(models.Func):
     function = "ROUND"
     template = "%(function)s(%(expressions)s, 2)"
 

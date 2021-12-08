@@ -1,14 +1,11 @@
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
-from utils.views_utils import ProductPagination, OrderingModelViewsetMixin
+from utils.views_utils import OrderingModelViewsetMixin, ProductPagination
 
 from .models import Recipe, RecipeCategory
-from .serializers import (
-    RecipeCategorySerializer,
-    RecipeListSerializer,
-    RecipeSerializer,
-)
+from .serializers import (RecipeCategorySerializer, RecipeListSerializer,
+                          RecipeSerializer)
 
 
 class RecipeViewset(OrderingModelViewsetMixin, viewsets.ModelViewSet):
@@ -31,7 +28,7 @@ class RecipeViewset(OrderingModelViewsetMixin, viewsets.ModelViewSet):
         ordering_fields = self.get_ordering_fields()
         if ordering_fields:
             return self.queryset.order_by(*ordering_fields)
-        return self.queryset.order_by("publication_date")
+        return self.queryset
 
 
 class RecipeCategoryViewset(viewsets.ModelViewSet):

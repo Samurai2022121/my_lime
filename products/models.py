@@ -2,6 +2,8 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
 
+from utils.models_utils import Timestampable
+
 
 class Category(MPTTModel):
     name = models.CharField(max_length=50, unique=True, verbose_name="Название")
@@ -33,7 +35,7 @@ class Category(MPTTModel):
         return self.name
 
 
-class Product(models.Model):
+class Product(Timestampable, models.Model):
     name = models.CharField(max_length=250, verbose_name="Наименование")
     category = models.ForeignKey(
         Category,
@@ -75,6 +77,7 @@ class Product(models.Model):
     discount = models.IntegerField(blank=True, null=True, verbose_name="Скидка, %")
     extra_info = models.JSONField(null=True, blank=True)
     is_archive = models.BooleanField(default=False)
+    is_sorted = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ["manufacturer", "name"]
