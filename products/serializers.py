@@ -177,20 +177,15 @@ class ProductSerializer(serializers.ModelSerializer):
         product = Product.objects.create(**validated_data)
 
         for image in images_data:
-            image, created = ProductImages.objects.get_or_create(**image)
-            product.iamges.add(image)
+            ProductImages.objects.create(product=product, **image)
         return product
 
     def update(self, instance, validated_data):
         images_data = validated_data.pop("images")
 
-        images_list = []
-
         for image in images_data:
-            image, created = ProductImages.objects.get_or_create(**image)
-            images_list.append(image)
+            ProductImages.objects.update_or_create(**image)
 
-        instance.ingredients = images_list
         super().update(instance, validated_data)
         return instance
 
