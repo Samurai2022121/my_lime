@@ -1,5 +1,3 @@
-import json
-
 from django.db.models import Q
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -83,7 +81,6 @@ class ProductViewset(OrderingModelViewsetMixin, viewsets.ModelViewSet):
         serialized_data.is_valid(raise_exception=True)
         products = serialized_data.data["products"]
         for product in products:
-            product = json.loads(product)
             Product.objects.filter(id=product.pop("id")).update(**product)
         return Response(status=status.HTTP_200_OK)
 
