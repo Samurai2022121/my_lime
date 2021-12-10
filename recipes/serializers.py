@@ -115,7 +115,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def create(self, validated_data):
-        user = self.context["request"].user
+        user = self.context["request"].user.id
         recipe_category_id = validated_data.pop("recipe_category_id")
         category = RecipeCategory.objects.get(id=recipe_category_id)
         validated_data.update({"recipe_category": category, "author_id": user})

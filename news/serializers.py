@@ -16,7 +16,7 @@ class NewsSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def create(self, validated_data):
-        user = self.context["request"].user
+        user = self.context["request"].user.id
         validated_data.update({"author_id": user})
         recipe = News.objects.create(**validated_data)
         return recipe
