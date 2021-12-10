@@ -9,7 +9,6 @@ from .models import News, Section
 class NewsSerializer(serializers.ModelSerializer):
     stars_count = serializers.SerializerMethodField()
     stared = serializers.SerializerMethodField()
-    section = serializers.SerializerMethodField()
     author = serializers.SerializerMethodField()
 
     class Meta:
@@ -31,9 +30,6 @@ class NewsSerializer(serializers.ModelSerializer):
                 user=user,
             ).exists()
         )
-
-    def get_section(self, obj):
-        return {"id": obj.section.id, "name": obj.section.name}
 
     def get_author(self, obj):
         return {"id": obj.author.id, "name": obj.author.name}
