@@ -1,3 +1,5 @@
+import json
+
 from django.db.models import Q
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -16,9 +18,10 @@ class ProductViewset(OrderingModelViewsetMixin, viewsets.ModelViewSet):
     serializer_class = serializers.ProductSerializer
     serializer_action_classes = {
         "list": serializers.ProductListSerializer,
-        "add_to_archive": serializers.BulkActionProductSerializer,
+        "change_archive_status": serializers.BulkActionProductSerializer,
         "change_category": serializers.BulkChangeProductCategorySerializer,
         "bulk_delete": serializers.BulkActionProductSerializer,
+        "bulk_update": serializers.BulkUpdateProductSerializer,
     }
     lookup_field = "id"
     queryset = Product.objects.all()
@@ -73,11 +76,16 @@ class ProductViewset(OrderingModelViewsetMixin, viewsets.ModelViewSet):
         Product.objects.filter(id__in=product_ids).delete()
         return Response(status=status.HTTP_200_OK)
 
-    # def create(self, request, *args, **kwargs):
-    #     raise exceptions.ValidationError('CREATE is not supported')
-    #
-    # def destroy(self, request, *args, **kwargs):
-    #     raise exceptions.ValidationError('DELETE is not supported')
+    @action(detail=False, methods=["post"], url_path="bulk_update")
+    def bulk_update(self, request, **kwargs):
+        serializer = self.get_serializer_class()
+        serialized_data = serializer(data=request.data)
+        serialized_data.is_valid(raise_exception=True)
+        products = serialized_data.data["products"]
+        for product in products:
+            product = json.loads(product)
+            Product.objects.filter(id=product.pop("id")).update(**product)
+        return Response(status=status.HTTP_200_OK)
 
 
 class CategoryViewset(viewsets.ModelViewSet):

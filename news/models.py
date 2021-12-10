@@ -22,8 +22,7 @@ class News(Timestampable, models.Model):
     section = models.ForeignKey(
         Section,
         related_name="news",
-        on_delete=models.SET_DEFAULT,
-        default="Общее",
+        on_delete=models.CASCADE,
         verbose_name="Новостной раздел",
     )
     author = models.ForeignKey(

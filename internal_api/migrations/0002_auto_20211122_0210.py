@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("products", "0015_alter_category_image"),
-        ("supply", "0001_initial"),
+        ("internal_api", "0001_initial"),
     ]
 
     operations = [

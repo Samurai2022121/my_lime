@@ -103,7 +103,8 @@ class RecipeSerializer(serializers.ModelSerializer):
     stars_count = serializers.SerializerMethodField()
     stared = serializers.SerializerMethodField()
     author = serializers.SerializerMethodField()
-    recipe_category = RecipeCategorySerializer()
+    recipe_category = RecipeCategorySerializer(read_only=True)
+    recipe_category_id = serializers.IntegerField(write_only=True, required=True)
     ingredients_in_stock = serializers.SerializerMethodField()
     average_star = serializers.SerializerMethodField()
     is_favourite = serializers.SerializerMethodField()
@@ -112,6 +113,21 @@ class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = "__all__"
+
+    def create(self, validated_data):
+        user = self.context["request"].user
+        recipe_category_id = validated_data.pop("recipe_category_id")
+        category = RecipeCategory.objects.get(id=recipe_category_id)
+        validated_data.update({"recipe_category": category, "author_id": user})
+        recipe = Recipe.objects.create(**validated_data)
+        return recipe
+
+    def update(self, instance, validated_data):
+        recipe_category_id = validated_data.pop("recipe_category_id")
+        category = RecipeCategory.objects.get(id=recipe_category_id)
+        validated_data.update({"recipe_category": category})
+        super().update(instance, validated_data)
+        return instance
 
     def get_stars_count(self, obj):
         return Star.objects.filter(

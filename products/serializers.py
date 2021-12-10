@@ -238,3 +238,7 @@ class BulkActionProductSerializer(serializers.Serializer):
 
 class BulkChangeProductCategorySerializer(BulkActionProductSerializer):
     new_category = serializers.IntegerField(required=True)
+
+
+class BulkUpdateProductSerializer(serializers.Serializer):
+    products = serializers.ListField(child=serializers.JSONField(), required=True)

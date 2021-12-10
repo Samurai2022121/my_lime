@@ -30,7 +30,10 @@ urlpatterns = [
     path("rating/", include(("reviews.urls", "reviews"), namespace="reviews")),
     path("news/", include(("news.urls", "news"), namespace="news")),
     path("orders/", include(("orders.urls", "orders"), namespace="orders")),
-    # path('supply/', include(('supply.urls', 'supply'), namespace='supply')),
+    path(
+        "internal-api/",
+        include(("internal_api.urls", "internal_api"), namespace="internal_api"),
+    ),
     path(
         "docs/",
         schema_view.with_ui("swagger", cache_timeout=0),

@@ -4,7 +4,7 @@ from django.db import models
 from products.models import Product
 
 
-class Shops(models.Model):
+class Shop(models.Model):
     address = models.TextField()
     name = models.CharField(max_length=255)
     date_added = models.DateTimeField(auto_now=True)

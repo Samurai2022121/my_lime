@@ -12,7 +12,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from users.models import CustomerDeliveryAddress, GeneratedPassword, User
-from users.serializers import (ChangeUserPasswordSerializer,
+from users.serializers import (BulkActionUserSerializer,
+                               ChangeUserPasswordSerializer,
                                CustomerDeliveryAddressSerializer,
                                GenerateRegistrationCodeSerializer,
                                LoginSerializer, RegistrationSerializer,
@@ -147,7 +148,11 @@ class UserView(OrderingModelViewsetMixin, viewsets.ModelViewSet):
     serializer_class = UserSerializer
     lookup_field = "id"
     queryset = User.objects.all()
-    serializer_action_classes = {"list": UserListSerializer}
+    serializer_action_classes = {
+        "list": UserListSerializer,
+        "change_archive_status": BulkActionUserSerializer,
+        "bulk_delete": BulkActionUserSerializer,
+    }
 
     def get_serializer_class(self):
         return self.serializer_action_classes.get(
@@ -171,6 +176,15 @@ class UserView(OrderingModelViewsetMixin, viewsets.ModelViewSet):
         serialized_data.is_valid(raise_exception=True)
         product_ids = serialized_data.data["users_ids"]
         User.objects.filter(id__in=product_ids).delete()
+        return Response(status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["post"], url_path="bulk-archive")
+    def change_archive_status(self, request, **kwargs):
+        serializer = self.get_serializer_class()
+        serialized_data = serializer(data=request.data)
+        serialized_data.is_valid(raise_exception=True)
+        users_ids = serialized_data.data["users_ids"]
+        User.objects.filter(id__in=users_ids).update(is_archive=Q(is_archive=False))
         return Response(status=status.HTTP_200_OK)
 
 

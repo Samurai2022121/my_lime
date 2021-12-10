@@ -24,13 +24,14 @@ INSTALLED_APPS = [
     "rest_framework",
     "mptt",
     "drf_yasg",
+    "django_filters",
     "rest_framework_simplejwt",
     "news",
     "orders",
     "products",
     "recipes",
     "reviews",
-    "supply",
+    "internal_api",
     "users",
 ]
 

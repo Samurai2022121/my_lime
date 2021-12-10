@@ -34,6 +34,7 @@ class User(AbstractUser):
     )
     avatar = models.ImageField(null=True, blank=True, verbose_name="Аватар")
     registration_date = models.DateTimeField(auto_now=True)
+    is_archive = models.BooleanField(default=False)
 
     USERNAME_FIELD = "phone_number"
     REQUIRED_FIELDS = []
