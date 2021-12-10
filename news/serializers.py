@@ -15,6 +15,12 @@ class NewsSerializer(serializers.ModelSerializer):
         model = News
         fields = "__all__"
 
+    def create(self, validated_data):
+        user = self.context["request"].user
+        validated_data.update({"author_id": user})
+        recipe = News.objects.create(**validated_data)
+        return recipe
+
     def get_stars_count(self, obj):
         return Star.objects.filter(
             content_type=ContentType.objects.get_for_model(obj), object_id=obj.id

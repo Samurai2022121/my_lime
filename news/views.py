@@ -21,7 +21,7 @@ class NewsViewset(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     pagination_class = ProductPagination
     filterset_class = NewsFilter
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
     serializer_class = NewsSerializer
     lookup_field = "id"
     queryset = News.objects.all()
