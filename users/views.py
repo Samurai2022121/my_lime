@@ -190,7 +190,7 @@ class UserView(OrderingModelViewsetMixin, viewsets.ModelViewSet):
     @action(detail=False, methods=["get"], url_path="current-user-info")
     def get_current_user(self, request, **kwargs):
         current_user = self.request.user
-        serialized_data = UserSerializer(current_user)
+        serialized_data = self.serializer_class(current_user)
         return Response(status=status.HTTP_200_OK, data=serialized_data.data)
 
 

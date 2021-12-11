@@ -2,6 +2,7 @@ from django.core.validators import RegexValidator
 from django.db import models
 
 from products.models import Product
+from utils.models_utils import Timestampable, phone_regex
 
 
 class Shop(models.Model):
@@ -10,33 +11,74 @@ class Shop(models.Model):
     date_added = models.DateTimeField(auto_now=True)
 
 
+class Personnel(models.Model):
+    WORK_STATUSES = (
+        ("working", "Работает"),
+        ("fired", "Уволен"),
+        ("vacation", "Отпуск"),
+        ("maternity_leave", "Декрет"),
+        ("probation", "Исп. срок"),
+    )
+
+    is_archived = models.BooleanField(default=False)
+    position = models.CharField(max_length=255)
+    working_place = models.ForeignKey(Shop, on_delete=models.PROTECT)
+    phone_number = models.CharField(validators=[phone_regex], max_length=17)
+    date_hired = models.DateTimeField(auto_now=True)
+    status = models.CharField(max_length=255, choices=WORK_STATUSES)
+    photo = models.ImageField(upload_to="internal-api/staff/", null=True, blank=True)
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    fathers_name = models.CharField(max_length=255)
+    date_of_birth = models.DateField()
+    passport = models.CharField(max_length=100)
+    place_of_birth = models.CharField(max_length=255)
+    department_issued_passport = models.CharField(max_length=255)
+    identification_number = models.CharField(max_length=255)
+    date_passport_issued = models.DateField()
+    date_passport_valid = models.DateField()
+    contract_period = models.IntegerField()
+    contract_type = models.CharField(max_length=255)
+
+
 class Warehouse(models.Model):
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name="warehouse"
     )
     measure_unit = models.CharField(max_length=35)
-    remaining = models.FloatField(default=0)
-    min_remaining = models.FloatField(default=0)
-    max_remaining = models.FloatField(default=0)
-    supplier = models.CharField(max_length=255)
-    supplier_email = models.EmailField()
-    phone_regex = RegexValidator(
-        regex=r"^\+?\d{9,15}$",
-        message='Phone number must be entered in the format: "+999999999". '
-        "Up to 15 digits allowed.",
-    )
+    remaining = models.FloatField(default=0, blank=True, null=True)
+    min_remaining = models.FloatField(default=0, blank=True, null=True)
+    max_remaining = models.FloatField(default=0, blank=True, null=True)
+    supplier = models.CharField(max_length=255, blank=True, null=True)
+    margin = models.FloatField(blank=True, null=True)
+    supplier_email = models.EmailField(blank=True, null=True)
     supplier_phone = models.CharField(
-        validators=[phone_regex], max_length=17, unique=True
+        validators=[phone_regex], max_length=17, blank=True, null=True
     )
+    auto_order = models.BooleanField(default=False)
 
 
-class RemainingProduct(models.Model):
+class RemainingProduct(Timestampable, models.Model):
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name="remaining_product"
     )
     remaining = models.FloatField(default=1)
 
 
-class TechCard(models.Model):
+class TechCard(Timestampable, models.Model):
+    name = models.CharField(max_length=255)
     product = models.ManyToManyField(Product, related_name="tech_card_product")
     amount = models.FloatField(default=1)
+    author = models.ForeignKey(Personnel, on_delete=models.PROTECT)
+    is_archived = models.BooleanField(default=False)
+
+
+class DailyMenuPlan(Timestampable, models.Model):
+    dishes = models.ManyToManyField(TechCard, through="MenuDishes")
+    author = models.ForeignKey(Personnel, on_delete=models.PROTECT)
+
+
+class MenuDishes(models.Model):
+    dish = models.ForeignKey(TechCard, on_delete=models.PROTECT)
+    menu = models.ForeignKey(DailyMenuPlan, on_delete=models.PROTECT)
+    quantity = models.IntegerField(default=1)

@@ -28,6 +28,7 @@ class Order(Timestampable, models.Model):
         max_length=75, choices=ORDER_STATUS, default=ORDER_STATUS[0][0]
     )
     payment_method = models.CharField(max_length=10, choices=PAYMENT_METHODS)
+    sum_total = models.FloatField()
 
     class Meta:
         verbose_name = "Заказ"
