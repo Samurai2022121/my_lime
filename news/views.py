@@ -1,7 +1,8 @@
 import django_filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
-from rest_framework.permissions import AllowAny, IsAuthenticated, BasePermission
+from rest_framework.permissions import (AllowAny, BasePermission,
+                                        IsAuthenticated)
 
 from utils.views_utils import ProductPagination
 
@@ -11,7 +12,7 @@ from .serializers import NewsSerializer, SectionSerializer
 
 class ReadOnlyPermissions(BasePermission):
     def has_permission(self, request, view):
-        if request.method == 'GET':
+        if request.method == "GET":
             return True
         return request.user and request.user.is_authenticated
 

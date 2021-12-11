@@ -187,6 +187,12 @@ class UserView(OrderingModelViewsetMixin, viewsets.ModelViewSet):
         User.objects.filter(id__in=users_ids).update(is_archive=Q(is_archive=False))
         return Response(status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=["get"], url_path="current-user-info")
+    def get_current_user(self, request, **kwargs):
+        current_user = self.request.user
+        serialized_data = UserSerializer(current_user)
+        return Response(status=status.HTTP_200_OK, data=serialized_data.data)
+
 
 class ChangeUserPasswordAPIView(views.APIView):
     permission_classes = (IsAuthenticated,)
