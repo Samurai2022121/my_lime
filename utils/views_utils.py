@@ -1,4 +1,7 @@
+from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
 
 
 class ProductPagination(PageNumberPagination):
@@ -26,3 +29,15 @@ class OrderingModelViewsetMixin:
             if hasattr(self.queryset.model, field):
                 ordering_values.append(orderby_part)
         return ordering_values
+
+
+class BulkUpdateViewSetMixin(object):
+    @action(detail=False, methods=["post"], url_path="bulk_update")
+    def bulk_update(self, request, **kwargs):
+        serializer = self.get_serializer_class()
+        serialized_data = serializer(data=request.data)
+        serialized_data.is_valid(raise_exception=True)
+        instances = serialized_data.data["instances"]
+        for instance in instances:
+            self.queryset.filter(id=instance.pop("id")).update(**instance)
+        return Response(status=status.HTTP_200_OK)

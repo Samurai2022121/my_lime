@@ -132,6 +132,7 @@ class ProductSerializer(serializers.ModelSerializer):
     average_star = serializers.SerializerMethodField()
     is_favourite = serializers.SerializerMethodField()
     favourite_count = serializers.SerializerMethodField()
+    reviews = serializers.SerializerMethodField()
     discounted_price = serializers.SerializerMethodField()
     category_read = CategorySerializer(read_only=True, source="category")
     images = ProductImagesSerializer(many=True)
@@ -170,6 +171,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "category_read",
+            "reviews",
         ]
 
     def create(self, validated_data):
@@ -210,6 +212,11 @@ class ProductSerializer(serializers.ModelSerializer):
             ).exists()
         )
 
+    def get_reviews(self, obj):
+        return Star.objects.filter(
+            content_type=ContentType.objects.get_for_model(obj), object_id=obj.id
+        ).values("review", "mark", "created_at", "user__name")
+
     def get_favourite_count(self, obj):
         return Favourite.objects.filter(
             content_type=ContentType.objects.get_for_model(obj), object_id=obj.id
@@ -238,7 +245,3 @@ class BulkActionProductSerializer(serializers.Serializer):
 
 class BulkChangeProductCategorySerializer(BulkActionProductSerializer):
     new_category = serializers.IntegerField(required=True)
-
-
-class BulkUpdateProductSerializer(serializers.Serializer):
-    products = serializers.ListField(child=serializers.JSONField(), required=True)

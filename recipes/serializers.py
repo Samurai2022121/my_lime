@@ -5,7 +5,7 @@ from rest_framework import serializers
 from reviews.models import Favourite, Star
 from utils.models_utils import Round
 
-from .models import Recipe, RecipeCategory
+from .models import Recipe, RecipeCategory, RecipeCookingSteps
 
 
 class RecipeCategoryListSerializer(serializers.ModelSerializer):
@@ -52,7 +52,6 @@ class RecipeListSerializer(serializers.ModelSerializer):
             "fats",
             "calories",
             "video",
-            "cooking_steps",
         ]
 
     def get_stars_count(self, obj):
@@ -99,6 +98,12 @@ class RecipeListSerializer(serializers.ModelSerializer):
         )
 
 
+class RecipeCookingStepsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecipeCookingSteps
+        fields = "__all__"
+
+
 class RecipeSerializer(serializers.ModelSerializer):
     stars_count = serializers.SerializerMethodField()
     stared = serializers.SerializerMethodField()
@@ -109,6 +114,8 @@ class RecipeSerializer(serializers.ModelSerializer):
     average_star = serializers.SerializerMethodField()
     is_favourite = serializers.SerializerMethodField()
     favourite_count = serializers.SerializerMethodField()
+    reviews = serializers.SerializerMethodField()
+    recipe_steps = RecipeCookingStepsSerializer(many=True)
 
     class Meta:
         model = Recipe
@@ -117,16 +124,26 @@ class RecipeSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = self.context["request"].user.id
         recipe_category_id = validated_data.pop("recipe_category_id")
+        recipe_steps = validated_data.pop("recipe_steps")
         category = RecipeCategory.objects.get(id=recipe_category_id)
         validated_data.update({"recipe_category": category, "author_id": user})
         recipe = Recipe.objects.create(**validated_data)
+        for step in recipe_steps:
+            RecipeCookingSteps.objects.create(recipe=recipe, **step)
         return recipe
 
     def update(self, instance, validated_data):
-        recipe_category_id = validated_data.pop("recipe_category_id")
+        recipe_steps = validated_data.pop("recipe_steps", [])
+        recipe_category_id = validated_data.pop("recipe_category_id", "")
         category = RecipeCategory.objects.get(id=recipe_category_id)
         validated_data.update({"recipe_category": category})
-        super().update(instance, validated_data)
+        instance = super().update(instance, validated_data)
+        for step in recipe_steps:
+            step_id = step.get("id", "")
+            if step_id:
+                RecipeCookingSteps.objects.get(id=step_id).update(**step)
+            else:
+                RecipeCookingSteps.objects.create(recipe=instance, **step)
         return instance
 
     def get_stars_count(self, obj):
@@ -149,6 +166,11 @@ class RecipeSerializer(serializers.ModelSerializer):
         return Star.objects.filter(
             content_type=ContentType.objects.get_for_model(obj), object_id=obj.id
         ).aggregate(value=Round(Avg("mark")))["value"]
+
+    def get_reviews(self, obj):
+        return Star.objects.filter(
+            content_type=ContentType.objects.get_for_model(obj), object_id=obj.id
+        ).values("review", "mark", "created_at", "user__name")
 
     def get_author(self, obj):
         return {"id": obj.author.id, "name": obj.author.name}

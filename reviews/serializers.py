@@ -24,14 +24,19 @@ class StarSerializer(serializers.Serializer):
     content_type = serializers.CharField(write_only=True)
     id = serializers.IntegerField(write_only=True)
     mark = serializers.IntegerField(write_only=True)
+    review = serializers.CharField(write_only=True)
 
     def create(self, validated_data):
         content_type = validated_data.get("content_type")
         mark = validated_data.get("mark")
+        review = validated_data.get("review")
         content_model = content_types[content_type].objects.get(
             id=validated_data.get("id")
         )
         star = Star.objects.create(
-            content_object=content_model, user=self.context["request"].user, mark=mark
+            content_object=content_model,
+            user=self.context["request"].user,
+            mark=mark,
+            review=review,
         )
         return star

@@ -1,18 +1,25 @@
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
-from utils.views_utils import OrderingModelViewsetMixin, ProductPagination
+from utils.serializers_utils import BulkUpdateSerializer
+from utils.views_utils import (BulkUpdateViewSetMixin,
+                               OrderingModelViewsetMixin, ProductPagination)
 
 from .models import Recipe, RecipeCategory
 from .serializers import (RecipeCategorySerializer, RecipeListSerializer,
                           RecipeSerializer)
 
 
-class RecipeViewset(OrderingModelViewsetMixin, viewsets.ModelViewSet):
+class RecipeViewset(
+    BulkUpdateViewSetMixin, OrderingModelViewsetMixin, viewsets.ModelViewSet
+):
     pagination_class = ProductPagination
     permission_classes = (AllowAny,)
     serializer_class = RecipeSerializer
-    serializer_action_classes = {"list": RecipeListSerializer}
+    serializer_action_classes = {
+        "list": RecipeListSerializer,
+        "bulk-update": BulkUpdateSerializer,
+    }
     lookup_field = "id"
     queryset = Recipe.objects.all()
 

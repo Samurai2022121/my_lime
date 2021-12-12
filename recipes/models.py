@@ -66,7 +66,6 @@ class Recipe(Timestampable, models.Model):
     fats = models.FloatField(blank=True, null=True, verbose_name="Жиры")
     calories = models.FloatField(blank=True, null=True, verbose_name="Калорийность")
     servings = models.IntegerField(verbose_name="Порции")
-    cooking_steps = ArrayField(models.TextField())
     video = models.URLField(null=True, blank=True)
 
     class Meta:
@@ -77,6 +76,15 @@ class Recipe(Timestampable, models.Model):
 
     def __str__(self):
         return self.name
+
+
+class RecipeCookingSteps(models.Model):
+    recipe = models.ForeignKey(
+        Recipe, related_name="recipe_steps", on_delete=models.PROTECT
+    )
+    name = models.CharField(max_length=255, blank=True, null=True)
+    description = models.TextField()
+    image = models.ImageField(upload_to="recipe/steps/")
 
 
 class RecipeProducts(models.Model):

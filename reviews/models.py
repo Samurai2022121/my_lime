@@ -38,6 +38,7 @@ class Star(models.Model):
     user = models.ForeignKey(User, related_name="star", on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     mark = models.PositiveIntegerField()
+    review = models.TextField(null=True, blank=True)
 
     objects = ContentTypeModelManager()
 

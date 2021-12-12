@@ -1,25 +1,33 @@
 from django.db.models import Q
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from utils.views_utils import OrderingModelViewsetMixin, ProductPagination
+from utils.serializers_utils import BulkUpdateSerializer
+from utils.views_utils import (BulkUpdateViewSetMixin,
+                               OrderingModelViewsetMixin, ProductPagination)
 
 from . import serializers
+from .filters import ProductFilter
 from .models import Category, Product, ProductImages
 
 
-class ProductViewset(OrderingModelViewsetMixin, viewsets.ModelViewSet):
+class ProductViewset(
+    BulkUpdateViewSetMixin, OrderingModelViewsetMixin, viewsets.ModelViewSet
+):
     pagination_class = ProductPagination
     permission_classes = (AllowAny,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = ProductFilter
     serializer_class = serializers.ProductSerializer
     serializer_action_classes = {
         "list": serializers.ProductListSerializer,
         "change_archive_status": serializers.BulkActionProductSerializer,
         "change_category": serializers.BulkChangeProductCategorySerializer,
         "bulk_delete": serializers.BulkActionProductSerializer,
-        "bulk_update": serializers.BulkUpdateProductSerializer,
+        "bulk_update": BulkUpdateSerializer,
     }
     lookup_field = "id"
     queryset = Product.objects.all()
@@ -72,16 +80,6 @@ class ProductViewset(OrderingModelViewsetMixin, viewsets.ModelViewSet):
         serialized_data.is_valid(raise_exception=True)
         product_ids = serialized_data.data["product_ids"]
         Product.objects.filter(id__in=product_ids).delete()
-        return Response(status=status.HTTP_200_OK)
-
-    @action(detail=False, methods=["post"], url_path="bulk_update")
-    def bulk_update(self, request, **kwargs):
-        serializer = self.get_serializer_class()
-        serialized_data = serializer(data=request.data)
-        serialized_data.is_valid(raise_exception=True)
-        products = serialized_data.data["products"]
-        for product in products:
-            Product.objects.filter(id=product.pop("id")).update(**product)
         return Response(status=status.HTTP_200_OK)
 
 
