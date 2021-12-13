@@ -186,8 +186,11 @@ class ProductSerializer(serializers.ModelSerializer):
         images_data = validated_data.pop("images")
 
         for image in images_data:
-            ProductImages.objects.update_or_create(**image)
-
+            id = image.get("id", "")
+            if id:
+                ProductImages.objects.filter(id=id).update(**image)
+            else:
+                ProductImages.objects.create(product=instance, **image)
         super().update(instance, validated_data)
         return instance
 
