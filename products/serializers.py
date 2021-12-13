@@ -5,7 +5,7 @@ from django.core.files.base import ContentFile
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Avg
 from rest_framework import serializers
-from base64.fields import Base64ImageField
+from drf_base64.fields import Base64ImageField
 
 
 from reviews.models import Favourite, Star
