@@ -57,7 +57,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     favourite_count = serializers.SerializerMethodField()
     discounted_price = serializers.SerializerMethodField()
     category = CategorySerializer()
-    images = ProductImagesSerializer(many=True)
+    images = ProductImagesSerializer(many=True, required=False)
 
     class Meta:
         model = Product
@@ -138,7 +138,7 @@ class ProductSerializer(serializers.ModelSerializer):
     reviews = serializers.SerializerMethodField()
     discounted_price = serializers.SerializerMethodField()
     category_read = CategorySerializer(read_only=True, source="category")
-    images = ProductImagesSerializer(many=True)
+    images = ProductImagesSerializer(many=True, required=False)
 
     class Meta:
         model = Product
