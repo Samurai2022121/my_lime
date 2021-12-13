@@ -178,7 +178,7 @@ class ProductSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        images_data = validated_data.pop("images")
+        images_data = validated_data.pop("images", [])
         product = Product.objects.create(**validated_data)
 
         for image in images_data:
@@ -186,7 +186,7 @@ class ProductSerializer(serializers.ModelSerializer):
         return product
 
     def update(self, instance, validated_data):
-        images_data = validated_data.pop("images")
+        images_data = validated_data.pop("images", [])
 
         for image_obj in images_data:
             image_id = image_obj.get("id", "")
