@@ -5,6 +5,8 @@ from django.core.files.base import ContentFile
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Avg
 from rest_framework import serializers
+from base64.fields import Base64ImageField
+
 
 from reviews.models import Favourite, Star
 from utils.models_utils import Round
@@ -45,6 +47,8 @@ class EditProductImagesSerializer(serializers.ModelSerializer):
 
 
 class ProductImagesSerializer(serializers.ModelSerializer):
+    image_1000 = Base64ImageField()
+
     class Meta:
         model = ProductImages
         fields = ("id", "image_1000", "image_500", "image_150", "main", "description")
