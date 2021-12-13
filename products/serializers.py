@@ -196,11 +196,11 @@ class ProductSerializer(serializers.ModelSerializer):
         for image_obj in images_data:
             print(image_obj)
             image_id = image_obj.get("id", "")
-            image = image_obj.pop("image_1000", "")
-            format, imgstr = image.split(';base64,')
-            ext = format.split('/')[-1]
-            new_image = ContentFile(base64.b64decode(imgstr), name=f'{uuid.uuid4()}.{ext}')
-            image_obj.update({"image_1000": new_image})
+            # image = image_obj.pop("image_1000", "")
+            # format, imgstr = image.split(';base64,')
+            # ext = format.split('/')[-1]
+            # new_image = ContentFile(base64.b64decode(imgstr), name=f'{uuid.uuid4()}.{ext}')
+            # image_obj.update({"image_1000": new_image})
             if image_id:
                 ProductImages.objects.filter(id=image_id).update(**image_obj)
             else:
