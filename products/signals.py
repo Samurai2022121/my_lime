@@ -8,7 +8,7 @@ from utils.models_utils import compress_image
 from .models import ProductImages
 
 
-# @receiver(post_save, sender=ProductImages)
+@receiver(post_save, sender=ProductImages)
 def save_product_images(sender, instance=None, created=False, **kwargs):
     if created:
         with deepcopy(instance.image_1000) as temp:
