@@ -186,6 +186,7 @@ class ProductSerializer(serializers.ModelSerializer):
         images_data = validated_data.pop("images")
 
         for image in images_data:
+            print(image)
             id = image.get("id", "")
             if id:
                 ProductImages.objects.filter(id=id).update(**image)
