@@ -84,6 +84,8 @@ class ProductListSerializer(serializers.ModelSerializer):
             "expiration_date",
             "production_date",
             "images",
+            "manufacturer",
+            "origin",
         ]
 
     def get_stars_count(self, obj):
