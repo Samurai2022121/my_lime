@@ -18,7 +18,7 @@ class RecipeViewset(
     serializer_class = RecipeSerializer
     serializer_action_classes = {
         "list": RecipeListSerializer,
-        "bulk-update": BulkUpdateSerializer,
+        "bulk_update": BulkUpdateSerializer,
     }
     lookup_field = "id"
     queryset = Recipe.objects.all()
