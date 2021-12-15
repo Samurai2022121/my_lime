@@ -21,7 +21,7 @@ class User(AbstractUser):
     phone_number = models.CharField(
         validators=[phone_regex], max_length=17, unique=True, verbose_name="Телефон"
     )
-    email = models.EmailField(_("email address"), unique=True, null=True, blank=True)
+    email = models.EmailField(_("email address"), null=True, blank=True)
     name = models.CharField(max_length=40, null=True, blank=True, verbose_name="Имя")
     surname = models.CharField(
         max_length=40, null=True, blank=True, verbose_name="Фамилия"
