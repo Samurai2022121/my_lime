@@ -1,5 +1,5 @@
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Avg
+from django.db.models import Avg, F
 from rest_framework import serializers
 
 from reviews.models import Favourite, Star
@@ -170,7 +170,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     def get_reviews(self, obj):
         return Star.objects.filter(
             content_type=ContentType.objects.get_for_model(obj), object_id=obj.id
-        ).values("review", "mark", "created_at", "user__name")
+        ).annotate(username=F('user__name')).values("review", "mark", "created_at", "username")
 
     def get_author(self, obj):
         return {"id": obj.author.id, "name": obj.author.name}
