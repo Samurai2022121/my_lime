@@ -86,6 +86,7 @@ class ProductListSerializer(serializers.ModelSerializer):
             "images",
             "manufacturer",
             "origin",
+            "measure_unit",
         ]
 
     def get_stars_count(self, obj):
@@ -177,6 +178,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "updated_at",
             "category_read",
             "reviews",
+            "measure_unit",
         ]
 
     def create(self, validated_data):

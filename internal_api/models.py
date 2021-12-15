@@ -45,7 +45,6 @@ class Warehouse(models.Model):
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name="warehouse"
     )
-    measure_unit = models.CharField(max_length=35)
     remaining = models.FloatField(default=0, blank=True, null=True)
     min_remaining = models.FloatField(default=0, blank=True, null=True)
     max_remaining = models.FloatField(default=0, blank=True, null=True)

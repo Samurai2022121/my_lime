@@ -1,21 +1,14 @@
 import django_filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
-from rest_framework.permissions import (AllowAny, BasePermission,
-                                        IsAuthenticated)
+from rest_framework.permissions import (AllowAny, IsAuthenticated)
 
+from utils.permissions import ReadOnlyPermissions
 from utils.serializers_utils import BulkUpdateSerializer
 from utils.views_utils import BulkUpdateViewSetMixin, ProductPagination
 
 from .models import News, Section
 from .serializers import NewsSerializer, SectionSerializer
-
-
-class ReadOnlyPermissions(BasePermission):
-    def has_permission(self, request, view):
-        if request.method == "GET":
-            return True
-        return request.user and request.user.is_authenticated
 
 
 class NewsFilter(django_filters.FilterSet):

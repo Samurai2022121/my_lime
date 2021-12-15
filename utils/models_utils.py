@@ -7,6 +7,7 @@ from django.core.validators import RegexValidator
 from django.db import models
 from PIL import Image
 
+
 phone_regex = RegexValidator(
     regex=r"^\+?\d{9,15}$",
     message='Phone number must be entered in the format: "+999999999". '

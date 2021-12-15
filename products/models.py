@@ -46,9 +46,6 @@ class Product(Timestampable, models.Model):
     )
     description = models.TextField(blank=True, null=True, verbose_name="Описание")
     price = models.FloatField(verbose_name="Цена")
-    creation_date = models.DateTimeField(
-        auto_now_add=True, verbose_name="Дата добавления"
-    )
     protein = models.FloatField(blank=True, null=True, verbose_name="Белки")
     carbohydrates = models.FloatField(blank=True, null=True, verbose_name="Углеводы")
     fats = models.FloatField(blank=True, null=True, verbose_name="Жиры")
@@ -78,6 +75,7 @@ class Product(Timestampable, models.Model):
     extra_info = models.JSONField(null=True, blank=True)
     is_archive = models.BooleanField(default=False)
     is_sorted = models.BooleanField(default=False)
+    measure_unit = models.CharField(max_length=35, blank=True, null=True)
 
     class Meta:
         unique_together = ["manufacturer", "name"]
