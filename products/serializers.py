@@ -1,7 +1,7 @@
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Avg
-from rest_framework import serializers
 from drf_base64.fields import Base64ImageField
+from rest_framework import serializers
 
 from reviews.models import Favourite, Star
 from utils.models_utils import Round
@@ -255,3 +255,9 @@ class BulkActionProductSerializer(serializers.Serializer):
 
 class BulkChangeProductCategorySerializer(BulkActionProductSerializer):
     new_category = serializers.IntegerField(required=True)
+
+
+class ProductMatrixSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ("name", "price", "barcode")

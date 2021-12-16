@@ -2,9 +2,11 @@ from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.generics import ListAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from internal_api.models import Warehouse
 from utils.serializers_utils import BulkUpdateSerializer
 from utils.views_utils import (BulkUpdateViewSetMixin,
                                OrderingModelViewsetMixin, ProductPagination)
@@ -115,3 +117,20 @@ class EditProductImagesViewset(
 
     def get_object(self):
         return self.queryset.get(id=self.kwargs["id"])
+
+
+class ProductMatrixViewset(ListAPIView):
+    pagination_class = ProductPagination
+    permission_classes = (AllowAny,)
+    serializer_class = serializers.ProductMatrixSerializer
+    queryset = Product.objects.all()
+
+    def get_queryset(self):
+        qs = self.queryset
+        outlet_id = self.request.query_params.get("outlet", None)
+        outlet_products_ids = Warehouse.objects.filter(shop=outlet_id).values_list(
+            "product__id", flat=True
+        )
+        if outlet_products_ids:
+            qs = self.queryset.exclude(id__in=outlet_products_ids)
+        return qs

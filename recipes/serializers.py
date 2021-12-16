@@ -168,9 +168,13 @@ class RecipeSerializer(serializers.ModelSerializer):
         ).aggregate(value=Round(Avg("mark")))["value"]
 
     def get_reviews(self, obj):
-        return Star.objects.filter(
-            content_type=ContentType.objects.get_for_model(obj), object_id=obj.id
-        ).annotate(username=F('user__name')).values("review", "mark", "created_at", "username")
+        return (
+            Star.objects.filter(
+                content_type=ContentType.objects.get_for_model(obj), object_id=obj.id
+            )
+            .annotate(username=F("user__name"))
+            .values("review", "mark", "created_at", "username")
+        )
 
     def get_author(self, obj):
         return {"id": obj.author.id, "name": obj.author.name}

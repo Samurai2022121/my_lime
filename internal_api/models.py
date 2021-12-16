@@ -1,4 +1,3 @@
-from django.core.validators import RegexValidator
 from django.db import models
 
 from products.models import Product
@@ -45,7 +44,7 @@ class Warehouse(models.Model):
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name="warehouse"
     )
-    shop = models.PositiveIntegerField(db_index=True, editable=False)
+    shop = models.PositiveIntegerField(db_index=True)
     remaining = models.FloatField(default=0, blank=True, null=True)
     min_remaining = models.FloatField(default=0, blank=True, null=True)
     max_remaining = models.FloatField(default=0, blank=True, null=True)

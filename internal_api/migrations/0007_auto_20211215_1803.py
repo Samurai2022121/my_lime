@@ -6,19 +6,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('internal_api', '0006_remove_warehouse_measure_unit'),
+        ("internal_api", "0006_remove_warehouse_measure_unit"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='warehouse',
-            name='shop',
+            model_name="warehouse",
+            name="shop",
             field=models.PositiveIntegerField(db_index=True, default=1, editable=False),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='warehouse',
-            name='product',
+            model_name="warehouse",
+            name="product",
             field=models.PositiveIntegerField(db_index=True, editable=False),
         ),
     ]

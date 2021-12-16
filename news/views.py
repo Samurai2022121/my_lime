@@ -1,7 +1,7 @@
 import django_filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
-from rest_framework.permissions import (AllowAny, IsAuthenticated)
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from utils.permissions import ReadOnlyPermissions
 from utils.serializers_utils import BulkUpdateSerializer
