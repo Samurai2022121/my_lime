@@ -76,6 +76,7 @@ class Product(Timestampable, models.Model):
     is_archive = models.BooleanField(default=False)
     is_sorted = models.BooleanField(default=False)
     measure_unit = models.CharField(max_length=35, blank=True, null=True)
+    vat_value = models.FloatField(null=True, blank=True)
 
     class Meta:
         unique_together = ["manufacturer", "name"]

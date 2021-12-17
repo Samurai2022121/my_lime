@@ -1,8 +1,8 @@
-from django.db.models import OuterRef, Q
 from rest_framework import viewsets
+from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
-
-from products.models import Product
+from rest_framework.response import Response
+from rest_framework.status import HTTP_202_ACCEPTED
 
 from . import models, serializers
 
@@ -33,3 +33,11 @@ class WarehouseViewSet(viewsets.ModelViewSet):
         if outlet_id:
             qs = qs.filter(shop=outlet_id)
         return qs
+
+
+class UploadCSVGenericView(GenericAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = serializers.UploadCSVSerializer
+
+    def post(self, request):
+        return Response(status=HTTP_202_ACCEPTED)
