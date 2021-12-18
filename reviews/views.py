@@ -16,6 +16,7 @@ from .serializers import FavouriteSerializer, StarSerializer
 
 class FavouriteGenericAPIView(CreateAPIView, DestroyAPIView):
     permission_classes = (AllowAny,)
+    pagination_class = None
     serializer_class = FavouriteSerializer
     queryset = Favourite.objects.all()
 
@@ -28,6 +29,8 @@ class FavouriteGenericAPIView(CreateAPIView, DestroyAPIView):
 
 
 class FavouriteObjectsListAPIView(APIView):
+    pagination_class = None
+
     def get(self, request, *args, **kwargs):
         user = request.user
         favourites = Favourite.objects.filter(user=user)
@@ -80,6 +83,7 @@ class FavouriteObjectsListAPIView(APIView):
 
 class StarGenericAPIView(CreateAPIView, DestroyAPIView):
     permission_classes = (AllowAny,)
+    pagination_class = None
     serializer_class = StarSerializer
     queryset = Star.objects.all()
 
@@ -92,6 +96,8 @@ class StarGenericAPIView(CreateAPIView, DestroyAPIView):
 
 
 class StarObjectsListAPIView(APIView):
+    pagination_class = None
+
     def get(self, request, *args, **kwargs):
         user = request.user
         stars = Star.objects.filter(user=user)

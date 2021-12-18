@@ -16,9 +16,9 @@ class PersonnelSerializer(serializers.ModelSerializer):
 
 
 class WarehouseSerializer(serializers.ModelSerializer):
-    outlet_name = serializers.CharField(source="outlet.name", read_only=True)
-    barcode = serializers.IntegerField(source="outlet.barcode", read_only=True)
-    price = serializers.FloatField(source="outlet.price", read_only=True)
+    product_name = serializers.CharField(source="product.name", read_only=True)
+    barcode = serializers.IntegerField(source="product.barcode", read_only=True)
+    price = serializers.FloatField(source="product.price", read_only=True)
 
     class Meta:
         model = models.Warehouse

@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from utils.permissions import ReadOnlyPermissions
 from utils.serializers_utils import BulkUpdateSerializer
-from utils.views_utils import BulkUpdateViewSetMixin, ProductPagination
+from utils.views_utils import BulkUpdateViewSetMixin
 
 from .models import News, Section
 from .serializers import NewsSerializer, SectionSerializer
@@ -21,7 +21,6 @@ class NewsFilter(django_filters.FilterSet):
 
 class NewsViewset(BulkUpdateViewSetMixin, viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
-    pagination_class = ProductPagination
     filterset_class = NewsFilter
     permission_classes = (ReadOnlyPermissions,)
     serializer_class = NewsSerializer
@@ -34,6 +33,7 @@ class NewsViewset(BulkUpdateViewSetMixin, viewsets.ModelViewSet):
 
 class SectionViewset(viewsets.ModelViewSet):
     permission_classes = (AllowAny,)
+    pagination_class = None
     serializer_class = SectionSerializer
     lookup_field = "id"
     queryset = Section.objects.all()

@@ -87,6 +87,7 @@ class ProductListSerializer(serializers.ModelSerializer):
             "manufacturer",
             "origin",
             "measure_unit",
+            "own_production",
         ]
 
     def get_stars_count(self, obj):
@@ -258,6 +259,19 @@ class BulkChangeProductCategorySerializer(BulkActionProductSerializer):
 
 
 class ProductMatrixSerializer(serializers.ModelSerializer):
+    product = serializers.IntegerField(source='id')
+    product_name = serializers.CharField(source='name')
+    margin = serializers.ReadOnlyField(default=0)
+    max_remaining = serializers.ReadOnlyField(default=0)
+    min_remaining = serializers.ReadOnlyField(default=0)
+    remaining = serializers.ReadOnlyField(default=0)
+    shop = serializers.ReadOnlyField(default=None)
+    supplier = serializers.ReadOnlyField(default=None)
+    supplier_email = serializers.ReadOnlyField(default=None)
+    supplier_phone = serializers.ReadOnlyField(default=None)
+
     class Meta:
         model = Product
-        fields = ("name", "price", "barcode")
+        fields = ("product_name", "price", "barcode", "product", "margin", "max_remaining",
+                  "min_remaining", "remaining", "shop", "supplier", "supplier_email",
+                  "supplier_phone",)

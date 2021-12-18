@@ -211,6 +211,7 @@ class ChangeUserPasswordAPIView(views.APIView):
 
 class CustomerDeliveryAddressViewset(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
+    pagination_class = None
     serializer_class = CustomerDeliveryAddressSerializer
     lookup_field = "id"
     queryset = CustomerDeliveryAddress.objects.none()

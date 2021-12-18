@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from internal_api.models import Warehouse
 from utils.serializers_utils import BulkUpdateSerializer
 from utils.views_utils import (BulkUpdateViewSetMixin,
-                               OrderingModelViewsetMixin, ProductPagination)
+                               OrderingModelViewsetMixin,)
 
 from . import serializers
 from .filters import ProductFilter
@@ -19,7 +19,6 @@ from .models import Category, Product, ProductImages
 class ProductViewset(
     BulkUpdateViewSetMixin, OrderingModelViewsetMixin, viewsets.ModelViewSet
 ):
-    pagination_class = ProductPagination
     permission_classes = (AllowAny,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ProductFilter
@@ -87,6 +86,7 @@ class ProductViewset(
 
 class CategoryViewset(viewsets.ModelViewSet):
     permission_classes = (AllowAny,)
+    pagination_class = None
     serializer_class = serializers.CategorySerializer
     lookup_field = "id"
     serializer_action_classes = {"list": serializers.CategoryListSerializer}
@@ -120,7 +120,6 @@ class EditProductImagesViewset(
 
 
 class ProductMatrixViewset(ListAPIView):
-    pagination_class = ProductPagination
     permission_classes = (AllowAny,)
     serializer_class = serializers.ProductMatrixSerializer
     queryset = Product.objects.all()

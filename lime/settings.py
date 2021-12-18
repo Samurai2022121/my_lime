@@ -84,6 +84,7 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_AUTHENTICATION_CLASSES": ("users.backends.JWTAuthentication",),
+    "DEFAULT_PAGINATION_CLASS": "utils.views_utils.DefaultPagination",
     "DATETIME_FORMAT": "%H:%M %d/%m/%Y",
     "DATE_FORMAT": "%d/%m/%Y",
     "TIME_FORMAT": "%H:%M",
