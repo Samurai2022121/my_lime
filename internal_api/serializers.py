@@ -36,3 +36,27 @@ class UploadCSVSerializer(serializers.Serializer):
     quantity_col = serializers.IntegerField(required=False)
     origin_col = serializers.IntegerField(required=False)
     first_row = serializers.IntegerField()
+
+
+class WarehouseOrderPositionsSerializer(serializers.ModelSerializer):
+    product_name = serializers.ReadOnlyField(source="product.name")
+    product_price = serializers.ReadOnlyField(source="product.price")
+    product_barcode = serializers.ReadOnlyField(source="product.barcode")
+
+    class Meta:
+        model = models.WarehouseOrderPositions
+        fields = (
+            "product_name",
+            "product_price",
+            "product_barcode",
+            "quantity",
+            "special",
+        )
+
+
+class WarehouseOrderSerializer(serializers.ModelSerializer):
+    order_positions = WarehouseOrderPositionsSerializer(many=True)
+
+    class Meta:
+        model = models.WarehouseOrder
+        fields = "__all__"

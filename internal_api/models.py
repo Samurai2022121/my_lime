@@ -81,3 +81,25 @@ class MenuDishes(models.Model):
     dish = models.ForeignKey(TechCard, on_delete=models.PROTECT)
     menu = models.ForeignKey(DailyMenuPlan, on_delete=models.PROTECT)
     quantity = models.IntegerField(default=1)
+
+
+class WarehouseOrder(Timestampable, models.Model):
+    ORDER_STATUSES = (
+        ("approved", "Подтверждено"),
+        ("delivered", "Уволен"),
+        ("canceled", "Отпуск"),
+        ("dispatched", "Декрет"),
+    )
+
+    status = models.CharField(max_length=255, choices=ORDER_STATUSES)
+    supplier = models.CharField(max_length=255)
+    order_positions = models.ManyToManyField(Product, through="WarehouseOrderPositions")
+
+
+class WarehouseOrderPositions(models.Model):
+    warehouse_order = models.ForeignKey(WarehouseOrder, on_delete=models.PROTECT)
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    quantity = models.FloatField(default=0)
+    bonus = models.IntegerField(default=0)
+    special = models.FloatField(default=0)
+    flaw = models.FloatField(default=0)

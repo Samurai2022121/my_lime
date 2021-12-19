@@ -41,3 +41,10 @@ class UploadCSVGenericView(GenericAPIView):
 
     def post(self, request):
         return Response(status=HTTP_202_ACCEPTED)
+
+
+class WarehouseOrderViewSet(viewsets.ModelViewSet):
+    permission_classes = (AllowAny,)
+    serializer_class = serializers.WarehouseOrderSerializer
+    lookup_field = "id"
+    queryset = models.WarehouseOrder.objects.all()

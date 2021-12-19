@@ -28,3 +28,15 @@ class TechCardAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
 @admin.register(models.DailyMenuPlan)
 class DailyMenuPlanAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
     pass
+
+
+@admin.register(models.WarehouseOrder)
+class WarehouseOrderAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
+    pass
+
+
+@admin.register(models.WarehouseOrderPositions)
+class WarehouseOrderPositionsAdmin(
+    ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin
+):
+    pass
