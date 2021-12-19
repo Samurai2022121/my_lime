@@ -104,7 +104,6 @@ class CategoryViewset(viewsets.ModelViewSet):
 
 
 class EditProductImagesViewset(
-    BulkUpdateViewSetMixin,
     mixins.ListModelMixin,
     viewsets.GenericViewSet,
 ):
@@ -124,6 +123,20 @@ class EditProductImagesViewset(
     def get_queryset(self):
         product_id = self.request.query_params.get("product_id", 0)
         return self.queryset.filter(product=product_id)
+
+    @action(detail=False, methods=["post"], url_path="bulk_update")
+    def bulk_update(self, request, **kwargs):
+        serializer = self.get_serializer_class()
+        serialized_data = serializer(data=request.data)
+        serialized_data.is_valid(raise_exception=True)
+        instances = serialized_data.data["instances"]
+        for instance in instances:
+            image = self.queryset.filter(id=instance.pop("id", None))
+            if image:
+                image.update(**instance)
+            else:
+                ProductImages.objects.create(**instance)
+        return Response(status=status.HTTP_202_ACCEPTED)
 
 
 class ProductMatrixViewset(ListAPIView):
