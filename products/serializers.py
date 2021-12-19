@@ -259,8 +259,8 @@ class BulkChangeProductCategorySerializer(BulkActionProductSerializer):
 
 
 class ProductMatrixSerializer(serializers.ModelSerializer):
-    product = serializers.IntegerField(source='id')
-    product_name = serializers.CharField(source='name')
+    product = serializers.IntegerField(source="id")
+    product_name = serializers.CharField(source="name")
     margin = serializers.ReadOnlyField(default=0)
     max_remaining = serializers.ReadOnlyField(default=0)
     min_remaining = serializers.ReadOnlyField(default=0)
@@ -269,9 +269,22 @@ class ProductMatrixSerializer(serializers.ModelSerializer):
     supplier = serializers.ReadOnlyField(default=None)
     supplier_email = serializers.ReadOnlyField(default=None)
     supplier_phone = serializers.ReadOnlyField(default=None)
+    auto_order = serializers.ReadOnlyField(default=False)
 
     class Meta:
         model = Product
-        fields = ("product_name", "price", "barcode", "product", "margin", "max_remaining",
-                  "min_remaining", "remaining", "shop", "supplier", "supplier_email",
-                  "supplier_phone",)
+        fields = (
+            "product_name",
+            "price",
+            "barcode",
+            "product",
+            "margin",
+            "max_remaining",
+            "min_remaining",
+            "remaining",
+            "shop",
+            "supplier",
+            "supplier_email",
+            "supplier_phone",
+            "auto_order",
+        )

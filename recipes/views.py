@@ -2,8 +2,7 @@ from rest_framework import viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from utils.serializers_utils import BulkUpdateSerializer
-from utils.views_utils import (BulkUpdateViewSetMixin,
-                               OrderingModelViewsetMixin,)
+from utils.views_utils import BulkUpdateViewSetMixin, OrderingModelViewsetMixin
 
 from .models import Recipe, RecipeCategory
 from .serializers import (RecipeCategorySerializer, RecipeListSerializer,

@@ -8,8 +8,7 @@ from rest_framework.response import Response
 
 from internal_api.models import Warehouse
 from utils.serializers_utils import BulkUpdateSerializer
-from utils.views_utils import (BulkUpdateViewSetMixin,
-                               OrderingModelViewsetMixin,)
+from utils.views_utils import BulkUpdateViewSetMixin, OrderingModelViewsetMixin
 
 from . import serializers
 from .filters import ProductFilter
@@ -105,18 +104,26 @@ class CategoryViewset(viewsets.ModelViewSet):
 
 
 class EditProductImagesViewset(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
+    BulkUpdateViewSetMixin,
+    mixins.ListModelMixin,
     viewsets.GenericViewSet,
 ):
     permission_classes = (AllowAny,)
-    lookup_field = "id"
+    pagination_class = None
     serializer_class = serializers.EditProductImagesSerializer
     queryset = ProductImages.objects.all()
+    serializer_action_classes = {
+        "bulk_update": BulkUpdateSerializer,
+    }
 
-    def get_object(self):
-        return self.queryset.get(id=self.kwargs["id"])
+    def get_serializer_class(self):
+        return self.serializer_action_classes.get(
+            self.action, super().get_serializer_class()
+        )
+
+    def get_queryset(self):
+        product_id = self.request.query_params.get("product_id", 0)
+        return self.queryset.filter(product=product_id)
 
 
 class ProductMatrixViewset(ListAPIView):
