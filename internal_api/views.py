@@ -1,11 +1,12 @@
 from rest_framework import viewsets
+from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.status import HTTP_202_ACCEPTED
 
 from . import models, serializers
-
+from utils.serializers_utils import BulkUpdateSerializer
 
 class ShopViewSet(viewsets.ModelViewSet):
     permission_classes = (AllowAny,)
@@ -26,6 +27,9 @@ class WarehouseViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.WarehouseSerializer
     lookup_field = "id"
     queryset = models.Warehouse.objects.all()
+    serializer_action_classes = {
+        "bulk_update": BulkUpdateSerializer,
+    }
 
     def get_queryset(self):
         qs = self.queryset
@@ -33,6 +37,20 @@ class WarehouseViewSet(viewsets.ModelViewSet):
         if outlet_id:
             qs = qs.filter(shop=outlet_id)
         return qs
+
+    @action(detail=False, methods=["post"], url_path="bulk_update")
+    def bulk_update(self, request, **kwargs):
+        serializer = self.get_serializer_class()
+        serialized_data = serializer(data=request.data)
+        serialized_data.is_valid(raise_exception=True)
+        instances = serialized_data.data["instances"]
+        for instance in instances:
+            image_id = instance.pop("id", None)
+            if image_id:
+                self.queryset.filter(id=image_id).update(**instance)
+            else:
+                models.Warehouse.objects.create(**instance)
+        return Response(status=HTTP_202_ACCEPTED)
 
 
 class UploadCSVGenericView(GenericAPIView):
