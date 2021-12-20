@@ -3,9 +3,10 @@ from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.status import HTTP_202_ACCEPTED
+from rest_framework.status import HTTP_202_ACCEPTED, HTTP_400_BAD_REQUEST
 
 from . import models, serializers
+from products.models import Product
 from utils.views_utils import BulkUpdateViewSetMixin
 from utils.serializers_utils import BulkUpdateSerializer
 
@@ -52,6 +53,11 @@ class WarehouseViewSet(viewsets.ModelViewSet):
         instances = serialized_data.data["instances"]
         for instance in instances:
             image_id = instance.pop("id", None)
+            product_id = instance.pop("product")
+            if not product_id:
+                return Response(status=HTTP_400_BAD_REQUEST, data={"message": "Товар не существует"})
+            product = Product.objects.get(id=product_id)
+            instance.update({"product": product})
             if image_id:
                 self.queryset.filter(id=image_id).update(**instance)
             else:
