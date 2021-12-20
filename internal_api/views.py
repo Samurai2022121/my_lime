@@ -6,13 +6,23 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_202_ACCEPTED
 
 from . import models, serializers
+from utils.views_utils import BulkUpdateViewSetMixin
 from utils.serializers_utils import BulkUpdateSerializer
 
-class ShopViewSet(viewsets.ModelViewSet):
+
+class ShopViewSet(BulkUpdateViewSetMixin, viewsets.ModelViewSet):
     permission_classes = (AllowAny,)
     serializer_class = serializers.ShopSerializer
     lookup_field = "id"
     queryset = models.Shop.objects.all()
+    serializer_action_classes = {
+        "bulk_update": BulkUpdateSerializer,
+    }
+
+    def get_serializer_class(self):
+        return self.serializer_action_classes.get(
+            self.action, super().get_serializer_class()
+        )
 
 
 class PersonnelViewSet(viewsets.ModelViewSet):
@@ -27,9 +37,6 @@ class WarehouseViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.WarehouseSerializer
     lookup_field = "id"
     queryset = models.Warehouse.objects.all()
-    serializer_action_classes = {
-        "bulk_update": BulkUpdateSerializer,
-    }
 
     def get_queryset(self):
         qs = self.queryset
@@ -40,8 +47,7 @@ class WarehouseViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["post"], url_path="bulk_update")
     def bulk_update(self, request, **kwargs):
-        serializer = self.get_serializer_class()
-        serialized_data = serializer(data=request.data)
+        serialized_data = BulkUpdateSerializer(data=request.data)
         serialized_data.is_valid(raise_exception=True)
         instances = serialized_data.data["instances"]
         for instance in instances:
