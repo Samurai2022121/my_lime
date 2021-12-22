@@ -40,3 +40,8 @@ class WarehouseOrderPositionsAdmin(
     ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin
 ):
     pass
+
+
+@admin.register(models.Supplier)
+class SupplierAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
+    pass

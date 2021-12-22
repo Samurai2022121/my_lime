@@ -15,6 +15,12 @@ class PersonnelSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class SupplierSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Supplier
+        fields = "__all__"
+
+
 class WarehouseSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source="product.name", read_only=True)
     barcode = serializers.IntegerField(source="product.barcode", read_only=True)

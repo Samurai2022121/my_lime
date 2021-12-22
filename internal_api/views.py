@@ -81,3 +81,18 @@ class WarehouseOrderViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.WarehouseOrderSerializer
     lookup_field = "id"
     queryset = models.WarehouseOrder.objects.all()
+
+
+class SupplierViewSet(BulkUpdateViewSetMixin, viewsets.ModelViewSet):
+    permission_classes = (AllowAny,)
+    serializer_class = serializers.SupplierSerializer
+    lookup_field = "id"
+    queryset = models.Supplier.objects.all()
+    serializer_action_classes = {
+        "bulk_update": BulkUpdateSerializer,
+    }
+
+    def get_serializer_class(self):
+        return self.serializer_action_classes.get(
+            self.action, super().get_serializer_class()
+        )

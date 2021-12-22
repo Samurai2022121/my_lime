@@ -95,7 +95,7 @@ class MenuDishes(models.Model):
 
 class WarehouseOrder(Timestampable, models.Model):
     ORDER_STATUSES = (
-        ("approved", "Подтверждено"),
+        ("approving", "Подтверждение"),
         ("delivered", "Уволен"),
         ("canceled", "Отпуск"),
         ("dispatched", "Декрет"),
@@ -104,6 +104,7 @@ class WarehouseOrder(Timestampable, models.Model):
     status = models.CharField(max_length=255, choices=ORDER_STATUSES)
     supplier = models.CharField(max_length=255)
     order_positions = models.ManyToManyField(Product, through="WarehouseOrderPositions")
+    waybill = models.CharField(max_length=255, null=True, blank=True)
 
 
 class WarehouseOrderPositions(models.Model):
@@ -113,4 +114,3 @@ class WarehouseOrderPositions(models.Model):
     bonus = models.IntegerField(default=0)
     special = models.FloatField(default=0)
     flaw = models.FloatField(default=0)
-    waybill = models.CharField(max_length=255, null=True, blank=True)
