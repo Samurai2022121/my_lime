@@ -23,14 +23,33 @@ class CategoryListSerializer(serializers.ModelSerializer):
 
 class CategorySerializer(serializers.ModelSerializer):
     parents = serializers.SerializerMethodField()
+    parent_id = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = Category
-        fields = ["id", "name", "parents"]
+        fields = ["id", "name", "parents", "parent_id"]
 
     def get_parents(self, obj):
         serializer = CategorySerializer(instance=obj.parent)
         return serializer.data
+
+    def create(self, validated_data):
+        parent_category_id = validated_data.pop("parent_id", None)
+        if parent_category_id:
+            parent_category = Category.objects.get(id=parent_category_id)
+            category = Category.objects.create(parent=parent_category, **validated_data)
+        else:
+            category = Category.objects.create(**validated_data)
+        return category
+
+    def update(self, instance, validated_data):
+        parent_category_id = validated_data.pop("parent_id", None)
+        parent_category = None
+        if parent_category_id:
+            parent_category = Category.objects.get(id=parent_category_id)
+        validated_data.update({"parent": parent_category})
+        instance = super().update(instance, validated_data)
+        return instance
 
 
 class EditProductImagesSerializer(serializers.ModelSerializer):

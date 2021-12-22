@@ -100,7 +100,10 @@ class CategoryViewset(viewsets.ModelViewSet):
         return self.queryset.get(id=self.kwargs["id"])
 
     def get_queryset(self):
-        return self.queryset.get_cached_trees()
+        main_categories = self.queryset.filter(level=0)
+        return Category.objects.get_queryset_descendants(
+            main_categories, include_self=True
+        ).filter(level=0)
 
 
 class EditProductImagesViewset(

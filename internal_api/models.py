@@ -40,6 +40,16 @@ class Personnel(models.Model):
     contract_type = models.CharField(max_length=255)
 
 
+class Supplier(models.Model):
+    name = models.CharField(max_length=255)
+    address = models.CharField(max_length=255, null=True, blank=True)
+    email = models.EmailField(blank=True, null=True)
+    phone = models.CharField(
+        validators=[phone_regex], max_length=17, blank=True, null=True
+    )
+    extra_info = models.JSONField(null=True, blank=True)
+
+
 class Warehouse(models.Model):
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name="warehouse"
@@ -103,3 +113,4 @@ class WarehouseOrderPositions(models.Model):
     bonus = models.IntegerField(default=0)
     special = models.FloatField(default=0)
     flaw = models.FloatField(default=0)
+    waybill = models.CharField(max_length=255, null=True, blank=True)
