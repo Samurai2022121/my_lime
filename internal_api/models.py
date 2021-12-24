@@ -108,8 +108,12 @@ class WarehouseOrder(Timestampable, models.Model):
 
 
 class WarehouseOrderPositions(models.Model):
-    warehouse_order = models.ForeignKey(WarehouseOrder, on_delete=models.PROTECT)
-    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    warehouse_order = models.ForeignKey(
+        WarehouseOrder, on_delete=models.PROTECT, related_name="warehouse_order"
+    )
+    product = models.ForeignKey(
+        Product, on_delete=models.PROTECT, related_name="warehouse_order"
+    )
     quantity = models.FloatField(default=0)
     bonus = models.IntegerField(default=0)
     special = models.FloatField(default=0)
