@@ -60,6 +60,13 @@ class EditProductImagesSerializer(serializers.ModelSerializer):
         fields = ("id", "image", "main", "description", "product")
 
 
+class BulkEditProductImagesSerializer(serializers.Serializer):
+    images = EditProductImagesSerializer(many=True)
+
+    class Meta:
+        fields = ("images", )
+
+
 class ProductImagesSerializer(serializers.ModelSerializer):
     image_1000 = Base64ImageField()
 

@@ -116,6 +116,7 @@ class EditProductImagesViewset(
     queryset = ProductImages.objects.all()
     serializer_action_classes = {
         "bulk_update": BulkUpdateSerializer,
+        "create": serializers.BulkEditProductImagesSerializer,
     }
 
     def get_serializer_class(self):
@@ -126,6 +127,14 @@ class EditProductImagesViewset(
     def get_queryset(self):
         product_id = self.request.query_params.get("product_id", 0)
         return self.queryset.filter(product=product_id)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer_class()
+        serialized_data = serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        for image in serialized_data:
+            ProductImages.objects.create(**image)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=["post"], url_path="bulk_update")
     def bulk_update(self, request, **kwargs):
