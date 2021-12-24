@@ -41,3 +41,11 @@ class BulkUpdateViewSetMixin(object):
         for instance in instances:
             self.queryset.filter(id=instance.pop("id")).update(**instance)
         return Response(status=status.HTTP_200_OK)
+
+
+class ChangeDestroyToArchiveMixin(object):
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.is_archive = True
+        instance.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)

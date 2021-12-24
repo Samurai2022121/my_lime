@@ -64,7 +64,7 @@ class BulkEditProductImagesSerializer(serializers.Serializer):
     images = EditProductImagesSerializer(many=True)
 
     class Meta:
-        fields = ("images", )
+        fields = ("images",)
 
 
 class ProductImagesSerializer(serializers.ModelSerializer):
@@ -314,3 +314,7 @@ class ProductMatrixSerializer(serializers.ModelSerializer):
             "supplier_phone",
             "auto_order",
         )
+
+
+class BulkActionProductImageSerializer(serializers.Serializer):
+    image_ids = serializers.ListField(child=serializers.IntegerField(), required=True)

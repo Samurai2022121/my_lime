@@ -8,7 +8,9 @@ from rest_framework.response import Response
 
 from internal_api.models import Warehouse
 from utils.serializers_utils import BulkUpdateSerializer
-from utils.views_utils import BulkUpdateViewSetMixin, OrderingModelViewsetMixin
+from utils.views_utils import (BulkUpdateViewSetMixin,
+                               ChangeDestroyToArchiveMixin,
+                               OrderingModelViewsetMixin)
 
 from . import serializers
 from .filters import ProductFilter
@@ -16,7 +18,10 @@ from .models import Category, Product, ProductImages
 
 
 class ProductViewset(
-    BulkUpdateViewSetMixin, OrderingModelViewsetMixin, viewsets.ModelViewSet
+    ChangeDestroyToArchiveMixin,
+    BulkUpdateViewSetMixin,
+    OrderingModelViewsetMixin,
+    viewsets.ModelViewSet,
 ):
     permission_classes = (AllowAny,)
     filter_backends = (DjangoFilterBackend,)
@@ -117,6 +122,7 @@ class EditProductImagesViewset(
     serializer_action_classes = {
         "bulk_update": BulkUpdateSerializer,
         "create": serializers.BulkEditProductImagesSerializer,
+        "bulk_delete": serializers.BulkActionProductImageSerializer,
     }
 
     def get_serializer_class(self):
@@ -149,6 +155,15 @@ class EditProductImagesViewset(
             else:
                 ProductImages.objects.create(**instance)
         return Response(status=status.HTTP_202_ACCEPTED)
+
+    @action(detail=False, methods=["post"], url_path="bulk-delete")
+    def bulk_delete(self, request, **kwargs):
+        serializer = self.get_serializer_class()
+        serialized_data = serializer(data=request.data)
+        serialized_data.is_valid(raise_exception=True)
+        image_ids = serialized_data.data["image_ids"]
+        ProductImages.objects.filter(id__in=image_ids).delete()
+        return Response(status=status.HTTP_200_OK)
 
 
 class ProductMatrixViewset(ListAPIView):
