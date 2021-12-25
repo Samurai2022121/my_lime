@@ -9,6 +9,7 @@ from products.serializers import ProductSerializer
 from recipes.models import Recipe
 from recipes.serializers import RecipeSerializer
 from utils.serializers_utils import CONTENT_TYPES as content_types
+from utils.views_utils import BulkChangeArchiveStatusViewSetMixin
 
 from .models import Favourite, Star
 from .serializers import FavouriteSerializer, StarSerializer
@@ -81,7 +82,9 @@ class FavouriteObjectsListAPIView(APIView):
         return Response(data, status=200)
 
 
-class StarGenericAPIView(CreateAPIView, DestroyAPIView):
+class StarGenericAPIView(
+    BulkChangeArchiveStatusViewSetMixin, CreateAPIView, DestroyAPIView
+):
     permission_classes = (AllowAny,)
     pagination_class = None
     serializer_class = StarSerializer

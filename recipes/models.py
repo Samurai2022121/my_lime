@@ -1,4 +1,3 @@
-from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
 
@@ -24,6 +23,7 @@ class RecipeCategory(MPTTModel):
         verbose_name="Изображение категории рецепта",
         upload_to="recipe/categories/",
     )
+    is_archive = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["name"]
@@ -67,6 +67,7 @@ class Recipe(Timestampable, models.Model):
     calories = models.FloatField(blank=True, null=True, verbose_name="Калорийность")
     servings = models.IntegerField(verbose_name="Порции")
     video = models.URLField(null=True, blank=True)
+    is_archive = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["name"]

@@ -8,7 +8,8 @@ from rest_framework.response import Response
 
 from internal_api.models import Warehouse
 from utils.serializers_utils import BulkUpdateSerializer
-from utils.views_utils import (BulkUpdateViewSetMixin,
+from utils.views_utils import (BulkChangeArchiveStatusViewSetMixin,
+                               BulkUpdateViewSetMixin,
                                ChangeDestroyToArchiveMixin,
                                OrderingModelViewsetMixin)
 
@@ -18,6 +19,7 @@ from .models import Category, Product, ProductImages
 
 
 class ProductViewset(
+    BulkChangeArchiveStatusViewSetMixin,
     ChangeDestroyToArchiveMixin,
     BulkUpdateViewSetMixin,
     OrderingModelViewsetMixin,
@@ -29,10 +31,7 @@ class ProductViewset(
     serializer_class = serializers.ProductSerializer
     serializer_action_classes = {
         "list": serializers.ProductListSerializer,
-        "change_archive_status": serializers.BulkActionProductSerializer,
         "change_category": serializers.BulkChangeProductCategorySerializer,
-        "bulk_delete": serializers.BulkActionProductSerializer,
-        "bulk_update": BulkUpdateSerializer,
     }
     lookup_field = "id"
     queryset = Product.objects.all()
@@ -57,17 +56,6 @@ class ProductViewset(
             return qs.order_by(*ordering_fields)
         return qs.order_by("in_stock")
 
-    @action(detail=False, methods=["post"], url_path="bulk-archive")
-    def change_archive_status(self, request, **kwargs):
-        serializer = self.get_serializer_class()
-        serialized_data = serializer(data=request.data)
-        serialized_data.is_valid(raise_exception=True)
-        product_ids = serialized_data.data["product_ids"]
-        Product.objects.filter(id__in=product_ids).update(
-            is_archive=Q(is_archive=False)
-        )
-        return Response(status=status.HTTP_200_OK)
-
     @action(detail=False, methods=["post"], url_path="bulk-change-category")
     def change_category(self, request, **kwargs):
         serializer = self.get_serializer_class()
@@ -78,17 +66,8 @@ class ProductViewset(
         Product.objects.filter(id__in=product_ids).update(category=new_category)
         return Response(status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=["post"], url_path="bulk-delete")
-    def bulk_delete(self, request, **kwargs):
-        serializer = self.get_serializer_class()
-        serialized_data = serializer(data=request.data)
-        serialized_data.is_valid(raise_exception=True)
-        product_ids = serialized_data.data["product_ids"]
-        Product.objects.filter(id__in=product_ids).delete()
-        return Response(status=status.HTTP_200_OK)
 
-
-class CategoryViewset(viewsets.ModelViewSet):
+class CategoryViewset(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet):
     permission_classes = (AllowAny,)
     pagination_class = None
     serializer_class = serializers.CategorySerializer

@@ -2,13 +2,18 @@ from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny
 
-from utils.views_utils import OrderingModelViewsetMixin
+from utils.views_utils import (BulkChangeArchiveStatusViewSetMixin,
+                               OrderingModelViewsetMixin)
 
 from .models import Order
 from .serializers import OrdersSerializer
 
 
-class OrderViewset(OrderingModelViewsetMixin, viewsets.ModelViewSet):
+class OrderViewset(
+    BulkChangeArchiveStatusViewSetMixin,
+    OrderingModelViewsetMixin,
+    viewsets.ModelViewSet,
+):
     permission_classes = (AllowAny,)
     serializer_class = OrdersSerializer
     lookup_field = "id"

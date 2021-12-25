@@ -12,8 +12,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from users.models import CustomerDeliveryAddress, GeneratedPassword, User
-from users.serializers import (BulkActionUserSerializer,
-                               ChangeUserPasswordSerializer,
+from users.serializers import (ChangeUserPasswordSerializer,
                                CustomerDeliveryAddressSerializer,
                                GenerateRegistrationCodeSerializer,
                                LoginSerializer, RegistrationSerializer,
@@ -21,7 +20,8 @@ from users.serializers import (BulkActionUserSerializer,
                                UserSerializer,
                                ValidateRegistrationCodeSerializer)
 from utils.models_utils import generate_new_password
-from utils.views_utils import OrderingModelViewsetMixin
+from utils.views_utils import (BulkChangeArchiveStatusViewSetMixin,
+                               OrderingModelViewsetMixin)
 
 
 class RegistrationAPIView(views.APIView):
@@ -143,15 +143,17 @@ class ValidateLoginCodeAPIView(views.APIView):
             return Response(data, status=status.HTTP_200_OK)
 
 
-class UserView(OrderingModelViewsetMixin, viewsets.ModelViewSet):
+class UserView(
+    BulkChangeArchiveStatusViewSetMixin,
+    OrderingModelViewsetMixin,
+    viewsets.ModelViewSet,
+):
     permission_classes = (AllowAny,)
     serializer_class = UserSerializer
     lookup_field = "id"
     queryset = User.objects.all()
     serializer_action_classes = {
         "list": UserListSerializer,
-        "change_archive_status": BulkActionUserSerializer,
-        "bulk_delete": BulkActionUserSerializer,
     }
 
     def get_serializer_class(self):
@@ -168,24 +170,6 @@ class UserView(OrderingModelViewsetMixin, viewsets.ModelViewSet):
         if ordering_fields:
             return qs.order_by(*ordering_fields)
         return qs
-
-    @action(detail=False, methods=["post"], url_path="bulk-delete")
-    def bulk_delete(self, request, **kwargs):
-        serializer = self.get_serializer_class()
-        serialized_data = serializer(data=request.data)
-        serialized_data.is_valid(raise_exception=True)
-        product_ids = serialized_data.data["users_ids"]
-        User.objects.filter(id__in=product_ids).delete()
-        return Response(status=status.HTTP_200_OK)
-
-    @action(detail=False, methods=["post"], url_path="bulk-archive")
-    def change_archive_status(self, request, **kwargs):
-        serializer = self.get_serializer_class()
-        serialized_data = serializer(data=request.data)
-        serialized_data.is_valid(raise_exception=True)
-        users_ids = serialized_data.data["users_ids"]
-        User.objects.filter(id__in=users_ids).update(is_archive=Q(is_archive=False))
-        return Response(status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["get"], url_path="current-user-info")
     def get_current_user(self, request, **kwargs):

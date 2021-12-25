@@ -1,7 +1,10 @@
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+
+from .serializers_utils import BulkActionSerializer, BulkUpdateSerializer
 
 
 class DefaultPagination(PageNumberPagination):
@@ -34,8 +37,7 @@ class OrderingModelViewsetMixin:
 class BulkUpdateViewSetMixin(object):
     @action(detail=False, methods=["post"], url_path="bulk_update")
     def bulk_update(self, request, **kwargs):
-        serializer = self.get_serializer_class()
-        serialized_data = serializer(data=request.data)
+        serialized_data = BulkUpdateSerializer(data=request.data)
         serialized_data.is_valid(raise_exception=True)
         instances = serialized_data.data["instances"]
         for instance in instances:
@@ -49,3 +51,13 @@ class ChangeDestroyToArchiveMixin(object):
         instance.is_archive = True
         instance.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class BulkChangeArchiveStatusViewSetMixin(object):
+    @action(detail=False, methods=["post"], url_path="bulk-archive")
+    def change_archive_status(self, request, **kwargs):
+        serialized_data = BulkActionSerializer(data=request.data)
+        serialized_data.is_valid(raise_exception=True)
+        instances = serialized_data.data["instances"]
+        self.queryset.filter(id__in=instances).update(is_archive=Q(is_archive=False))
+        return Response(status=status.HTTP_200_OK)

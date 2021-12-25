@@ -39,6 +39,7 @@ class Star(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     mark = models.PositiveIntegerField()
     review = models.TextField(null=True, blank=True)
+    is_archive = models.BooleanField(default=False)
 
     objects = ContentTypeModelManager()
 

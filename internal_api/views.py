@@ -7,19 +7,19 @@ from rest_framework.status import HTTP_202_ACCEPTED, HTTP_400_BAD_REQUEST
 
 from products.models import Product
 from utils.serializers_utils import BulkUpdateSerializer
-from utils.views_utils import BulkUpdateViewSetMixin
+from utils.views_utils import (BulkChangeArchiveStatusViewSetMixin,
+                               BulkUpdateViewSetMixin)
 
 from . import models, serializers
 
 
-class ShopViewSet(BulkUpdateViewSetMixin, viewsets.ModelViewSet):
+class ShopViewSet(
+    BulkChangeArchiveStatusViewSetMixin, BulkUpdateViewSetMixin, viewsets.ModelViewSet
+):
     permission_classes = (AllowAny,)
     serializer_class = serializers.ShopSerializer
     lookup_field = "id"
     queryset = models.Shop.objects.all()
-    serializer_action_classes = {
-        "bulk_update": BulkUpdateSerializer,
-    }
 
     def get_serializer_class(self):
         return self.serializer_action_classes.get(
@@ -27,7 +27,7 @@ class ShopViewSet(BulkUpdateViewSetMixin, viewsets.ModelViewSet):
         )
 
 
-class PersonnelViewSet(viewsets.ModelViewSet):
+class PersonnelViewSet(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet):
     permission_classes = (AllowAny,)
     serializer_class = serializers.PersonnelSerializer
     lookup_field = "id"
@@ -83,14 +83,13 @@ class WarehouseOrderViewSet(viewsets.ModelViewSet):
     queryset = models.WarehouseOrder.objects.all()
 
 
-class SupplierViewSet(BulkUpdateViewSetMixin, viewsets.ModelViewSet):
+class SupplierViewSet(
+    BulkChangeArchiveStatusViewSetMixin, BulkUpdateViewSetMixin, viewsets.ModelViewSet
+):
     permission_classes = (AllowAny,)
     serializer_class = serializers.SupplierSerializer
     lookup_field = "id"
     queryset = models.Supplier.objects.all()
-    serializer_action_classes = {
-        "bulk_update": BulkUpdateSerializer,
-    }
 
     def get_serializer_class(self):
         return self.serializer_action_classes.get(

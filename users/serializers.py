@@ -170,7 +170,3 @@ class ChangeUserPasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError("Пароли не совпадают.")
 
         return data
-
-
-class BulkActionUserSerializer(serializers.Serializer):
-    users_ids = serializers.ListField(child=serializers.IntegerField(), required=True)

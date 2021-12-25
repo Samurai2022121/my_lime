@@ -29,6 +29,7 @@ class Order(Timestampable, models.Model):
     )
     payment_method = models.CharField(max_length=10, choices=PAYMENT_METHODS)
     sum_total = models.FloatField()
+    is_archive = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "Заказ"

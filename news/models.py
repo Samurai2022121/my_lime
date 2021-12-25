@@ -31,6 +31,7 @@ class News(Timestampable, models.Model):
     image = models.ImageField(
         null=True, blank=True, verbose_name="Изображение", upload_to="news/"
     )
+    is_archive = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "новость"

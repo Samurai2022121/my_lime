@@ -125,3 +125,4 @@ class CustomerDeliveryAddress(models.Model):
     surname = models.CharField(max_length=255, null=True, blank=True)
     phone_number = models.CharField(validators=[phone_regex], max_length=17)
     email = models.EmailField()
+    is_archive = models.BooleanField(default=False)

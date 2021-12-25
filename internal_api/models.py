@@ -8,6 +8,7 @@ class Shop(models.Model):
     address = models.TextField()
     name = models.CharField(max_length=255)
     date_added = models.DateTimeField(auto_now=True)
+    is_archive = models.BooleanField(default=False)
 
 
 class Personnel(models.Model):
@@ -38,6 +39,7 @@ class Personnel(models.Model):
     date_passport_valid = models.DateField()
     contract_period = models.IntegerField()
     contract_type = models.CharField(max_length=255)
+    is_archive = models.BooleanField(default=False)
 
 
 class Supplier(models.Model):
@@ -48,6 +50,7 @@ class Supplier(models.Model):
         validators=[phone_regex], max_length=17, blank=True, null=True
     )
     extra_info = models.JSONField(null=True, blank=True)
+    is_archive = models.BooleanField(default=False)
 
 
 class Warehouse(models.Model):
@@ -80,6 +83,7 @@ class TechCard(Timestampable, models.Model):
     amount = models.FloatField(default=1)
     author = models.ForeignKey(Personnel, on_delete=models.PROTECT)
     is_archived = models.BooleanField(default=False)
+    is_archive = models.BooleanField(default=False)
 
 
 class DailyMenuPlan(Timestampable, models.Model):
@@ -105,6 +109,7 @@ class WarehouseOrder(Timestampable, models.Model):
     supplier = models.CharField(max_length=255)
     order_positions = models.ManyToManyField(Product, through="WarehouseOrderPositions")
     waybill = models.CharField(max_length=255, null=True, blank=True)
+    is_archive = models.BooleanField(default=False)
 
 
 class WarehouseOrderPositions(models.Model):

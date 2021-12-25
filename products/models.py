@@ -22,6 +22,7 @@ class Category(MPTTModel):
         verbose_name="Изображение категории",
         upload_to="products/categories/",
     )
+    is_archive = models.BooleanField(default=False)
 
     class MPTTMeta:
         order_insertion_by = ["name"]
