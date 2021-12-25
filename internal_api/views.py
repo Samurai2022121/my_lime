@@ -21,11 +21,6 @@ class ShopViewSet(
     lookup_field = "id"
     queryset = models.Shop.objects.all()
 
-    def get_serializer_class(self):
-        return self.serializer_action_classes.get(
-            self.action, super().get_serializer_class()
-        )
-
 
 class PersonnelViewSet(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet):
     permission_classes = (AllowAny,)
@@ -90,8 +85,3 @@ class SupplierViewSet(
     serializer_class = serializers.SupplierSerializer
     lookup_field = "id"
     queryset = models.Supplier.objects.all()
-
-    def get_serializer_class(self):
-        return self.serializer_action_classes.get(
-            self.action, super().get_serializer_class()
-        )
