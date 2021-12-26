@@ -59,6 +59,8 @@ class WarehouseOrderPositionsSerializer(serializers.HyperlinkedModelSerializer):
             "product_barcode",
             "quantity",
             "special",
+            "bonus",
+            "flaw",
             "id",
         )
 
