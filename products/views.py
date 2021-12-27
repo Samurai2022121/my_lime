@@ -117,8 +117,7 @@ class EditProductImagesViewset(
         serializer = self.get_serializer_class()
         serialized_data = serializer(data=request.data)
         serialized_data.is_valid(raise_exception=True)
-        print(serialized_data.data)
-        for image in serialized_data.data:
+        for image in serialized_data.data["images"]:
             product = Product.objects.get(id=image.pop('product'))
             ProductImages.objects.create(**image, product=product)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
