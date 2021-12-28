@@ -1,3 +1,4 @@
+from django.db.models import F, Sum
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
@@ -76,6 +77,14 @@ class WarehouseOrderViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.WarehouseOrderSerializer
     lookup_field = "id"
     queryset = models.WarehouseOrder.objects.all()
+
+    def get_queryset(self):
+        qs = self.queryset.prefetch_related("warehouse_order").annotate(
+            total=Sum(
+                F("warehouse_order__quantity") * F("warehouse_order__buying_price")
+            )
+        )
+        return qs
 
 
 class SupplierViewSet(

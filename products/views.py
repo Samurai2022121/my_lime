@@ -118,7 +118,7 @@ class EditProductImagesViewset(
         serialized_data = serializer(data=request.data)
         serialized_data.is_valid(raise_exception=True)
         for image in serialized_data.data["images"]:
-            product = Product.objects.get(id=image.pop('product'))
+            product = Product.objects.get(id=image.pop("product"))
             ProductImages.objects.create(**image, product=product)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -129,7 +129,7 @@ class EditProductImagesViewset(
         serialized_data.is_valid(raise_exception=True)
         instances = serialized_data.data["instances"]
         for instance in instances:
-            product = Product.objects.get(id=instance.pop('product'))
+            product = Product.objects.get(id=instance.pop("product"))
             image = self.queryset.filter(id=instance.pop("id", None))
             if image:
                 image.update(**instance)

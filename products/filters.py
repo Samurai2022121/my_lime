@@ -10,4 +10,8 @@ class ProductFilter(django_filters.FilterSet):
 
     class Meta:
         model = Product
-        fields = {}
+        fields = {
+            "is_archive": ["exact"],
+            "is_sorted": ["exact"],
+            "price": ["lt", "lte", "gt", "gte", "exact"],
+        }

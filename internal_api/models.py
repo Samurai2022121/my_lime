@@ -61,12 +61,14 @@ class Warehouse(models.Model):
     remaining = models.FloatField(default=0, blank=True, null=True)
     min_remaining = models.FloatField(default=0, blank=True, null=True)
     max_remaining = models.FloatField(default=0, blank=True, null=True)
-    supplier = models.CharField(max_length=255, blank=True, null=True)
-    margin = models.FloatField(blank=True, null=True)
-    supplier_email = models.EmailField(blank=True, null=True)
-    supplier_phone = models.CharField(
-        validators=[phone_regex], max_length=17, blank=True, null=True
+    supplier = models.ForeignKey(
+        Supplier,
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        related_name="warehouse",
     )
+    margin = models.FloatField(blank=True, null=True)
     auto_order = models.BooleanField(default=False)
 
 
@@ -99,16 +101,23 @@ class MenuDishes(models.Model):
 
 class WarehouseOrder(Timestampable, models.Model):
     ORDER_STATUSES = (
-        ("approving", "Подтверждение"),
-        ("delivered", "Уволен"),
-        ("canceled", "Отпуск"),
-        ("dispatched", "Декрет"),
+        ("approving", "Подтверждается"),
+        ("delivered", "Доставлен"),
+        ("canceled", "Отменен"),
+        ("dispatched", "Отправлен"),
     )
 
     status = models.CharField(max_length=255, choices=ORDER_STATUSES)
-    supplier = models.CharField(max_length=255)
+    supplier = models.ForeignKey(
+        Supplier,
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        related_name="warehouse_order",
+    )
     order_positions = models.ManyToManyField(Product, through="WarehouseOrderPositions")
     waybill = models.CharField(max_length=255, null=True, blank=True)
+    order_number = models.CharField(max_length=255, null=True, blank=True)
     is_archive = models.BooleanField(default=False)
 
 
@@ -123,3 +132,6 @@ class WarehouseOrderPositions(models.Model):
     bonus = models.IntegerField(default=0)
     special = models.FloatField(default=0)
     flaw = models.FloatField(default=0)
+    buying_price = models.FloatField(default=0)
+    value_added_tax = models.FloatField(default=0)
+    value_added_tax_value = models.FloatField(default=0)

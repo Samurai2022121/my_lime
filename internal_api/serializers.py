@@ -25,10 +25,28 @@ class WarehouseSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source="product.name", read_only=True)
     barcode = serializers.IntegerField(source="product.barcode", read_only=True)
     price = serializers.FloatField(source="product.price", read_only=True)
+    supplier = SupplierSerializer()
 
     class Meta:
         model = models.Warehouse
         fields = "__all__"
+
+    def create(self, validated_data):
+        supplier = None
+        supplier_data = validated_data.pop("supplier", None)
+        if supplier_data:
+            supplier = models.Supplier.objects.get(id=supplier_data["id"])
+        models.WarehouseOrder.objects.create(**validated_data)
+        return models.Warehouse.objects.create(**validated_data, supplier=supplier)
+
+    def update(self, instance, validated_data):
+        supplier = None
+        supplier_data = validated_data.pop("supplier", None)
+        if supplier_data:
+            supplier = models.Supplier.objects.get(id=supplier_data["id"])
+        validated_data.update({"supplier": supplier})
+        instance = super().update(instance, validated_data)
+        return instance
 
 
 class UploadCSVSerializer(serializers.Serializer):
@@ -46,7 +64,6 @@ class UploadCSVSerializer(serializers.Serializer):
 
 class WarehouseOrderPositionsSerializer(serializers.HyperlinkedModelSerializer):
     product_name = serializers.ReadOnlyField(source="product.name")
-    product_price = serializers.ReadOnlyField(source="product.price")
     product_barcode = serializers.ReadOnlyField(source="product.barcode")
     product_id = serializers.IntegerField(source="product.id")
 
@@ -55,13 +72,15 @@ class WarehouseOrderPositionsSerializer(serializers.HyperlinkedModelSerializer):
         fields = (
             "product_id",
             "product_name",
-            "product_price",
+            "buying_price",
             "product_barcode",
             "quantity",
             "special",
             "bonus",
             "flaw",
             "id",
+            "value_added_tax",
+            "value_added_tax_value",
         )
 
 
@@ -69,6 +88,8 @@ class WarehouseOrderSerializer(serializers.ModelSerializer):
     order_positions = WarehouseOrderPositionsSerializer(
         many=True, source="warehouse_order"
     )
+    supplier = SupplierSerializer()
+    total = serializers.FloatField()
 
     class Meta:
         model = models.WarehouseOrder
