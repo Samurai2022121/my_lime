@@ -7,7 +7,6 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from internal_api.models import Warehouse
-from utils.serializers_utils import BulkUpdateSerializer
 from utils.views_utils import (BulkChangeArchiveStatusViewSetMixin,
                                BulkUpdateViewSetMixin,
                                ChangeDestroyToArchiveMixin,
@@ -99,7 +98,7 @@ class EditProductImagesViewset(
     serializer_class = serializers.EditProductImagesSerializer
     queryset = ProductImages.objects.all()
     serializer_action_classes = {
-        "bulk_update": BulkUpdateSerializer,
+        "bulk_update": serializers.BulkUpdateProductImagesSerializer,
         "create": serializers.BulkEditProductImagesSerializer,
         "bulk_delete": serializers.BulkActionProductImageSerializer,
     }

@@ -67,6 +67,11 @@ class BulkEditProductImagesSerializer(serializers.Serializer):
         fields = ("images",)
 
 
+class BulkUpdateProductImagesSerializer(serializers.Serializer):
+    instances = serializers.ListField(child=serializers.JSONField(), required=True)
+    product = serializers.IntegerField(required=True)
+
+
 class ProductImagesSerializer(serializers.ModelSerializer):
     image_1000 = Base64ImageField()
 
