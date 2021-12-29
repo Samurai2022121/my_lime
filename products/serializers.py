@@ -53,7 +53,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class EditProductImagesSerializer(serializers.ModelSerializer):
-    image_1000 = Base64ImageField()
+    image_1000 = Base64ImageField(required=True)
 
     class Meta:
         model = ProductImages
