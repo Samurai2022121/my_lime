@@ -128,8 +128,8 @@ class EditProductImagesViewset(
         serialized_data = serializer(data=request.data)
         serialized_data.is_valid(raise_exception=True)
         instances = serialized_data.data["instances"]
+        product = Product.objects.get(id=serialized_data.data["product"])
         for instance in instances:
-            product = Product.objects.get(id=instance.pop("product"))
             image = self.queryset.filter(id=instance.pop("id", None))
             if image:
                 image.update(**instance)
