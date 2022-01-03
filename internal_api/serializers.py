@@ -130,6 +130,3 @@ class WarehouseOrderSerializer(serializers.ModelSerializer):
                 instance.order_positions.add(new_order_position)
         instance = super().update(instance, validated_data)
         return instance
-
-
-class CreateWarehouseOrderSerializer(serializers.Serializer):
