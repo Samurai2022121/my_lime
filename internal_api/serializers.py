@@ -109,7 +109,9 @@ class WarehouseOrderSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     f"Product does {product_id} not exists."
                 )
-            order.order_positions.create(product=product.first(), **order_position)
+            models.WarehouseOrderPositions.objects.create(
+                product=product.first(), warehouse_order=order, **order_position
+            )
         return order
 
     def update(self, instance, validated_data):

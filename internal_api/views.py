@@ -8,8 +8,10 @@ from rest_framework.status import HTTP_202_ACCEPTED, HTTP_400_BAD_REQUEST
 
 from products.models import Product
 from utils.serializers_utils import BulkUpdateSerializer
-from utils.views_utils import (BulkChangeArchiveStatusViewSetMixin,
-                               BulkUpdateViewSetMixin)
+from utils.views_utils import (
+    BulkChangeArchiveStatusViewSetMixin,
+    BulkUpdateViewSetMixin,
+)
 
 from . import models, serializers
 
