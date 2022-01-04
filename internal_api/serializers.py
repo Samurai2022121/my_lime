@@ -97,6 +97,7 @@ class WarehouseOrderSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def create(self, validated_data):
+        print(validated_data)
         order_positions = validated_data.pop("order_positions")
         supplier_id = validated_data.pop("supplier_id")
         supplier = models.Supplier.objects.get(id=supplier_id)
