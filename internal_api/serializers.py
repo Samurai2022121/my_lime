@@ -103,10 +103,12 @@ class WarehouseOrderSerializer(serializers.ModelSerializer):
         validated_data.update({"supplier": supplier})
         order = models.WarehouseOrder.objects.create(**validated_data)
         for order_position in order_positions:
-            product_id = order_position.pop("product_id")
-            product = models.Product.objects.get(id=product_id)
+            product_id = order_position.pop("product")["id"]
+            product = models.Product.objects.filter(id=product_id)
+            if not product:
+                continue
             order.order_positions.create(
-                product=product, **order_position
+                product=product.first(), **order_position
             )
         return order
 
@@ -116,7 +118,7 @@ class WarehouseOrderSerializer(serializers.ModelSerializer):
         supplier = models.Supplier.objects.get(id=supplier_id)
         validated_data.update({"supplier": supplier})
         for order_position in order_positions:
-            product_id = order_position.pop("product_id")
+            product_id = order_position.pop("product")["id"]
             order_id = order_position.pop("id", None)
             product = models.Product.objects.get(id=product_id)
             if order_id:
