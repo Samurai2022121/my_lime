@@ -115,7 +115,9 @@ class WarehouseOrder(Timestampable, models.Model):
         null=True,
         related_name="warehouse_order",
     )
-    order_positions = models.ManyToManyField(Product, through="WarehouseOrderPositions", blank=True)
+    order_positions = models.ManyToManyField(
+        Product, through="WarehouseOrderPositions", blank=True
+    )
     waybill = models.CharField(max_length=255, null=True, blank=True)
     order_number = models.CharField(max_length=255, null=True, blank=True)
     is_archive = models.BooleanField(default=False)

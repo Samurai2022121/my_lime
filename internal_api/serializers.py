@@ -106,10 +106,10 @@ class WarehouseOrderSerializer(serializers.ModelSerializer):
             product_id = order_position.pop("product")["id"]
             product = models.Product.objects.filter(id=product_id)
             if not product:
-                continue
-            order.order_positions.create(
-                product=product.first(), **order_position
-            )
+                raise serializers.ValidationError(
+                    f"Product does {product_id} not exists."
+                )
+            order.order_positions.create(product=product.first(), **order_position)
         return order
 
     def update(self, instance, validated_data):
