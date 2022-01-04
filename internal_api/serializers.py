@@ -100,7 +100,8 @@ class WarehouseOrderSerializer(serializers.ModelSerializer):
         order_positions = validated_data.pop("order_positions", None)
         supplier_id = validated_data.pop("supplier_id")
         supplier = models.Supplier.objects.get(id=supplier_id)
-        order = models.WarehouseOrder.objects.create(**validated_data, supplier=supplier)
+        validated_data.update({"supplier": supplier})
+        order = models.WarehouseOrder.objects.create(**validated_data)
         for order_position in order_positions:
             product_id = order_position.pop("product_id")
             product = models.Product.objects.get(id=product_id)
