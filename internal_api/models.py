@@ -128,7 +128,7 @@ class WarehouseOrderPositions(models.Model):
         WarehouseOrder, on_delete=models.PROTECT, related_name="warehouse_order"
     )
     product = models.ForeignKey(
-        Product, on_delete=models.PROTECT, related_name="warehouse_order"
+        Product, on_delete=models.PROTECT, related_name="warehouse_order_product"
     )
     quantity = models.FloatField(default=0)
     bonus = models.IntegerField(default=0)
