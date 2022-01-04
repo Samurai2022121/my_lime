@@ -105,10 +105,9 @@ class WarehouseOrderSerializer(serializers.ModelSerializer):
         for order_position in order_positions:
             product_id = order_position.pop("product_id")
             product = models.Product.objects.get(id=product_id)
-            order_position_instance = models.WarehouseOrderPositions.objects.create(
+            models.WarehouseOrder.order_positions.create(
                 product=product, **order_position
             )
-            order.order_positions.add(order_position_instance)
         return order
 
     def update(self, instance, validated_data):
