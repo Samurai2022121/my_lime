@@ -90,7 +90,7 @@ class WarehouseOrderSerializer(serializers.ModelSerializer):
     )
     supplier = SupplierSerializer(read_only=True)
     supplier_id = serializers.IntegerField(write_only=True)
-    total = serializers.FloatField()
+    total = serializers.FloatField(read_only=True)
 
     class Meta:
         model = models.WarehouseOrder
