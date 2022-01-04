@@ -97,12 +97,10 @@ class WarehouseOrderSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def create(self, validated_data):
-        print(validated_data)
-        order_positions = validated_data.pop("order_positions")
+        order_positions = validated_data.pop("warehouse_order")
         supplier_id = validated_data.pop("supplier_id")
         supplier = models.Supplier.objects.get(id=supplier_id)
         validated_data.update({"supplier": supplier})
-        print(validated_data)
         order = models.WarehouseOrder.objects.create(**validated_data)
         for order_position in order_positions:
             product_id = order_position.pop("product_id")
@@ -113,7 +111,7 @@ class WarehouseOrderSerializer(serializers.ModelSerializer):
         return order
 
     def update(self, instance, validated_data):
-        order_positions = validated_data.pop("order_positions")
+        order_positions = validated_data.pop("warehouse_order")
         supplier_id = validated_data.pop("supplier_id")
         supplier = models.Supplier.objects.get(id=supplier_id)
         validated_data.update({"supplier": supplier})
