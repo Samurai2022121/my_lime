@@ -99,7 +99,7 @@ class MenuDishes(models.Model):
     quantity = models.IntegerField(default=1)
 
 
-class WarehouseOrder(Timestampable, models.Model):
+class WarehouseOrder(models.Model):
     ORDER_STATUSES = (
         ("approving", "Подтверждается"),
         ("delivered", "Доставлен"),
@@ -122,6 +122,8 @@ class WarehouseOrder(Timestampable, models.Model):
     waybill = models.CharField(max_length=255, null=True, blank=True)
     order_number = models.CharField(max_length=255, null=True, blank=True)
     is_archive = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True, editable=False)
 
 
 class WarehouseOrderPositions(models.Model):
