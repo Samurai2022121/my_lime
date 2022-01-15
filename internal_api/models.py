@@ -118,6 +118,7 @@ class WarehouseOrder(Timestampable, models.Model):
     order_positions = models.ManyToManyField(
         Product, through="WarehouseOrderPositions", blank=True
     )
+    shop = models.ForeignKey(Shop, on_delete=models.PROTECT)
     waybill = models.CharField(max_length=255, null=True, blank=True)
     order_number = models.CharField(max_length=255, null=True, blank=True)
     is_archive = models.BooleanField(default=False)

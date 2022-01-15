@@ -91,6 +91,8 @@ class WarehouseOrderSerializer(serializers.ModelSerializer):
     supplier = SupplierSerializer(read_only=True)
     supplier_id = serializers.IntegerField(write_only=True)
     total = serializers.FloatField(read_only=True)
+    shop_address = serializers.CharField(source="shop.address")
+    shop_id = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = models.WarehouseOrder
@@ -99,8 +101,10 @@ class WarehouseOrderSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         order_positions = validated_data.pop("warehouse_order")
         supplier_id = validated_data.pop("supplier_id")
+        shop_id = validated_data.pop("shop_id")
+        shop = models.Shop.objects.get(id=shop_id)
         supplier = models.Supplier.objects.get(id=supplier_id)
-        validated_data.update({"supplier": supplier})
+        validated_data.update({"supplier": supplier, "shop": shop})
         order = models.WarehouseOrder.objects.create(**validated_data)
         for order_position in order_positions:
             product_id = order_position.pop("product")["id"]

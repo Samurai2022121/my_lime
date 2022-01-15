@@ -119,6 +119,7 @@ class ProductListSerializer(serializers.ModelSerializer):
             "origin",
             "measure_unit",
             "own_production",
+            "barcode",
         ]
 
     def get_stars_count(self, obj):
