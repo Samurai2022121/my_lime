@@ -1,3 +1,6 @@
+from itertools import islice
+
+import pandas as pd
 from django.db.models import F, Sum
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -68,8 +71,42 @@ class UploadCSVGenericView(GenericAPIView):
     permission_classes = (AllowAny,)
     serializer_class = serializers.UploadCSVSerializer
 
+    product_fields_mapping = {
+        "price_col": "price",
+        "name_col": "name",
+        "barcode_col": "barcode",
+        "vat_col": "vat_value",
+        "measure_unit_col": "measure_unit",
+        "origin_col": "origin",
+        "supplier_col": "manufacturer",
+    }
+
     def post(self, request):
-        return Response(status=HTTP_202_ACCEPTED)
+        serialized_data = self.serializer_class(data=request.data)
+        serialized_data.is_valid(raise_exception=True)
+
+        file = pd.read_excel(serialized_data["csv_file"])
+        file = file.where(pd.notnull(file), None)
+        products = []
+        for index, row in file.iloc[serialized_data["first_row"] :].iterrows():
+            if not (name := row[serialized_data["name_col"]]) and not (
+                price := row[serialized_data["price_col"]]
+            ):
+                continue
+            products.append(
+                Product(
+                    name=name,
+                    price=price,
+                    barcode=row[serialized_data["barcode"]],
+                    vat_value=row[serialized_data["vat_col"]],
+                    measure_unit=row[serialized_data["measure_unit_col"]],
+                    origin=row[serialized_data["origin_col"]],
+                    manufacturer=row[serialized_data["supplier_col"]],
+                )
+            )
+        created_products = Product.objects.bulk_create(products)
+
+        return Response(status=HTTP_202_ACCEPTED, data=created_products)
 
 
 class WarehouseOrderViewSet(viewsets.ModelViewSet):
