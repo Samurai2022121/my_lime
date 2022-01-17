@@ -9,6 +9,7 @@ router.register("personnel", views.PersonnelViewSet)
 router.register("matrix", views.WarehouseViewSet)
 router.register("product-orders", views.WarehouseOrderViewSet)
 router.register("supplier", views.SupplierViewSet)
+router.register("supply-contracts", views.SupplyContractViewSet)
 
 urlpatterns = [
     path("upload-csv/", views.UploadCSVGenericView.as_view(), name="csv-upload"),

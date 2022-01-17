@@ -131,3 +131,10 @@ class SupplierViewSet(
     serializer_class = serializers.SupplierSerializer
     lookup_field = "id"
     queryset = models.Supplier.objects.all()
+
+
+class SupplyContractViewSet(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet):
+    permission_classes = (AllowAny,)
+    serializer_class = serializers.SupplyContractSerializer
+    lookup_field = "id"
+    queryset = models.SupplyContract.objects.all()
