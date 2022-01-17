@@ -1,12 +1,8 @@
 from django.urls import path
 from rest_framework import routers
 
-from .views import (
-    CategoryViewset,
-    EditProductImagesViewset,
-    ProductMatrixViewset,
-    ProductViewset,
-)
+from .views import (CategoryViewset, EditProductImagesViewset,
+                    ProductMatrixViewset, ProductViewset)
 
 router = routers.SimpleRouter()
 router.register("products", ProductViewset)

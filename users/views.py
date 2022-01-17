@@ -12,22 +12,16 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from users.models import CustomerDeliveryAddress, GeneratedPassword, User
-from users.serializers import (
-    ChangeUserPasswordSerializer,
-    CustomerDeliveryAddressSerializer,
-    GenerateRegistrationCodeSerializer,
-    LoginSerializer,
-    RegistrationSerializer,
-    TokenObtainSerializer,
-    UserListSerializer,
-    UserSerializer,
-    ValidateRegistrationCodeSerializer,
-)
+from users.serializers import (ChangeUserPasswordSerializer,
+                               CustomerDeliveryAddressSerializer,
+                               GenerateRegistrationCodeSerializer,
+                               LoginSerializer, RegistrationSerializer,
+                               TokenObtainSerializer, UserListSerializer,
+                               UserSerializer,
+                               ValidateRegistrationCodeSerializer)
 from utils.models_utils import generate_new_password
-from utils.views_utils import (
-    BulkChangeArchiveStatusViewSetMixin,
-    OrderingModelViewsetMixin,
-)
+from utils.views_utils import (BulkChangeArchiveStatusViewSetMixin,
+                               OrderingModelViewsetMixin)
 
 
 class RegistrationAPIView(views.APIView):

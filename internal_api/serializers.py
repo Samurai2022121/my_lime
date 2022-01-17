@@ -15,7 +15,15 @@ class PersonnelSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class SupplyContractSerializer(serializers.Serializer):
+    class Meta:
+        model = models.SupplyContract
+        fields = "__all__"
+
+
 class SupplierSerializer(serializers.ModelSerializer):
+    supply_contracts = SupplyContractSerializer(many=True, read_only=True)
+
     class Meta:
         model = models.Supplier
         fields = "__all__"
@@ -66,6 +74,7 @@ class WarehouseOrderPositionsSerializer(serializers.HyperlinkedModelSerializer):
     product_name = serializers.ReadOnlyField(source="product.name")
     product_barcode = serializers.ReadOnlyField(source="product.barcode")
     product_id = serializers.IntegerField(source="product.id")
+    id = serializers.CharField()
 
     class Meta:
         model = models.WarehouseOrderPositions
@@ -81,6 +90,7 @@ class WarehouseOrderPositionsSerializer(serializers.HyperlinkedModelSerializer):
             "id",
             "value_added_tax",
             "value_added_tax_value",
+            "margin",
         )
 
 
@@ -93,7 +103,7 @@ class WarehouseOrderSerializer(serializers.ModelSerializer):
     total = serializers.FloatField(read_only=True)
     shop_address = serializers.CharField(source="shop.address", read_only=True)
     shop_id = serializers.IntegerField(write_only=True)
-    created_at = serializers.DateTimeField()
+    created_at = serializers.DateTimeField(required=False)
 
     class Meta:
         model = models.WarehouseOrder
@@ -126,18 +136,17 @@ class WarehouseOrderSerializer(serializers.ModelSerializer):
         shop = models.Shop.objects.get(id=shop_id)
         supplier = models.Supplier.objects.get(id=supplier_id)
         validated_data.update({"supplier": supplier, "shop": shop})
+        instance = super().update(instance, validated_data)
         for order_position in order_positions:
             product_id = order_position.pop("product")["id"]
-            order_id = order_position.pop("id", None)
+            order_position_id = order_position.pop("id", None)
             product = models.Product.objects.get(id=product_id)
-            if order_id:
-                models.WarehouseOrderPositions.objects.filter(id=order_id).update(
-                    product=product, **order_position
-                )
+            if order_position_id:
+                models.WarehouseOrderPositions.objects.filter(
+                    id=order_position_id
+                ).update(product=product, **order_position)
             else:
-                new_order_position = models.WarehouseOrderPositions.objects.create(
-                    product=product, **order_position
+                models.WarehouseOrderPositions.objects.create(
+                    product=product, warehouse_order=instance, **order_position
                 )
-                instance.order_positions.add(new_order_position)
-        instance = super().update(instance, validated_data)
         return instance

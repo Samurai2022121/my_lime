@@ -1,3 +1,6 @@
+from datetime import date
+from secrets import token_hex
+
 from django.db import models
 
 from products.models import Product
@@ -51,6 +54,25 @@ class Supplier(models.Model):
     )
     extra_info = models.JSONField(null=True, blank=True)
     is_archive = models.BooleanField(default=False)
+    bank_identifier_code = models.IntegerField(null=True, blank=True)
+    bank_account = models.CharField(max_length=255, null=True, blank=True)
+
+
+def create_contract_download_path(instance, filename):
+    directory = "/internal-api/supply-contracts/"
+    upload_date = date.today().strftime("%d%M%Y")
+    salt = token_hex(5)
+    return f"{directory}_{upload_date}_{salt}_{filename}"
+
+
+class SupplyContract(Timestampable, models.Model):
+    supplier = models.ForeignKey(
+        Supplier, on_delete=models.PROTECT, related_name="supply_contract"
+    )
+    contract_number = models.CharField(max_length=255)
+    contract = models.FileField(
+        null=True, blank=True, upload_to=create_contract_download_path
+    )
 
 
 class Warehouse(models.Model):
@@ -120,10 +142,11 @@ class WarehouseOrder(models.Model):
     )
     shop = models.ForeignKey(Shop, on_delete=models.PROTECT)
     waybill = models.CharField(max_length=255, null=True, blank=True)
+    waybill_date = models.DateField(null=True, blank=True)
     order_number = models.CharField(max_length=255, null=True, blank=True)
     is_archive = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True, editable=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 class WarehouseOrderPositions(models.Model):
@@ -140,3 +163,4 @@ class WarehouseOrderPositions(models.Model):
     buying_price = models.FloatField(default=0)
     value_added_tax = models.FloatField(default=0)
     value_added_tax_value = models.FloatField(default=0)
+    margin = models.FloatField(default=0)

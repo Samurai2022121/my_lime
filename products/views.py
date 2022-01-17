@@ -7,12 +7,10 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from internal_api.models import Warehouse
-from utils.views_utils import (
-    BulkChangeArchiveStatusViewSetMixin,
-    BulkUpdateViewSetMixin,
-    ChangeDestroyToArchiveMixin,
-    OrderingModelViewsetMixin,
-)
+from utils.views_utils import (BulkChangeArchiveStatusViewSetMixin,
+                               BulkUpdateViewSetMixin,
+                               ChangeDestroyToArchiveMixin,
+                               OrderingModelViewsetMixin)
 
 from . import serializers
 from .filters import ProductFilter
