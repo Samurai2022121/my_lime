@@ -90,8 +90,8 @@ REST_FRAMEWORK = {
     "TIME_FORMAT": "%H:%M",
 }
 
-ACCESS_TOKEN_LIFETIME = timedelta(hours=15)
-REFRESH_TOKEN_LIFETIME = timedelta(days=1)
+ACCESS_TOKEN_LIFETIME = timedelta(days=10)
+REFRESH_TOKEN_LIFETIME = timedelta(days=11)
 
 AUTH_PASSWORD_VALIDATORS = [
     {
