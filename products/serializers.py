@@ -92,35 +92,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = [
-            "name",
-            "category",
-            "price",
-            "in_stock",
-            "id",
-            "weight",
-            "stars_count",
-            "stared",
-            "average_star",
-            "is_favourite",
-            "favourite_count",
-            "discount",
-            "discounted_price",
-            "carbohydrates",
-            "fats",
-            "calories",
-            "energy",
-            "protein",
-            "description",
-            "expiration_date",
-            "production_date",
-            "images",
-            "manufacturer",
-            "origin",
-            "measure_unit",
-            "own_production",
-            "barcode",
-        ]
+        exclude = ["is_sorted", "is_archive"]
 
     def get_stars_count(self, obj):
         return Star.objects.filter(
