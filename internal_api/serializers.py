@@ -74,7 +74,7 @@ class WarehouseOrderPositionsSerializer(serializers.HyperlinkedModelSerializer):
     product_name = serializers.ReadOnlyField(source="product.name")
     product_barcode = serializers.ReadOnlyField(source="product.barcode")
     product_id = serializers.IntegerField(source="product.id")
-    id = serializers.CharField()
+    id = serializers.CharField(required=False)
 
     class Meta:
         model = models.WarehouseOrderPositions
