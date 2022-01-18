@@ -124,7 +124,7 @@ class WarehouseOrderViewSet(ChangeDestroyToArchiveMixin, viewsets.ModelViewSet):
     def get_queryset(self):
         qs = (
             self.queryset.prefetch_related("warehouse_order")
-            .filter(is_archieve=False)
+            .filter(is_archive=False)
             .annotate(
                 total=Sum(
                     F("warehouse_order__quantity") * F("warehouse_order__buying_price")
