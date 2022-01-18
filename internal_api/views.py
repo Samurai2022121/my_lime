@@ -1,5 +1,4 @@
 import pandas as pd
-
 from django.db.models import F, Sum
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -11,13 +10,17 @@ from rest_framework.status import HTTP_202_ACCEPTED, HTTP_400_BAD_REQUEST
 from products.models import Product
 from utils.serializers_utils import BulkUpdateSerializer
 from utils.views_utils import (BulkChangeArchiveStatusViewSetMixin,
-                               BulkUpdateViewSetMixin)
+                               BulkUpdateViewSetMixin,
+                               ChangeDestroyToArchiveMixin)
 
 from . import models, serializers
 
 
 class ShopViewSet(
-    BulkChangeArchiveStatusViewSetMixin, BulkUpdateViewSetMixin, viewsets.ModelViewSet
+    ChangeDestroyToArchiveMixin,
+    BulkChangeArchiveStatusViewSetMixin,
+    BulkUpdateViewSetMixin,
+    viewsets.ModelViewSet,
 ):
     permission_classes = (AllowAny,)
     serializer_class = serializers.ShopSerializer
@@ -25,7 +28,11 @@ class ShopViewSet(
     queryset = models.Shop.objects.all()
 
 
-class PersonnelViewSet(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet):
+class PersonnelViewSet(
+    ChangeDestroyToArchiveMixin,
+    BulkChangeArchiveStatusViewSetMixin,
+    viewsets.ModelViewSet,
+):
     permission_classes = (AllowAny,)
     serializer_class = serializers.PersonnelSerializer
     lookup_field = "id"
@@ -108,23 +115,30 @@ class UploadCSVGenericView(GenericAPIView):
         return Response(status=HTTP_202_ACCEPTED, data=created_products)
 
 
-class WarehouseOrderViewSet(viewsets.ModelViewSet):
+class WarehouseOrderViewSet(ChangeDestroyToArchiveMixin, viewsets.ModelViewSet):
     permission_classes = (AllowAny,)
     serializer_class = serializers.WarehouseOrderSerializer
     lookup_field = "id"
     queryset = models.WarehouseOrder.objects.all()
 
     def get_queryset(self):
-        qs = self.queryset.prefetch_related("warehouse_order").annotate(
-            total=Sum(
-                F("warehouse_order__quantity") * F("warehouse_order__buying_price")
+        qs = (
+            self.queryset.prefetch_related("warehouse_order")
+            .filter(is_archieve=False)
+            .annotate(
+                total=Sum(
+                    F("warehouse_order__quantity") * F("warehouse_order__buying_price")
+                )
             )
         )
         return qs
 
 
 class SupplierViewSet(
-    BulkChangeArchiveStatusViewSetMixin, BulkUpdateViewSetMixin, viewsets.ModelViewSet
+    ChangeDestroyToArchiveMixin,
+    BulkChangeArchiveStatusViewSetMixin,
+    BulkUpdateViewSetMixin,
+    viewsets.ModelViewSet,
 ):
     permission_classes = (AllowAny,)
     serializer_class = serializers.SupplierSerializer
