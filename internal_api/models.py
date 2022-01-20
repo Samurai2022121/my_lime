@@ -56,6 +56,7 @@ class Supplier(models.Model):
     is_archive = models.BooleanField(default=False)
     bank_identifier_code = models.IntegerField(null=True, blank=True)
     bank_account = models.CharField(max_length=255, null=True, blank=True)
+    inner_id = models.CharField(max_length=255, null=True, blank=True)
 
 
 def create_contract_download_path(instance, filename):
@@ -73,6 +74,7 @@ class SupplyContract(Timestampable, models.Model):
     contract = models.FileField(
         null=True, blank=True, upload_to=create_contract_download_path
     )
+    contract_date = models.DateField()
 
 
 class Warehouse(models.Model):
