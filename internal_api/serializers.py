@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from . import models
-
+from users.models import User
 
 class ShopSerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,7 +16,7 @@ class PersonnelSerializer(serializers.ModelSerializer):
 
 
 class SupplyContractSerializer(serializers.ModelSerializer):
-    supplier = serializers.PrimaryKeyRelatedField()
+    supplier = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
 
     class Meta:
         model = models.SupplyContract
