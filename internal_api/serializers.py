@@ -16,6 +16,8 @@ class PersonnelSerializer(serializers.ModelSerializer):
 
 
 class SupplyContractSerializer(serializers.Serializer):
+    supplier = serializers.PrimaryKeyRelatedField()
+
     class Meta:
         model = models.SupplyContract
         fields = "__all__"
