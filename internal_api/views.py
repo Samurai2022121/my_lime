@@ -49,7 +49,9 @@ class WarehouseViewSet(viewsets.ModelViewSet):
         qs = self.queryset
         outlet_id = self.request.query_params.get("outlet", None)
         if outlet_id:
-            qs = qs.filter(shop=outlet_id)
+            qs = qs.filter(shop=outlet_id, product__is_archive=False)
+        else:
+            qs = qs.none()
         return qs
 
     @action(detail=False, methods=["post"], url_path="bulk_update")
