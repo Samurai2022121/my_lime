@@ -54,7 +54,7 @@ class Product(Timestampable, models.Model):
     energy = models.FloatField(
         blank=True, null=True, verbose_name="Энергетическая ценность"
     )
-    barcode = models.IntegerField(blank=True, null=True, verbose_name="Штрихкод")
+    barcode = models.BigIntegerField(blank=True, null=True, verbose_name="Штрихкод")
     manufacturer = models.CharField(
         max_length=250, blank=True, null=True, verbose_name="Производитель"
     )
@@ -68,7 +68,7 @@ class Product(Timestampable, models.Model):
         blank=True, null=True, verbose_name="Дата производства"
     )
     weight = models.FloatField(blank=True, null=True, verbose_name="Вес, грамм")
-    in_stock = models.BooleanField(verbose_name="Наличие")
+    in_stock = models.BooleanField(verbose_name="Наличие", default=False)
     own_production = models.BooleanField(
         default=False, verbose_name="Собственное производство"
     )

@@ -72,6 +72,7 @@ class UploadCSVSerializer(serializers.Serializer):
     first_row = serializers.IntegerField()
 
 
+
 class WarehouseOrderPositionsSerializer(serializers.HyperlinkedModelSerializer):
     product_name = serializers.ReadOnlyField(source="product.name")
     product_barcode = serializers.ReadOnlyField(source="product.barcode")

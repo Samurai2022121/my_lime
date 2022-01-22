@@ -7,7 +7,9 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.status import HTTP_202_ACCEPTED, HTTP_400_BAD_REQUEST
 
+
 from products.models import Product
+from products.serializers import ProductListSerializer
 from utils.serializers_utils import BulkUpdateSerializer
 from utils.views_utils import (BulkChangeArchiveStatusViewSetMixin,
                                BulkUpdateViewSetMixin,
@@ -78,6 +80,7 @@ class WarehouseViewSet(viewsets.ModelViewSet):
 class UploadCSVGenericView(GenericAPIView):
     permission_classes = (AllowAny,)
     serializer_class = serializers.UploadCSVSerializer
+    queryset = models.Product.objects.all()
 
     product_fields_mapping = {
         "price_col": "price",
@@ -90,31 +93,41 @@ class UploadCSVGenericView(GenericAPIView):
     }
 
     def post(self, request):
+        context = {'request': request}
         serialized_data = self.serializer_class(data=request.data)
         serialized_data.is_valid(raise_exception=True)
 
-        file = pd.read_excel(serialized_data["csv_file"])
+        file = pd.read_excel(serialized_data.validated_data["csv_file"])
+
         file = file.where(pd.notnull(file), None)
         products = []
-        for index, row in file.iloc[serialized_data["first_row"] :].iterrows():
-            if not (name := row[serialized_data["name_col"]]) and not (
-                price := row[serialized_data["price_col"]]
-            ):
-                continue
-            products.append(
-                Product(
-                    name=name,
-                    price=price,
-                    barcode=row[serialized_data["barcode"]],
-                    vat_value=row[serialized_data["vat_col"]],
-                    measure_unit=row[serialized_data["measure_unit_col"]],
-                    origin=row[serialized_data["origin_col"]],
-                    manufacturer=row[serialized_data["supplier_col"]],
-                )
-            )
-        created_products = Product.objects.bulk_create(products)
+        row_num = serialized_data.validated_data["first_row"]
 
-        return Response(status=HTTP_202_ACCEPTED, data=created_products)
+        for index, row in file.iloc[row_num :].iterrows():
+
+            price = None
+
+            if row[serialized_data.validated_data["name_col"]] and row[serialized_data.validated_data["price_col"]]:
+
+                name = row[serialized_data.validated_data["name_col"]]
+                price = float(row[serialized_data.validated_data["price_col"]])
+      
+                products.append(
+                    Product(
+                        name=name,
+                        price=price,
+                        barcode=row[serialized_data.validated_data["barcode_col"]],
+                        vat_value=row[serialized_data.validated_data["vat_col"]],
+                        measure_unit=row[serialized_data.validated_data["measure_unit_col"]],
+                        origin=row[serialized_data.validated_data["origin_col"]],
+                        manufacturer=row[serialized_data.validated_data["supplier_col"]],
+                    )
+                )
+
+        created_products = Product.objects.bulk_create(products)
+        serializer = ProductListSerializer(created_products, many=True, context=context)
+
+        return Response(status=HTTP_202_ACCEPTED, data=serializer.data)
 
 
 class WarehouseOrderViewSet(ChangeDestroyToArchiveMixin, viewsets.ModelViewSet):
