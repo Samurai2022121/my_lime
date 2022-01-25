@@ -123,7 +123,7 @@ class UploadCSVGenericView(GenericAPIView):
                     )
                 )
 
-        created_products = Product.objects.bulk_create(products)
+        created_products = Product.objects.bulk_create(products, ignore_conflicts=True)
         serializer = ProductListSerializer(created_products, many=True, context=context)
 
         return Response(status=HTTP_202_ACCEPTED, data=serializer.data)
