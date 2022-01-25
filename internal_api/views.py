@@ -96,31 +96,30 @@ class UploadCSVGenericView(GenericAPIView):
         context = {'request': request}
         serialized_data = self.serializer_class(data=request.data)
         serialized_data.is_valid(raise_exception=True)
+        data = serialized_data.validated_data
 
-        file = pd.read_excel(serialized_data.validated_data["csv_file"])
+        file = pd.read_excel(data.get("csv_file", None))
 
         file = file.where(pd.notnull(file), None)
         products = []
-        row_num = serialized_data.validated_data["first_row"]
+        row_num = data.get("first_row", None)
 
-        for index, row in file.iloc[row_num :].iterrows():
+        for index, row in file.iloc[row_num:].iterrows():
 
-            price = None
+            if row[data("name_col", 0)] and row[data("price_col", 0)]:
 
-            if row[serialized_data.validated_data["name_col"]] and row[serialized_data.validated_data["price_col"]]:
-
-                name = row[serialized_data.validated_data["name_col"]]
-                price = float(row[serialized_data.validated_data["price_col"]])
+                name = row[data("name_col", None)]
+                price = float(row[data.get("price_col", None)])
       
                 products.append(
                     Product(
                         name=name,
                         price=price,
-                        barcode=row[serialized_data.validated_data["barcode_col"]],
-                        vat_value=row[serialized_data.validated_data["vat_col"]],
-                        measure_unit=row[serialized_data.validated_data["measure_unit_col"]],
-                        origin=row[serialized_data.validated_data["origin_col"]],
-                        manufacturer=row[serialized_data.validated_data["supplier_col"]],
+                        barcode=row[data["barcode_col"]] if data["barcode_col"] else None,
+                        vat_value=row[data["vat_col"]] if data["vat_col"] else None,
+                        measure_unit=row[data["measure_unit_col"]] if data["measure_unit_col"] else None,
+                        origin=row[data["origin_col"]] if data["origin_col"] else None,
+                        manufacturer=row[data["supplier_col"]] if data["supplier_col"] else None,
                     )
                 )
 
