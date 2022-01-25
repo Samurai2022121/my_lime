@@ -106,20 +106,20 @@ class UploadCSVGenericView(GenericAPIView):
 
         for index, row in file.iloc[row_num:].iterrows():
 
-            if row[data("name_col", 0)] and row[data("price_col", 0)]:
+            if row[data.get("name_col", 0)] and row[data.get("price_col", 0)]:
 
-                name = row[data("name_col", None)]
+                name = row[data.get("name_col", None)]
                 price = float(row[data.get("price_col", None)])
       
                 products.append(
                     Product(
                         name=name,
                         price=price,
-                        barcode=row[data["barcode_col"]] if data["barcode_col"] else None,
-                        vat_value=row[data["vat_col"]] if data["vat_col"] else None,
-                        measure_unit=row[data["measure_unit_col"]] if data["measure_unit_col"] else None,
-                        origin=row[data["origin_col"]] if data["origin_col"] else None,
-                        manufacturer=row[data["supplier_col"]] if data["supplier_col"] else None,
+                        barcode=row[data["barcode_col"]] if data.get("barcode_col", None) else None,
+                        vat_value=row[data["vat_col"]] if data.get("vat_col", None) else None,
+                        measure_unit=row[data["measure_unit_col"]] if data.get("measure_unit_col", None) else None,
+                        origin=row[data["origin_col"]] if data.get("origin_col", None) else None,
+                        manufacturer=row[data["supplier_col"]] if data.get("supplier_col", None) else None,
                     )
                 )
 
