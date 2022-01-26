@@ -61,7 +61,7 @@ class Supplier(models.Model):
     )
     extra_info = models.JSONField(null=True, blank=True)
     is_archive = models.BooleanField(default=False)
-    bank_identifier_code = models.BigIntegerField(null=True, blank=True)
+    bank_identifier_code = models.CharField(max_length=255, null=True, blank=True)
     bank_account = models.CharField(max_length=255, null=True, blank=True)
     inner_id = models.CharField(max_length=255, null=True, blank=True)
     payer_identification_number = models.CharField(
