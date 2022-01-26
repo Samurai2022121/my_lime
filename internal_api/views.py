@@ -7,13 +7,15 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.status import HTTP_202_ACCEPTED, HTTP_400_BAD_REQUEST
 
-
+from internal_api.models import MenuDish, TechCard
 from products.models import Product
 from products.serializers import ProductListSerializer
 from utils.serializers_utils import BulkUpdateSerializer
-from utils.views_utils import (BulkChangeArchiveStatusViewSetMixin,
-                               BulkUpdateViewSetMixin,
-                               ChangeDestroyToArchiveMixin)
+from utils.views_utils import (
+    BulkChangeArchiveStatusViewSetMixin,
+    BulkUpdateViewSetMixin,
+    ChangeDestroyToArchiveMixin,
+)
 
 from . import models, serializers
 
@@ -93,7 +95,8 @@ class UploadCSVGenericView(GenericAPIView):
     }
 
     def post(self, request):
-        context = {'request': request}
+        context = {"request": request}
+
         serialized_data = self.serializer_class(data=request.data)
         serialized_data.is_valid(raise_exception=True)
         data = serialized_data.validated_data
@@ -110,7 +113,6 @@ class UploadCSVGenericView(GenericAPIView):
 
                 name = row[data.get("name_col", None)]
                 price = float(row[data.get("price_col", None)])
-      
                 products.append(
                     Product(
                         name=name,
@@ -165,3 +167,17 @@ class SupplyContractViewSet(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelV
     serializer_class = serializers.SupplyContractSerializer
     lookup_field = "id"
     queryset = models.SupplyContract.objects.all()
+
+
+class TechCardViewSet(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet):
+    permission_classes = (AllowAny,)
+    serializer_class = serializers.TechCardSerializer
+    lookup_field = "id"
+    queryset = models.TechCard.objects.filter(is_archive=False)
+
+
+class DailyMenuViewSet(viewsets.ModelViewSet):
+    permission_classes = (AllowAny,)
+    serializer_class = serializers.DailyMenuSerializer
+    lookup_field = "id"
+    queryset = models.DailyMenuPlan.objects.all()

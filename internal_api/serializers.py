@@ -1,7 +1,10 @@
 from rest_framework import serializers
+from drf_writable_nested import WritableNestedModelSerializer
+
+from users.models import User
 
 from . import models
-from users.models import User
+
 
 class ShopSerializer(serializers.ModelSerializer):
     class Meta:
@@ -67,10 +70,8 @@ class UploadCSVSerializer(serializers.Serializer):
     vat_col = serializers.IntegerField(required=False)
     supplier_col = serializers.IntegerField(required=False)
     measure_unit_col = serializers.IntegerField(required=False)
-    quantity_col = serializers.IntegerField(required=False)
     origin_col = serializers.IntegerField(required=False)
     first_row = serializers.IntegerField()
-
 
 
 class WarehouseOrderPositionsSerializer(serializers.HyperlinkedModelSerializer):
@@ -153,3 +154,31 @@ class WarehouseOrderSerializer(serializers.ModelSerializer):
                     product=product, warehouse_order=instance, **order_position
                 )
         return instance
+
+
+class TechProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.TechCardProduct
+        fields = ["product", "quantity"]
+
+
+class TechCardSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+    tech_card_product = TechProductSerializer(many=True)
+
+    class Meta:
+        model = models.TechCard
+        fields = ["name", "amount", "author", "created_at", "tech_card_product"]
+
+
+class MenuDishSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.MenuDish
+        fields = ["dish", "quantity"]
+
+
+class DailyMenuSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+    menu_dish = MenuDishSerializer(many=True)
+
+    class Meta:
+        model = models.DailyMenuPlan
+        fields = ["author", "menu_dish", "created_at", "updated_at"]

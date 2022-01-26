@@ -20,14 +20,38 @@ class WarehouseAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
     pass
 
 
+@admin.register(models.TechCardProduct)
+class WarehouseAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
+    pass
+
+
+class ProductForTechCardInline(admin.StackedInline):
+    model = models.TechCardProduct
+    extra = 1
+
+
 @admin.register(models.TechCard)
 class TechCardAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
+    inlines = [
+        ProductForTechCardInline,
+    ]
+
+
+@admin.register(models.MenuDish)
+class MenuDishesAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
     pass
+
+
+class MenuDishInline(admin.StackedInline):
+    model = models.MenuDish
+    extra = 1
 
 
 @admin.register(models.DailyMenuPlan)
 class DailyMenuPlanAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
-    pass
+    inlines = [
+        MenuDishInline,
+    ]
 
 
 @admin.register(models.WarehouseOrder)

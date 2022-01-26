@@ -4,8 +4,10 @@ from rest_framework import viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from utils.permissions import ReadOnlyPermissions
-from utils.views_utils import (BulkChangeArchiveStatusViewSetMixin,
-                               BulkUpdateViewSetMixin)
+from utils.views_utils import (
+    BulkChangeArchiveStatusViewSetMixin,
+    BulkUpdateViewSetMixin,
+)
 
 from .models import News, Section
 from .serializers import NewsSerializer, SectionSerializer

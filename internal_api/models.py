@@ -44,6 +44,13 @@ class Personnel(models.Model):
     contract_type = models.CharField(max_length=255)
     is_archive = models.BooleanField(default=False)
 
+    class Meta:
+        verbose_name = "Персонал"
+        verbose_name_plural = "Персонал"
+
+    def __str__(self):
+        return self.first_name
+
 
 class Supplier(models.Model):
     name = models.CharField(max_length=255)
@@ -54,9 +61,12 @@ class Supplier(models.Model):
     )
     extra_info = models.JSONField(null=True, blank=True)
     is_archive = models.BooleanField(default=False)
-    bank_identifier_code = models.IntegerField(null=True, blank=True)
+    bank_identifier_code = models.BigIntegerField(null=True, blank=True)
     bank_account = models.CharField(max_length=255, null=True, blank=True)
     inner_id = models.CharField(max_length=255, null=True, blank=True)
+    payer_identification_number = models.CharField(
+        max_length=255, null=True, blank=True
+    )
 
 
 def create_contract_download_path(instance, filename):
@@ -105,22 +115,62 @@ class RemainingProduct(Timestampable, models.Model):
 
 class TechCard(Timestampable, models.Model):
     name = models.CharField(max_length=255)
-    product = models.ManyToManyField(Product, related_name="tech_card_product")
     amount = models.FloatField(default=1)
-    author = models.ForeignKey(Personnel, on_delete=models.PROTECT)
-    is_archived = models.BooleanField(default=False)
+    author = models.ForeignKey(
+        Personnel, on_delete=models.PROTECT, related_name="tech_card"
+    )
     is_archive = models.BooleanField(default=False)
+    product = models.ManyToManyField(Product, through="TechCardProduct")
+
+    class Meta:
+        verbose_name = "Техкарта"
+        verbose_name_plural = "Техкарты"
+
+    def __str__(self):
+        return self.name
+
+
+class TechCardProduct(models.Model):
+    tech_card = models.ForeignKey(
+        TechCard, on_delete=models.PROTECT, related_name="tech_product"
+    )
+    product = models.ForeignKey(
+        Product, on_delete=models.PROTECT, related_name="tech_card_product"
+    )
+    quantity = models.FloatField()
 
 
 class DailyMenuPlan(Timestampable, models.Model):
-    dishes = models.ManyToManyField(TechCard, through="MenuDishes")
-    author = models.ForeignKey(Personnel, on_delete=models.PROTECT)
+    dishes = models.ManyToManyField(TechCard, through="MenuDish")
+    author = models.ForeignKey(
+        Personnel, on_delete=models.PROTECT, related_name="daily_menu_plan"
+    )
+
+    class Meta:
+        verbose_name = "План меню на день"
+        verbose_name_plural = "Планы меню на день"
+
+    def __str__(self):
+        return self.author.first_name
 
 
-class MenuDishes(models.Model):
-    dish = models.ForeignKey(TechCard, on_delete=models.PROTECT)
-    menu = models.ForeignKey(DailyMenuPlan, on_delete=models.PROTECT)
+class MenuDish(models.Model):
+    dish = models.ForeignKey(
+        TechCard, on_delete=models.PROTECT, related_name="menu_dish"
+    )
+    menu = models.ForeignKey(
+        DailyMenuPlan,
+        on_delete=models.PROTECT,
+        related_name="menu_dish",
+    )
     quantity = models.IntegerField(default=1)
+
+    class Meta:
+        verbose_name = "Заявка меню на день"
+        verbose_name_plural = "Заявки меню на день"
+
+    def __str__(self):
+        return self.dish.name
 
 
 class WarehouseOrder(models.Model):
