@@ -101,7 +101,7 @@ class UploadCSVGenericView(GenericAPIView):
         serialized_data.is_valid(raise_exception=True)
         data = serialized_data.validated_data
 
-        file = pd.read_excel(data.get("csv_file", None))
+        file = pd.read_excel(data.get("csv_file", None), engine='openpyxl')
 
         file = file.where(pd.notnull(file), None)
         products = []

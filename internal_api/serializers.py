@@ -17,16 +17,23 @@ class PersonnelSerializer(serializers.ModelSerializer):
         model = models.Personnel
         fields = "__all__"
 
+class SupplyerContractFilesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.SupplyContractFile
+        fields = ['contract']
+
 
 class SupplyContractSerializer(serializers.ModelSerializer):
     supplier = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    file_supply = SupplyerContractFilesSerializer(many=True)
 
     class Meta:
         model = models.SupplyContract
         fields = "__all__"
 
 
-class SupplierSerializer(serializers.ModelSerializer):
+class SupplierSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     supply_contracts = SupplyContractSerializer(many=True, read_only=True)
 
     class Meta:

@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.http import request
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -47,6 +48,14 @@ class ProductViewset(
 
     def get_queryset(self):
         qs = self.queryset.filter(is_archive=False)
+
+        if "is_archive" in self.request.query_params and self.request.query_params["is_archive"]:
+            qs = Product.objects.filter(is_archive=True)
+        elif "is_sorted" in self.request.query_params and not self.request.query_params["is_sorted"]:
+            qs = Product.objects.filter(is_sorted=False)
+        else:
+            qs = self.queryset.filter(is_archive=False, is_sorted=True)
+
         if "s" in self.request.query_params:
             search_value = self.request.query_params["s"]
             qs = qs.filter(

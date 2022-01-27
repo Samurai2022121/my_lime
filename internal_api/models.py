@@ -68,9 +68,15 @@ class Supplier(models.Model):
         max_length=255, null=True, blank=True
     )
 
+    class Meta:
+        verbose_name = "Поставщик"
+        verbose_name_plural = "Поставщики"
+
+    def __str__(self):
+        return self.name
 
 def create_contract_download_path(instance, filename):
-    directory = "/internal-api/supply-contracts/"
+    directory = "internal-api/supply-contracts/"
     upload_date = date.today().strftime("%d%M%Y")
     salt = token_hex(5)
     return f"{directory}_{upload_date}_{salt}_{filename}"
@@ -81,10 +87,20 @@ class SupplyContract(Timestampable, models.Model):
         Supplier, on_delete=models.PROTECT, related_name="supply_contract"
     )
     contract_number = models.CharField(max_length=255)
-    contract = models.FileField(
-        null=True, blank=True, upload_to=create_contract_download_path
-    )
     contract_date = models.DateField()
+
+
+    class Meta:
+        verbose_name = "Контракт поставщика"
+        verbose_name_plural = "Контракты поставщиков"
+
+    def __str__(self):
+        return self.supplier.name
+
+
+class SupplyContractFile(models.Model):
+    contract = models.FileField(upload_to=create_contract_download_path)
+    supply_contract = models.ForeignKey(SupplyContract, on_delete=models.PROTECT, related_name="file_supply")
 
 
 class Warehouse(models.Model):
