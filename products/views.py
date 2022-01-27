@@ -47,12 +47,11 @@ class ProductViewset(
         return self.queryset.get(id=self.kwargs["id"])
 
     def get_queryset(self):
-        qs = self.queryset.filter(is_archive=False)
-
-        if "is_archive" in self.request.query_params and self.request.query_params["is_archive"]:
-            qs = Product.objects.filter(is_archive=True)
-        elif "is_sorted" in self.request.query_params and not self.request.query_params["is_sorted"]:
-            qs = Product.objects.filter(is_sorted=False)
+        query_params = self.request.query_params
+        if "is_archive" in query_params and int(query_params["is_archive"]):
+            qs = self.queryset.filter(is_archive=True)
+        elif "is_sorted" in query_params and not int(query_params["is_sorted"]):
+            qs = self.queryset.filter(is_sorted=False)
         else:
             qs = self.queryset.filter(is_archive=False, is_sorted=True)
 
