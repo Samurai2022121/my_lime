@@ -147,6 +147,7 @@ class ProductSerializer(serializers.ModelSerializer):
     discounted_price = serializers.SerializerMethodField()
     category_read = CategorySerializer(read_only=True, source="category")
     images = ProductImagesSerializer(many=True, required=False)
+    is_sorted = serializers.CharField(write_only=True)
 
     class Meta:
         model = Product
@@ -184,6 +185,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "category_read",
             "reviews",
             "measure_unit",
+            "is_sorted",
         ]
 
     def create(self, validated_data):
