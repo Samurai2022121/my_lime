@@ -5,10 +5,8 @@ from rest_framework import viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from utils.permissions import ReadOnlyPermissions
-from utils.views_utils import (
-    BulkChangeArchiveStatusViewSetMixin,
-    BulkUpdateViewSetMixin,
-)
+from utils.views_utils import (BulkChangeArchiveStatusViewSetMixin,
+                               BulkUpdateViewSetMixin)
 
 from .models import News, Section
 from .serializers import NewsSerializer, SectionSerializer
@@ -37,7 +35,9 @@ class NewsViewset(
         if "s" in self.request.query_params:
             search_value = self.request.query_params["s"]
             qs = qs.filter(
-                Q(author__name__icontains=search_value) | Q(author__surname__icontains=search_value) | Q(headline__icontains=search_value)
+                Q(author__name__icontains=search_value)
+                | Q(author__surname__icontains=search_value)
+                | Q(headline__icontains=search_value)
             )
         return qs.order_by("created_at")
 

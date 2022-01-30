@@ -75,6 +75,7 @@ class Supplier(models.Model):
     def __str__(self):
         return self.name
 
+
 def create_contract_download_path(instance, filename):
     directory = "internal-api/supply-contracts/"
     upload_date = date.today().strftime("%d%M%Y")
@@ -89,7 +90,6 @@ class SupplyContract(Timestampable, models.Model):
     contract_number = models.CharField(max_length=255)
     contract_date = models.DateField()
 
-
     class Meta:
         verbose_name = "Контракт поставщика"
         verbose_name_plural = "Контракты поставщиков"
@@ -100,7 +100,9 @@ class SupplyContract(Timestampable, models.Model):
 
 class SupplyContractFile(models.Model):
     contract = models.FileField(upload_to=create_contract_download_path)
-    supply_contract = models.ForeignKey(SupplyContract, on_delete=models.PROTECT, related_name="file_supply")
+    supply_contract = models.ForeignKey(
+        SupplyContract, on_delete=models.PROTECT, related_name="file_supply"
+    )
 
 
 class Warehouse(models.Model):

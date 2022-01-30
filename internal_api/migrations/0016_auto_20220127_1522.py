@@ -6,16 +6,19 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('internal_api', '0015_filesupplycontract'),
+        ("internal_api", "0015_filesupplycontract"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='supplier',
-            options={'verbose_name': 'Поставщик', 'verbose_name_plural': 'Поставщики'},
+            name="supplier",
+            options={"verbose_name": "Поставщик", "verbose_name_plural": "Поставщики"},
         ),
         migrations.AlterModelOptions(
-            name='supplycontract',
-            options={'verbose_name': 'Контракт поставщика', 'verbose_name_plural': 'Контракты поставщиков'},
+            name="supplycontract",
+            options={
+                "verbose_name": "Контракт поставщика",
+                "verbose_name_plural": "Контракты поставщиков",
+            },
         ),
     ]

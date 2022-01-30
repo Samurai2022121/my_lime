@@ -1,11 +1,7 @@
 from django.urls import path
 
-from .views import (
-    FavouriteGenericAPIView,
-    FavouriteObjectsListAPIView,
-    StarGenericAPIView,
-    StarObjectsListAPIView,
-)
+from .views import (FavouriteGenericAPIView, FavouriteObjectsListAPIView,
+                    StarGenericAPIView, StarObjectsListAPIView)
 
 urlpatterns = [
     path(

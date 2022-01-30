@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('internal_api', '0016_auto_20220127_1522'),
+        ("internal_api", "0016_auto_20220127_1522"),
     ]
 
     operations = [
         migrations.RenameModel(
-            old_name='FileSupplyContract',
-            new_name='SupplyContractFile',
+            old_name="FileSupplyContract",
+            new_name="SupplyContractFile",
         ),
     ]

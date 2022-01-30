@@ -1,7 +1,6 @@
-from rest_framework import serializers
-from drf_writable_nested import WritableNestedModelSerializer
 from drf_base64.fields import Base64FileField
-
+from drf_writable_nested import WritableNestedModelSerializer
+from rest_framework import serializers
 
 from users.models import User
 
@@ -19,16 +18,21 @@ class PersonnelSerializer(serializers.ModelSerializer):
         model = models.Personnel
         fields = "__all__"
 
+
 class SupplyerContractFilesSerializer(serializers.ModelSerializer):
     contract = Base64FileField()
 
     class Meta:
         model = models.SupplyContractFile
-        fields = ['contract',]
+        fields = [
+            "contract",
+        ]
 
 
 class SupplyContractSerializer(serializers.ModelSerializer):
-    supplier = serializers.PrimaryKeyRelatedField(queryset=models.Supplier.objects.all())
+    supplier = serializers.PrimaryKeyRelatedField(
+        queryset=models.Supplier.objects.all()
+    )
     file_supply = SupplyerContractFilesSerializer(many=True)
 
     class Meta:

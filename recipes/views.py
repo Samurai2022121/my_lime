@@ -2,18 +2,13 @@ from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
-from utils.views_utils import (
-    BulkChangeArchiveStatusViewSetMixin,
-    BulkUpdateViewSetMixin,
-    OrderingModelViewsetMixin,
-)
+from utils.views_utils import (BulkChangeArchiveStatusViewSetMixin,
+                               BulkUpdateViewSetMixin,
+                               OrderingModelViewsetMixin)
 
 from .models import Recipe, RecipeCategory
-from .serializers import (
-    RecipeCategorySerializer,
-    RecipeListSerializer,
-    RecipeSerializer,
-)
+from .serializers import (RecipeCategorySerializer, RecipeListSerializer,
+                          RecipeSerializer)
 
 
 class RecipeViewset(
@@ -44,9 +39,7 @@ class RecipeViewset(
 
         if "s" in self.request.query_params:
             search_value = self.request.query_params["s"]
-            qs = qs.filter(
-                Q(name__icontains=search_value)
-            )
+            qs = qs.filter(Q(name__icontains=search_value))
 
         if ordering_fields:
             qs = qs.order_by(*ordering_fields)

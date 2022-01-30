@@ -7,12 +7,10 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from internal_api.models import Warehouse
-from utils.views_utils import (
-    BulkChangeArchiveStatusViewSetMixin,
-    BulkUpdateViewSetMixin,
-    ChangeDestroyToArchiveMixin,
-    OrderingModelViewsetMixin,
-)
+from utils.views_utils import (BulkChangeArchiveStatusViewSetMixin,
+                               BulkUpdateViewSetMixin,
+                               ChangeDestroyToArchiveMixin,
+                               OrderingModelViewsetMixin)
 
 from . import serializers
 from .filters import ProductFilter
@@ -57,7 +55,9 @@ class ProductViewset(
         if "s" in self.request.query_params:
             search_value = self.request.query_params["s"]
             qs = qs.filter(
-                Q(name__icontains=search_value) | Q(barcode__icontains=search_value) | Q(id__icontains=search_value)
+                Q(name__icontains=search_value)
+                | Q(barcode__icontains=search_value)
+                | Q(id__icontains=search_value)
             )
         ordering_fields = self.get_ordering_fields()
         if ordering_fields:
@@ -93,9 +93,15 @@ class CategoryViewset(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet
 
     def get_queryset(self):
         main_categories = self.queryset.filter(level=0)
-        return Category.objects.get_queryset_descendants(
+        qs = Category.objects.get_queryset_descendants(
             main_categories, include_self=True
         ).filter(level=0)
+
+        if "s" in self.request.query_params:
+            search_value = self.request.query_params["s"]
+            qs = qs.filter(Q(name__icontains=search_value))
+
+        return qs
 
 
 class EditProductImagesViewset(

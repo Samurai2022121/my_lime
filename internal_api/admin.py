@@ -81,7 +81,6 @@ class FileSupplyInline(admin.StackedInline):
     extra = 1
 
 
-
 @admin.register(models.SupplyContract)
 class SupplierAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
     inlines = [

@@ -13,4 +13,3 @@ class ProductFilter(django_filters.FilterSet):
         fields = {
             "price": ["lt", "lte", "gt", "gte", "exact"],
         }
-

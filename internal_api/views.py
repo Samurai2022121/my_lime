@@ -1,5 +1,5 @@
 import pandas as pd
-from django.db.models import F, Sum, Q
+from django.db.models import F, Q, Sum
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
@@ -10,11 +10,9 @@ from rest_framework.status import HTTP_202_ACCEPTED, HTTP_400_BAD_REQUEST
 from products.models import Product
 from products.serializers import ProductListSerializer
 from utils.serializers_utils import BulkUpdateSerializer
-from utils.views_utils import (
-    BulkChangeArchiveStatusViewSetMixin,
-    BulkUpdateViewSetMixin,
-    ChangeDestroyToArchiveMixin,
-)
+from utils.views_utils import (BulkChangeArchiveStatusViewSetMixin,
+                               BulkUpdateViewSetMixin,
+                               ChangeDestroyToArchiveMixin)
 
 from . import models, serializers
 
@@ -34,7 +32,11 @@ class ShopViewSet(
         qs = self.queryset
         if "s" in self.request.query_params:
             search_value = self.request.query_params["s"]
-            qs = qs.filter(Q(name__icontais=search_value) | Q(address__icontains=search_value) | Q(id__icontains=search_value))
+            qs = qs.filter(
+                Q(name__icontais=search_value)
+                | Q(address__icontains=search_value)
+                | Q(id__icontains=search_value)
+            )
         return qs
 
 
@@ -65,7 +67,9 @@ class WarehouseViewSet(viewsets.ModelViewSet):
         if "s" in self.request.query_params:
             search_value = self.request.query_params["s"]
             qs = qs.filter(
-                Q(product__name__icontains=search_value) | Q(product__barcode__icontains=search_value) | Q(product__id__icontains=search_value)
+                Q(product__name__icontains=search_value)
+                | Q(product__barcode__icontains=search_value)
+                | Q(product__id__icontains=search_value)
             )
         qs = qs.order_by("product__name")
         return qs
@@ -113,7 +117,7 @@ class UploadCSVGenericView(GenericAPIView):
         serialized_data.is_valid(raise_exception=True)
         data = serialized_data.validated_data
 
-        file = pd.read_excel(data.get("csv_file", None), engine='openpyxl')
+        file = pd.read_excel(data.get("csv_file", None), engine="openpyxl")
 
         file = file.where(pd.notnull(file), None)
         products = []
@@ -129,11 +133,21 @@ class UploadCSVGenericView(GenericAPIView):
                     Product(
                         name=name,
                         price=price,
-                        barcode=row[data["barcode_col"]] if data.get("barcode_col", None) else None,
-                        vat_value=row[data["vat_col"]] if data.get("vat_col", None) else None,
-                        measure_unit=row[data["measure_unit_col"]] if data.get("measure_unit_col", None) else None,
-                        origin=row[data["origin_col"]] if data.get("origin_col", None) else None,
-                        manufacturer=row[data["supplier_col"]] if data.get("supplier_col", None) else None,
+                        barcode=row[data["barcode_col"]]
+                        if data.get("barcode_col", None)
+                        else None,
+                        vat_value=row[data["vat_col"]]
+                        if data.get("vat_col", None)
+                        else None,
+                        measure_unit=row[data["measure_unit_col"]]
+                        if data.get("measure_unit_col", None)
+                        else None,
+                        origin=row[data["origin_col"]]
+                        if data.get("origin_col", None)
+                        else None,
+                        manufacturer=row[data["supplier_col"]]
+                        if data.get("supplier_col", None)
+                        else None,
                     )
                 )
 
@@ -161,9 +175,7 @@ class WarehouseOrderViewSet(ChangeDestroyToArchiveMixin, viewsets.ModelViewSet):
         )
         if "s" in self.request.query_params:
             search_value = self.request.query_params["s"]
-            qs = qs.filter(
-                Q(order_number__icontains=search_value)
-            )
+            qs = qs.filter(Q(order_number__icontains=search_value))
         return qs
 
 
@@ -183,7 +195,9 @@ class SupplierViewSet(
         if "s" in self.request.query_params:
             search_value = self.request.query_params["s"]
             qs = qs.filter(
-                Q(name__icontains=search_value) | Q(email__icontains=search_value) | Q(phone__icontains=search_value)
+                Q(name__icontains=search_value)
+                | Q(email__icontains=search_value)
+                | Q(phone__icontains=search_value)
             )
         return qs.order_by("name")
 
