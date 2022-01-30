@@ -1,4 +1,5 @@
 import django_filters
+from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -30,6 +31,15 @@ class NewsViewset(
     serializer_class = NewsSerializer
     lookup_field = "id"
     queryset = News.objects.all()
+
+    def get_queryset(self):
+        qs = self.queryset
+        if "s" in self.request.query_params:
+            search_value = self.request.query_params["s"]
+            qs = qs.filter(
+                Q(author__name__icontains=search_value) | Q(author__surname__icontains=search_value) | Q(headline__icontains=search_value)
+            )
+        return qs.order_by("created_at")
 
 
 class SectionViewset(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet):

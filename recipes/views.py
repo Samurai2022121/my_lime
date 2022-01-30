@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
@@ -38,10 +39,21 @@ class RecipeViewset(
         return self.queryset.get(id=self.kwargs["id"])
 
     def get_queryset(self):
+        qs = self.queryset
         ordering_fields = self.get_ordering_fields()
+
+        if "s" in self.request.query_params:
+            search_value = self.request.query_params["s"]
+            qs = qs.filter(
+                Q(name__icontains=search_value)
+            )
+
         if ordering_fields:
-            return self.queryset.order_by(*ordering_fields)
-        return self.queryset
+            qs = qs.order_by(*ordering_fields)
+        else:
+            qs = qs.order_by("name")
+
+        return qs
 
 
 class RecipeCategoryViewset(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet):

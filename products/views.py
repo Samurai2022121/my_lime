@@ -1,5 +1,4 @@
 from django.db.models import Q
-from django.http import request
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -58,7 +57,7 @@ class ProductViewset(
         if "s" in self.request.query_params:
             search_value = self.request.query_params["s"]
             qs = qs.filter(
-                Q(name__icontains=search_value) | Q(barcode__icontains=search_value)
+                Q(name__icontains=search_value) | Q(barcode__icontains=search_value) | Q(id__icontains=search_value)
             )
         ordering_fields = self.get_ordering_fields()
         if ordering_fields:
@@ -162,7 +161,7 @@ class ProductMatrixViewset(ListAPIView):
     queryset = Product.objects.all()
 
     def get_queryset(self):
-        qs = self.queryset
+        qs = self.queryset.filter(is_sorted=True, is_archive=False)
         outlet_id = self.request.query_params.get("outlet", None)
         outlet_products_ids = Warehouse.objects.filter(shop=outlet_id).values_list(
             "product__id", flat=True

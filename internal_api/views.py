@@ -1,5 +1,5 @@
 import pandas as pd
-from django.db.models import F, Sum
+from django.db.models import F, Sum, Q
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
@@ -7,7 +7,6 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.status import HTTP_202_ACCEPTED, HTTP_400_BAD_REQUEST
 
-from internal_api.models import MenuDish, TechCard
 from products.models import Product
 from products.serializers import ProductListSerializer
 from utils.serializers_utils import BulkUpdateSerializer
@@ -30,6 +29,13 @@ class ShopViewSet(
     serializer_class = serializers.ShopSerializer
     lookup_field = "id"
     queryset = models.Shop.objects.all()
+
+    def get_queryset(self):
+        qs = self.queryset
+        if "s" in self.request.query_params:
+            search_value = self.request.query_params["s"]
+            qs = qs.filter(Q(name__icontais=search_value) | Q(address__icontains=search_value) | Q(id__icontains=search_value))
+        return qs
 
 
 class PersonnelViewSet(
@@ -56,6 +62,12 @@ class WarehouseViewSet(viewsets.ModelViewSet):
             qs = qs.filter(shop=outlet_id, product__is_archive=False)
         else:
             qs = qs.none()
+        if "s" in self.request.query_params:
+            search_value = self.request.query_params["s"]
+            qs = qs.filter(
+                Q(product__name__icontains=search_value) | Q(product__barcode__icontains=search_value) | Q(product__id__icontains=search_value)
+            )
+        qs = qs.order_by("product__name")
         return qs
 
     @action(detail=False, methods=["post"], url_path="bulk_update")
@@ -147,6 +159,11 @@ class WarehouseOrderViewSet(ChangeDestroyToArchiveMixin, viewsets.ModelViewSet):
                 )
             )
         )
+        if "s" in self.request.query_params:
+            search_value = self.request.query_params["s"]
+            qs = qs.filter(
+                Q(order_number__icontains=search_value)
+            )
         return qs
 
 
@@ -160,6 +177,15 @@ class SupplierViewSet(
     serializer_class = serializers.SupplierSerializer
     lookup_field = "id"
     queryset = models.Supplier.objects.all()
+
+    def get_queryset(self):
+        qs = self.queryset
+        if "s" in self.request.query_params:
+            search_value = self.request.query_params["s"]
+            qs = qs.filter(
+                Q(name__icontains=search_value) | Q(email__icontains=search_value) | Q(phone__icontains=search_value)
+            )
+        return qs.order_by("name")
 
 
 class SupplyContractViewSet(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet):
