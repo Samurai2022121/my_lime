@@ -24,10 +24,11 @@ class CategoryListSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     parents = serializers.SerializerMethodField()
     parent_id = serializers.CharField(write_only=True, required=False)
+    image = serializers.ImageField(write_only=True)
 
     class Meta:
         model = Category
-        fields = ["id", "name", "parents", "parent_id"]
+        fields = ["id", "name", "parents", "parent_id", "image"]
 
     def get_parents(self, obj):
         serializer = CategorySerializer(instance=obj.parent)
