@@ -136,7 +136,7 @@ class UploadCSVGenericView(GenericAPIView):
                         barcode=row[data["barcode_col"]]
                         if data.get("barcode_col", None)
                         else None,
-                        vat_value=row[data["vat_col"]].replace("%", "")
+                        vat_value=str(row[data["vat_col"]]).replace("%", "")
                         if data.get("vat_col", None)
                         else None,
                         measure_unit=row[data["measure_unit_col"]]
