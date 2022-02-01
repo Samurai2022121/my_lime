@@ -1,5 +1,4 @@
 from django.contrib.auth.base_user import BaseUserManager
-from django.utils.translation import ugettext_lazy as _
 
 
 class CustomUserManager(BaseUserManager):
@@ -7,9 +6,9 @@ class CustomUserManager(BaseUserManager):
         self, phone_number, password, is_staff, is_superuser, email=None, **extra_fields
     ):
         if not phone_number:
-            raise ValueError(_("The Phone Number must be set"))
+            raise ValueError("Необходимо указать номер мобильного телефона")
         if not password:
-            raise ValueError(_("The Password must be set"))
+            raise ValueError("Необходимо указать пароль")
 
         email = self.normalize_email(email) if email else None
         user = self.model(

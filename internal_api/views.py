@@ -33,7 +33,7 @@ class ShopViewSet(
         if "s" in self.request.query_params:
             search_value = self.request.query_params["s"]
             qs = qs.filter(
-                Q(name__icontais=search_value)
+                Q(name__icontains=search_value)
                 | Q(address__icontains=search_value)
                 | Q(id__icontains=search_value)
             )

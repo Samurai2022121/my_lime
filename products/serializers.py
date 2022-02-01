@@ -93,7 +93,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        exclude = ["is_sorted", "is_archive"]
+        exclude = ["is_archive"]
 
     def get_stars_count(self, obj):
         return Star.objects.filter(
@@ -152,42 +152,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = [
-            "name",
-            "description",
-            "price",
-            "production_date",
-            "images",
-            "protein",
-            "carbohydrates",
-            "fats",
-            "calories",
-            "energy",
-            "barcode",
-            "manufacturer",
-            "expiration_date",
-            "weight",
-            "in_stock",
-            "id",
-            "stars_count",
-            "stared",
-            "average_star",
-            "is_favourite",
-            "favourite_count",
-            "category",
-            "origin",
-            "discount",
-            "discounted_price",
-            "extra_info",
-            "images",
-            "own_production",
-            "created_at",
-            "updated_at",
-            "category_read",
-            "reviews",
-            "measure_unit",
-            "is_sorted",
-        ]
+        exclude = ["is_archive"]
 
     def create(self, validated_data):
         images_data = validated_data.pop("images", [])
