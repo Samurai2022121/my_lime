@@ -63,9 +63,7 @@ class PersonnelDocument(Timestampable, models.Model):
     personnel = models.ForeignKey(
         Personnel, on_delete=models.PROTECT, related_name="personnel_document"
     )
-    personnel_document = models.FileField(
-        upload_to=create_personnel_document_download_path, null=True
-    )
+    personnel_document = models.FileField(upload_to=create_personnel_document_download_path)
     document_number = models.CharField(max_length=255)
     document_date = models.DateField()
 
@@ -121,10 +119,10 @@ class Warehouse(models.Model):
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name="warehouse"
     )
-    shop = models.ForeignKey(Shop, on_delete=models.PROTECT, related_name="warehouse")
-    remaining = models.DecimalField(default=0, max_digits=7, decimal_places=2)
-    min_remaining = models.DecimalField(default=0, max_digits=7, decimal_places=2)
-    max_remaining = models.DecimalField(default=0, max_digits=7, decimal_places=2)
+    shop = models.PositiveIntegerField(db_index=True)
+    remaining = models.FloatField(default=0, blank=True, null=True)
+    min_remaining = models.FloatField(default=0, blank=True, null=True)
+    max_remaining = models.FloatField(default=0, blank=True, null=True)
     supplier = models.ForeignKey(
         Supplier,
         on_delete=models.PROTECT,
@@ -132,7 +130,7 @@ class Warehouse(models.Model):
         null=True,
         related_name="warehouse",
     )
-    margin = models.DecimalField(blank=True, null=True, max_digits=4, decimal_places=2)
+    margin = models.FloatField(blank=True, null=True)
     auto_order = models.BooleanField(default=False)
 
 
@@ -140,12 +138,12 @@ class RemainingProduct(Timestampable, models.Model):
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name="remaining_product"
     )
-    remaining = models.DecimalField(default=1, max_digits=7, decimal_places=2)
+    remaining = models.FloatField(default=1)
 
 
 class TechCard(Timestampable, models.Model):
     name = models.CharField(max_length=255)
-    amount = models.DecimalField(default=1, max_digits=7, decimal_places=2)
+    amount = models.FloatField(default=1)
     author = models.ForeignKey(
         Personnel, on_delete=models.PROTECT, related_name="tech_card"
     )
@@ -167,7 +165,7 @@ class TechCardProduct(models.Model):
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name="tech_card_product"
     )
-    quantity = models.DecimalField(max_digits=7, decimal_places=2)
+    quantity = models.FloatField()
 
 
 class DailyMenuPlan(Timestampable, models.Model):
@@ -238,60 +236,11 @@ class WarehouseOrderPositions(models.Model):
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name="warehouse_order_product"
     )
-    quantity = models.DecimalField(default=0, max_digits=7, decimal_places=2)
+    quantity = models.FloatField(default=0)
     bonus = models.IntegerField(default=0)
-    special = models.DecimalField(default=0, max_digits=7, decimal_places=2)
-    flaw = models.DecimalField(default=0, max_digits=7, decimal_places=2)
-    buying_price = models.DecimalField(default=0, max_digits=7, decimal_places=2)
-    value_added_tax = models.DecimalField(default=0, max_digits=4, decimal_places=2)
-    value_added_tax_value = models.DecimalField(
-        default=0, max_digits=7, decimal_places=2
-    )
-    margin = models.DecimalField(default=0, max_digits=4, decimal_places=2)
-
-
-class LegalEntities(models.Model):
-    registration_id = models.CharField(
-        "регистрационный номер",
-        max_length=9,
-        primary_key=True,
-    )
-    registration_date = models.CharField(
-        "дата регистрации",
-        max_length=255,
-        blank=True,
-        null=True,
-    )
-    active = models.CharField(
-        "действует",
-        max_length=255,
-        blank=True,
-        null=True,
-    )
-    phone = models.CharField("телефон", max_length=255, blank=True, null=True)
-    region = models.CharField("регион", max_length=255, blank=True, null=True)
-    email = models.CharField("имейл", max_length=255, blank=True, null=True)
-    address = models.CharField("адрес", max_length=255, blank=True, null=True)
-    okved = models.CharField("ОКВЭД", max_length=255, blank=True, null=True)
-    name = models.CharField(
-        "краткое наименование",
-        max_length=255,
-        blank=True,
-        null=True,
-    )
-    full_name = models.CharField(
-        "полное наименование",
-        max_length=255,
-        blank=True,
-        null=True,
-    )
-    status = models.CharField("статус", max_length=255, blank=True, null=True)
-
-    class Meta:
-        verbose_name = "Юридическое лицо"
-        verbose_name_plural = "Юридические лица"
-        db_table = "legal_entities"
-        managed = False
-
-    def __str__(self):
-        return self.name
+    special = models.FloatField(default=0)
+    flaw = models.FloatField(default=0)
+    buying_price = models.FloatField(default=0)
+    value_added_tax = models.FloatField(default=0)
+    value_added_tax_value = models.FloatField(default=0)
+    margin = models.FloatField(default=0)
