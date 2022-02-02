@@ -12,6 +12,7 @@ router.register("supplier", views.SupplierViewSet)
 router.register("supply-contracts", views.SupplyContractViewSet)
 router.register("tech-card", views.TechCardViewSet)
 router.register("daily-menu", views.DailyMenuViewSet)
+router.register("legal-entities", views.LegalEntityViewSet)
 
 
 urlpatterns = [

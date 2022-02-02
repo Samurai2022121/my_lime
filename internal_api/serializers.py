@@ -194,3 +194,10 @@ class DailyMenuSerializer(WritableNestedModelSerializer, serializers.ModelSerial
     class Meta:
         model = models.DailyMenuPlan
         fields = ["author", "menu_dish", "created_at", "updated_at"]
+
+
+class LegalEntitySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.LegalEntities
+        fields = '__all__'

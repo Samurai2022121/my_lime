@@ -86,3 +86,8 @@ class SupplierAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
     inlines = [
         FileSupplyInline,
     ]
+
+
+@admin.register(models.LegalEntities)
+class LegalEntityAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
+    pass

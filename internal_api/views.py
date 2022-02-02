@@ -1,5 +1,6 @@
 import pandas as pd
 from django.db.models import F, Q, Sum
+from django_filters import rest_framework as filters
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
@@ -221,3 +222,33 @@ class DailyMenuViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.DailyMenuSerializer
     lookup_field = "id"
     queryset = models.DailyMenuPlan.objects.all()
+
+
+class LegalEntityFilterSet(filters.FilterSet):
+    """ Searches through `registration_id` and/or `name` fields. """
+    s = filters.CharFilter(
+        method='search_by_id_or_name',
+        label='регистрационный номер или наименование',
+    )
+
+    class Meta:
+        model = models.LegalEntities
+        fields = ('s',)
+
+    def search_by_id_or_name(self, qs, name, value):
+        return qs.filter(
+            Q(registration_id__contains=value) | Q(name__icontains=value)
+        )
+
+
+class LegalEntityViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = (AllowAny,)
+    serializer_class = serializers.LegalEntitySerializer
+    lookup_field = 'registration_id'
+    queryset = models.LegalEntities.objects.filter(active='+')
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = LegalEntityFilterSet
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.paginator.page_size = 30
