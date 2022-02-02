@@ -175,7 +175,7 @@ class TechProductSerializer(serializers.ModelSerializer):
 
 
 class TechCardSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
-    tech_card_product = TechProductSerializer(many=True)
+    tech_card_product = TechProductSerializer(source="tech_product", many=True)
 
     class Meta:
         model = models.TechCard
