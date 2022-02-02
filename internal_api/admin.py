@@ -71,6 +71,21 @@ class SupplyContractAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin)
     pass
 
 
+<<<<<<< HEAD
+=======
+class FileSupplyInline(admin.StackedInline):
+    model = models.SupplyContractFile
+    extra = 1
+
+
+@admin.register(models.SupplyContract)
+class SupplierAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
+    inlines = [
+        FileSupplyInline,
+    ]
+
+
+>>>>>>> 2563f9b... Add legal entities endpoint. (#7)
 @admin.register(models.LegalEntities)
 class LegalEntityAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
     pass

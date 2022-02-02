@@ -254,8 +254,8 @@ class DailyMenuViewSet(viewsets.ModelViewSet):
 
 
 class LegalEntityFilterSet(filters.FilterSet):
-    """Searches through `registration_id` and/or `name` fields."""
 
+    """Searches through `registration_id` and/or `name` fields."""
     s = filters.CharFilter(
         method="search_by_id_or_name",
         label="регистрационный номер или наименование",
