@@ -11,27 +11,28 @@ class ShopSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class PersonnelSerializer(serializers.ModelSerializer):
+class PersonnelDocumentSerializer(serializers.ModelSerializer):
+    personnnel = serializers.PrimaryKeyRelatedField(
+        queryset=models.Personnel.objects.all()
+    )
+
     class Meta:
-        model = models.Personnel
+        model = models.PersonnelDocument
         fields = "__all__"
 
 
-class SupplierContractFilesSerializer(serializers.ModelSerializer):
-    contract = Base64FileField()
+class PersonnelSerializer(serializers.ModelSerializer):
+    personnel_document = PersonnelDocumentSerializer(many=True)
 
     class Meta:
-        model = models.SupplyContractFile
-        fields = [
-            "contract",
-        ]
+        model = models.Personnel
+        fields = "__all__"
 
 
 class SupplyContractSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     supplier = serializers.PrimaryKeyRelatedField(
         queryset=models.Supplier.objects.all()
     )
-    file_supply = SupplierContractFilesSerializer(many=True)
 
     class Meta:
         model = models.SupplyContract

@@ -52,6 +52,22 @@ class Personnel(models.Model):
         return self.first_name
 
 
+def create_personnel_document_download_path(instance, filename):
+    directory = "internal-api/personal-documents/"
+    upload_date = date.today().strftime("%d%M%Y")
+    salt = token_hex(5)
+    return f"{directory}_{upload_date}_{salt}_{filename}"
+
+
+class PersonnelDocument(Timestampable, models.Model):
+    personnel = models.ForeignKey(
+        Personnel, on_delete=models.PROTECT, related_name="personnel_document"
+    )
+    personnel_document = models.FileField(upload_to=create_personnel_document_download_path)
+    document_number = models.CharField(max_length=255)
+    document_date = models.DateField()
+
+
 class Supplier(models.Model):
     name = models.CharField(max_length=255)
     address = models.CharField(max_length=255, null=True, blank=True)
@@ -87,6 +103,7 @@ class SupplyContract(Timestampable, models.Model):
     supplier = models.ForeignKey(
         Supplier, on_delete=models.PROTECT, related_name="supply_contract"
     )
+    contract = models.FileField(upload_to=create_contract_download_path)
     contract_number = models.CharField(max_length=255)
     contract_date = models.DateField()
 
@@ -96,13 +113,6 @@ class SupplyContract(Timestampable, models.Model):
 
     def __str__(self):
         return self.supplier.name
-
-
-class SupplyContractFile(models.Model):
-    contract = models.FileField(upload_to=create_contract_download_path)
-    supply_contract = models.ForeignKey(
-        SupplyContract, on_delete=models.PROTECT, related_name="file_supply"
-    )
 
 
 class Warehouse(models.Model):
