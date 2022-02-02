@@ -29,7 +29,9 @@ class PersonnelSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class SupplyContractSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+class SupplyContractSerializer(
+    WritableNestedModelSerializer, serializers.ModelSerializer
+):
     supplier = serializers.PrimaryKeyRelatedField(
         queryset=models.Supplier.objects.all()
     )
