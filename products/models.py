@@ -80,7 +80,7 @@ class Product(Timestampable, models.Model):
     vat_value = models.FloatField(null=True, blank=True)
 
     class Meta:
-        unique_together = ["manufacturer", "name"]
+        unique_together = ["manufacturer", "name", "barcode"]
         verbose_name = "товар"
         verbose_name_plural = "товары"
 
