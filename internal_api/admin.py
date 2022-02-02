@@ -67,7 +67,7 @@ class SupplierAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(models.SupplyContract)
-class SupplyContractAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
+class SupplierAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
     pass
 
 
