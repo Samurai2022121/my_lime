@@ -71,18 +71,6 @@ class SupplierAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
     pass
 
 
-@admin.register(models.SupplyContractFile)
-class FileSupplyAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
-    pass
-
-
-class FileSupplyInline(admin.StackedInline):
-    model = models.SupplyContractFile
-    extra = 1
-
-
 @admin.register(models.SupplyContract)
 class SupplierAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
-    inlines = [
-        FileSupplyInline,
-    ]
+    pass
