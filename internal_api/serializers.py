@@ -51,7 +51,9 @@ class SupplierSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
 class WarehouseSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source="product.name", read_only=True)
     barcode = serializers.IntegerField(source="product.barcode", read_only=True)
-    price = serializers.FloatField(source="product.price", read_only=True)
+    price = serializers.DecimalField(
+        source="product.price", read_only=True, max_digits=6, decimal_places=2
+    )
     supplier = SupplierSerializer()
 
     class Meta:
@@ -118,7 +120,7 @@ class WarehouseOrderSerializer(serializers.ModelSerializer):
     )
     supplier = SupplierSerializer(read_only=True)
     supplier_id = serializers.IntegerField(write_only=True)
-    total = serializers.FloatField(read_only=True)
+    total = serializers.DecimalField(read_only=True, max_digits=10, decimal_places=2)
     shop_address = serializers.CharField(source="shop.address", read_only=True)
     shop_id = serializers.IntegerField(write_only=True)
     created_at = serializers.DateTimeField(required=False)

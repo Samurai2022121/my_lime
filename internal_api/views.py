@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import pandas as pd
 from django.db.models import F, Q, Sum
 from django_filters import rest_framework as filters
@@ -129,7 +131,7 @@ class UploadCSVGenericView(GenericAPIView):
             if row[data.get("name_col", 0)] and row[data.get("price_col", 0)]:
 
                 name = row[data.get("name_col", None)]
-                price = float(row[data.get("price_col", None)])
+                price = Decimal(row[data.get("price_col", None)])
                 products.append(
                     Product(
                         name=name,

@@ -61,10 +61,22 @@ class Recipe(Timestampable, models.Model):
     image = models.ImageField(
         null=True, blank=True, verbose_name="Изображение", upload_to="recipe/"
     )
-    protein = models.FloatField(blank=True, null=True, verbose_name="Белки")
-    carbohydrates = models.FloatField(blank=True, null=True, verbose_name="Углеводы")
-    fats = models.FloatField(blank=True, null=True, verbose_name="Жиры")
-    calories = models.FloatField(blank=True, null=True, verbose_name="Калорийность")
+    protein = models.DecimalField(
+        blank=True, null=True, verbose_name="Белки", max_digits=4, decimal_places=2
+    )
+    carbohydrates = models.DecimalField(
+        blank=True, null=True, verbose_name="Углеводы", max_digits=4, decimal_places=2
+    )
+    fats = models.DecimalField(
+        blank=True, null=True, verbose_name="Жиры", max_digits=4, decimal_places=2
+    )
+    calories = models.DecimalField(
+        blank=True,
+        null=True,
+        verbose_name="Калорийность",
+        max_digits=6,
+        decimal_places=2,
+    )
     servings = models.IntegerField(verbose_name="Порции")
     video = models.URLField(null=True, blank=True)
     is_archive = models.BooleanField(default=False)
@@ -98,7 +110,7 @@ class RecipeProducts(models.Model):
         verbose_name="рецепт",
         related_name="recipe_products",
     )
-    quantity = models.FloatField(default=1)
+    quantity = models.DecimalField(default=1, max_digits=7, decimal_places=2)
 
     class Meta:
         verbose_name = "ингриндиент для рецепта"

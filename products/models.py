@@ -50,16 +50,34 @@ class Product(Timestampable, models.Model):
         null=True,
     )
     description = models.TextField(blank=True, null=True, verbose_name="Описание")
-    price = models.FloatField(
+    price = models.DecimalField(
+        decimal_places=2,
+        max_digits=6,
         verbose_name="Цена",
         validators=[MinValueValidator(0.01), MaxValueValidator(9999.99)],
     )
-    protein = models.FloatField(blank=True, null=True, verbose_name="Белки")
-    carbohydrates = models.FloatField(blank=True, null=True, verbose_name="Углеводы")
-    fats = models.FloatField(blank=True, null=True, verbose_name="Жиры")
-    calories = models.FloatField(blank=True, null=True, verbose_name="Калорийность")
-    energy = models.FloatField(
-        blank=True, null=True, verbose_name="Энергетическая ценность"
+    protein = models.DecimalField(
+        blank=True, null=True, verbose_name="Белки", max_digits=4, decimal_places=2
+    )
+    carbohydrates = models.DecimalField(
+        blank=True, null=True, verbose_name="Углеводы", max_digits=4, decimal_places=2
+    )
+    fats = models.DecimalField(
+        blank=True, null=True, verbose_name="Жиры", max_digits=4, decimal_places=2
+    )
+    calories = models.DecimalField(
+        blank=True,
+        null=True,
+        verbose_name="Калорийность",
+        max_digits=6,
+        decimal_places=2,
+    )
+    energy = models.DecimalField(
+        blank=True,
+        null=True,
+        verbose_name="Энергетическая ценность",
+        max_digits=6,
+        decimal_places=2,
     )
     barcode = models.BigIntegerField(blank=True, null=True, verbose_name="Штрихкод")
     manufacturer = models.CharField(
@@ -74,7 +92,9 @@ class Product(Timestampable, models.Model):
     production_date = models.DateField(
         blank=True, null=True, verbose_name="Дата производства"
     )
-    weight = models.FloatField(blank=True, null=True, verbose_name="Вес, грамм")
+    weight = models.DecimalField(
+        blank=True, null=True, verbose_name="Вес, грамм", max_digits=7, decimal_places=2
+    )
     in_stock = models.BooleanField(verbose_name="Наличие", default=False)
     own_production = models.BooleanField(
         default=False, verbose_name="Собственное производство"
@@ -84,7 +104,9 @@ class Product(Timestampable, models.Model):
     is_archive = models.BooleanField(default=False)
     is_sorted = models.BooleanField(default=False)
     measure_unit = models.CharField(max_length=35, blank=True, null=True)
-    vat_value = models.FloatField(null=True, blank=True)
+    vat_value = models.DecimalField(
+        null=True, blank=True, max_digits=7, decimal_places=2
+    )
     for_scales = models.BooleanField(default=False)
     for_own_production = models.BooleanField(default=False)
 

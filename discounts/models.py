@@ -13,7 +13,7 @@ class LoyaltyDiscount(models.Model):
         related_name="loyalty_discount",
         verbose_name="Скидка клиента",
     )
-    discount = models.FloatField()
+    discount = models.DecimalField(max_digits=4, decimal_places=2)
 
     class Meta:
         verbose_name = "Программа лояльности"
