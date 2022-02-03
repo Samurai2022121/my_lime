@@ -11,7 +11,7 @@ class ShopSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class PersonnelDocumentSerializer(serializers.ModelSerializer):
+class PersonnelDocumentSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     personnnel = serializers.PrimaryKeyRelatedField(
         queryset=models.Personnel.objects.all()
     )
@@ -21,7 +21,7 @@ class PersonnelDocumentSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class PersonnelSerializer(serializers.ModelSerializer):
+class PersonnelSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     personnel_document = PersonnelDocumentSerializer(many=True)
 
     class Meta:
