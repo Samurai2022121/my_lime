@@ -238,31 +238,46 @@ class WarehouseOrderPositions(models.Model):
 
 class LegalEntities(models.Model):
     registration_id = models.CharField(
-        'регистрационный номер', max_length=9, primary_key=True,
+        "регистрационный номер",
+        max_length=9,
+        primary_key=True,
     )
     registration_date = models.CharField(
-        'дата регистрации', max_length=255, blank=True, null=True,
+        "дата регистрации",
+        max_length=255,
+        blank=True,
+        null=True,
     )
     active = models.CharField(
-        'действует', max_length=255, blank=True, null=True,
+        "действует",
+        max_length=255,
+        blank=True,
+        null=True,
     )
-    phone = models.CharField('телефон', max_length=255, blank=True, null=True)
-    region = models.CharField('регион', max_length=255, blank=True, null=True)
-    email = models.CharField('имейл', max_length=255, blank=True, null=True)
-    address = models.CharField('адрес', max_length=255, blank=True, null=True)
-    okved = models.CharField('ОКВЭД', max_length=255, blank=True, null=True)
+    phone = models.CharField("телефон", max_length=255, blank=True, null=True)
+    region = models.CharField("регион", max_length=255, blank=True, null=True)
+    email = models.CharField("имейл", max_length=255, blank=True, null=True)
+    address = models.CharField("адрес", max_length=255, blank=True, null=True)
+    okved = models.CharField("ОКВЭД", max_length=255, blank=True, null=True)
     name = models.CharField(
-        'краткое наименование', max_length=255, blank=True, null=True,
+        "краткое наименование",
+        max_length=255,
+        blank=True,
+        null=True,
     )
     full_name = models.CharField(
-        'полное наименование', max_length=255, blank=True, null=True,
+        "полное наименование",
+        max_length=255,
+        blank=True,
+        null=True,
     )
-    status = models.CharField('статус', max_length=255, blank=True, null=True)
+    status = models.CharField("статус", max_length=255, blank=True, null=True)
 
     class Meta:
-        verbose_name = 'Юридическое лицо'
-        verbose_name_plural = 'Юридические лица'
-        db_table = 'legal_entities'
+        verbose_name = "Юридическое лицо"
+        verbose_name_plural = "Юридические лица"
+        db_table = "legal_entities"
+        managed = False
 
     def __str__(self):
         return self.name

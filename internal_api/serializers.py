@@ -27,7 +27,9 @@ class SupplierContractFilesSerializer(serializers.ModelSerializer):
         ]
 
 
-class SupplyContractSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+class SupplyContractSerializer(
+    WritableNestedModelSerializer, serializers.ModelSerializer
+):
     supplier = serializers.PrimaryKeyRelatedField(
         queryset=models.Supplier.objects.all()
     )
@@ -197,7 +199,6 @@ class DailyMenuSerializer(WritableNestedModelSerializer, serializers.ModelSerial
 
 
 class LegalEntitySerializer(serializers.ModelSerializer):
-
     class Meta:
         model = models.LegalEntities
-        fields = '__all__'
+        fields = "__all__"

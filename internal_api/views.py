@@ -225,27 +225,26 @@ class DailyMenuViewSet(viewsets.ModelViewSet):
 
 
 class LegalEntityFilterSet(filters.FilterSet):
-    """ Searches through `registration_id` and/or `name` fields. """
+    """Searches through `registration_id` and/or `name` fields."""
+
     s = filters.CharFilter(
-        method='search_by_id_or_name',
-        label='регистрационный номер или наименование',
+        method="search_by_id_or_name",
+        label="регистрационный номер или наименование",
     )
 
     class Meta:
         model = models.LegalEntities
-        fields = ('s',)
+        fields = ("s",)
 
     def search_by_id_or_name(self, qs, name, value):
-        return qs.filter(
-            Q(registration_id__contains=value) | Q(name__icontains=value)
-        )
+        return qs.filter(Q(registration_id__contains=value) | Q(name__icontains=value))
 
 
 class LegalEntityViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (AllowAny,)
     serializer_class = serializers.LegalEntitySerializer
-    lookup_field = 'registration_id'
-    queryset = models.LegalEntities.objects.filter(active='+')
+    lookup_field = "registration_id"
+    queryset = models.LegalEntities.objects.filter(active="+")
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = LegalEntityFilterSet
 

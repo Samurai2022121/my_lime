@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
 
@@ -38,6 +39,9 @@ class Category(MPTTModel):
 
 class Product(Timestampable, models.Model):
     name = models.CharField(max_length=250, verbose_name="Наименование")
+    short_name = models.CharField(
+        max_length=20, verbose_name="Краткое наименование", null=True, blank=True
+    )
     category = models.ForeignKey(
         Category,
         related_name="products",
@@ -46,7 +50,10 @@ class Product(Timestampable, models.Model):
         null=True,
     )
     description = models.TextField(blank=True, null=True, verbose_name="Описание")
-    price = models.FloatField(verbose_name="Цена")
+    price = models.FloatField(
+        verbose_name="Цена",
+        validators=[MinValueValidator(0.01), MaxValueValidator(9999.99)],
+    )
     protein = models.FloatField(blank=True, null=True, verbose_name="Белки")
     carbohydrates = models.FloatField(blank=True, null=True, verbose_name="Углеводы")
     fats = models.FloatField(blank=True, null=True, verbose_name="Жиры")
@@ -78,11 +85,19 @@ class Product(Timestampable, models.Model):
     is_sorted = models.BooleanField(default=False)
     measure_unit = models.CharField(max_length=35, blank=True, null=True)
     vat_value = models.FloatField(null=True, blank=True)
+    for_scales = models.BooleanField(default=False)
+    for_own_production = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ["manufacturer", "name", "barcode"]
         verbose_name = "товар"
         verbose_name_plural = "товары"
+        constraints = (
+            models.CheckConstraint(
+                check=models.Q(price__gte=0.01) & models.Q(price__lte=9999.99),
+                name="price_range",
+            ),
+        )
 
     def __str__(self):
         return self.name
