@@ -64,7 +64,7 @@ class PersonnelDocument(Timestampable, models.Model):
         Personnel, on_delete=models.PROTECT, related_name="personnel_document"
     )
     personnel_document = models.FileField(
-        upload_to=create_personnel_document_download_path
+        upload_to=create_personnel_document_download_path, null=True
     )
     document_number = models.CharField(max_length=255)
     document_date = models.DateField()

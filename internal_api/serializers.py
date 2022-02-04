@@ -12,9 +12,6 @@ class ShopSerializer(serializers.ModelSerializer):
 
 
 class PersonnelDocumentSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
-    personnnel = serializers.PrimaryKeyRelatedField(
-        queryset=models.Personnel.objects.all()
-    )
 
     class Meta:
         model = models.PersonnelDocument
