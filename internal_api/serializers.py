@@ -45,7 +45,7 @@ class SupplyContractsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.SupplyContract
-        fields = ('files_supply',)
+        fields = "__all__"
 
 
 class SupplierSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
