@@ -99,7 +99,9 @@ class Product(Timestampable, models.Model):
     own_production = models.BooleanField(
         default=False, verbose_name="Собственное производство"
     )
-    discount = models.IntegerField(blank=True, null=True, verbose_name="Скидка, %")
+    discount = models.DecimalField(
+        blank=True, null=True, verbose_name="Скидка, %", max_digits=5, decimal_places=2
+    )
     extra_info = models.JSONField(null=True, blank=True)
     is_archive = models.BooleanField(default=False)
     is_sorted = models.BooleanField(default=False)

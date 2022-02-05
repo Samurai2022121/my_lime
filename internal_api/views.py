@@ -212,7 +212,9 @@ class SupplyContractViewSet(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelV
     queryset = models.SupplyContract.objects.all()
 
 
-class PersonnelDocumentViewSet(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet):
+class PersonnelDocumentViewSet(
+    BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet
+):
     permission_classes = (AllowAny,)
     serializer_class = serializers.PersonnelDocumentSerializer
     lookup_field = "id"

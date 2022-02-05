@@ -2,7 +2,7 @@ import django_filters
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 
 from utils.permissions import ReadOnlyPermissions
 from utils.views_utils import (BulkChangeArchiveStatusViewSetMixin,

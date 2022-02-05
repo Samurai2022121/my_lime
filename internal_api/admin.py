@@ -20,11 +20,6 @@ class WarehouseAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
     pass
 
 
-@admin.register(models.TechCardProduct)
-class WarehouseAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
-    pass
-
-
 class ProductForTechCardInline(admin.StackedInline):
     model = models.TechCardProduct
     extra = 1
@@ -72,7 +67,7 @@ class SupplierAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(models.SupplyContract)
-class SupplierAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
+class SupplyContractAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
     pass
 
 

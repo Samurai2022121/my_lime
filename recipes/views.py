@@ -1,6 +1,6 @@
 from django.db.models import Q
 from rest_framework import viewsets
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 
 from utils.views_utils import (BulkChangeArchiveStatusViewSetMixin,
                                BulkUpdateViewSetMixin,

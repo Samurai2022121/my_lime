@@ -1,4 +1,3 @@
-from drf_base64.fields import Base64FileField
 from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework import serializers
 
@@ -11,8 +10,9 @@ class ShopSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class PersonnelDocumentSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
-
+class PersonnelDocumentSerializer(
+    WritableNestedModelSerializer, serializers.ModelSerializer
+):
     class Meta:
         model = models.PersonnelDocument
         fields = "__all__"
