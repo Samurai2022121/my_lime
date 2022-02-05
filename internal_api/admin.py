@@ -73,9 +73,7 @@ class SupplierAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
 
 @admin.register(models.SupplyContract)
 class SupplierAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
-    inlines = [
-        FileSupplyInline,
-    ]
+    pass
 
 
 @admin.register(models.LegalEntities)
