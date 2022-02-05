@@ -1,3 +1,4 @@
+from drf_base64.fields import Base64FileField
 from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework import serializers
 
@@ -32,6 +33,7 @@ class SupplyContractSerializer(
     supplier = serializers.PrimaryKeyRelatedField(
         queryset=models.Supplier.objects.all()
     )
+    contract = Base64FileField()
 
     class Meta:
         model = models.SupplyContract
