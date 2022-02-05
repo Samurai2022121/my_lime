@@ -38,6 +38,10 @@ class SupplyContractSerializer(
         fields = "__all__"
 
 
+class SupplyContractsSerializer(serializers.Serializer):
+    files_supply = SupplyContractSerializer(many=True)
+
+
 class SupplierSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     supply_contract = SupplyContractSerializer(many=True, read_only=True)
 
