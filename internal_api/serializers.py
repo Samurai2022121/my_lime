@@ -40,8 +40,12 @@ class SupplyContractSerializer(
         fields = "__all__"
 
 
-class SupplyContractsSerializer(serializers.Serializer):
+class SupplyContractsSerializer(serializers.ModelSerializer):
     files_supply = SupplyContractSerializer(many=True)
+
+    class Meta:
+        model = models.SupplyContract
+        fields = ('files_supply',)
 
 
 class SupplierSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
