@@ -1,11 +1,16 @@
 from django.urls import path
 from rest_framework import routers
 
-from users.views import (ChangeUserPasswordAPIView,
-                         CustomerDeliveryAddressViewset,
-                         GenerateLoginCodeAPIView, LoginAPIView,
-                         RegistrationAPIView, TokenObtainAPIView, UserView,
-                         ValidateLoginCodeAPIView)
+from users.views import (
+    ChangeUserPasswordAPIView,
+    CustomerDeliveryAddressViewset,
+    GenerateLoginCodeAPIView,
+    LoginAPIView,
+    RegistrationAPIView,
+    TokenObtainAPIView,
+    UserView,
+    ValidateLoginCodeAPIView,
+)
 
 router = routers.SimpleRouter()
 router.register("users", UserView)

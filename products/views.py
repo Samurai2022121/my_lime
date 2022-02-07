@@ -7,17 +7,19 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from internal_api.models import Warehouse
-from utils.views_utils import (BulkChangeArchiveStatusViewSetMixin,
-                               BulkUpdateViewSetMixin,
-                               ChangeDestroyToArchiveMixin,
-                               OrderingModelViewsetMixin)
+from utils.views_utils import (
+    BulkChangeArchiveStatusViewSetMixin,
+    BulkUpdateViewSetMixin,
+    ChangeDestroyToArchiveMixin,
+    OrderingModelViewsetMixin,
+)
 
 from . import serializers
 from .filters import ProductFilter
 from .models import Category, Product, ProductImages
 
 
-class ProductViewset(
+class ProductAdminViewset(
     BulkChangeArchiveStatusViewSetMixin,
     ChangeDestroyToArchiveMixin,
     BulkUpdateViewSetMixin,
@@ -29,7 +31,7 @@ class ProductViewset(
     filterset_class = ProductFilter
     serializer_class = serializers.ProductSerializer
     serializer_action_classes = {
-        "list": serializers.ProductListSerializer,
+        "list": serializers.ProductListAdminSerializer,
         "change_category": serializers.BulkChangeProductCategorySerializer,
     }
     lookup_field = "id"
@@ -44,21 +46,13 @@ class ProductViewset(
         return self.queryset.get(id=self.kwargs["id"])
 
     def get_queryset(self):
+        qs = self.queryset
         query_params = self.request.query_params
-        if "is_archive" in query_params and int(query_params["is_archive"]):
-            qs = self.queryset.filter(is_archive=True)
-        elif "is_sorted" in query_params and not int(query_params["is_sorted"]):
-            qs = self.queryset.filter(is_sorted=False)
-        else:
-            qs = self.queryset.filter(is_archive=False, is_sorted=True)
+        if "is_sorted" not in query_params:
+            qs = qs.filter(is_sorted=True)
+        if "is_archive" not in query_params:
+            qs = qs.filter(is_archive=False)
 
-        if "s" in self.request.query_params:
-            search_value = self.request.query_params["s"]
-            qs = qs.filter(
-                Q(name__icontains=search_value)
-                | Q(barcode__icontains=search_value)
-                | Q(id__icontains=search_value)
-            )
         ordering_fields = self.get_ordering_fields()
         if ordering_fields:
             return qs.order_by(*ordering_fields)
@@ -73,6 +67,38 @@ class ProductViewset(
         new_category = serialized_data.data["new_category"]
         Product.objects.filter(id__in=product_ids).update(category=new_category)
         return Response(status=status.HTTP_200_OK)
+
+
+class ProductViewset(
+    OrderingModelViewsetMixin,
+    viewsets.ReadOnlyModelViewSet,
+):
+    permission_classes = (AllowAny,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = ProductFilter
+    serializer_class = serializers.ProductSerializer
+    serializer_action_classes = {
+        "list": serializers.ProductListSerializer,
+    }
+    lookup_field = "id"
+    queryset = Product.objects.all()
+
+    def get_serializer_class(self):
+        return self.serializer_action_classes.get(
+            self.action, super().get_serializer_class()
+        )
+
+    def get_object(self):
+        return self.queryset.get(id=self.kwargs["id"])
+
+    def get_queryset(self):
+        qs = self.queryset.filter(
+            is_archive=False, is_sorted=True, for_own_production=False
+        )
+        ordering_fields = self.get_ordering_fields()
+        if ordering_fields:
+            return qs.order_by(*ordering_fields)
+        return qs.order_by("in_stock")
 
 
 class CategoryViewset(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet):

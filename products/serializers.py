@@ -81,6 +81,15 @@ class ProductImagesSerializer(serializers.ModelSerializer):
         fields = ("id", "image_1000", "image_500", "image_150", "main", "description")
 
 
+class ProductListAdminSerializer(serializers.ModelSerializer):
+    category = CategorySerializer()
+    images = ProductImagesSerializer(many=True, required=False)
+
+    class Meta:
+        model = Product
+        exclude = "__all__"
+
+
 class ProductListSerializer(serializers.ModelSerializer):
     stars_count = serializers.SerializerMethodField()
     stared = serializers.SerializerMethodField()
@@ -93,7 +102,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        exclude = ["is_archive"]
+        exclude = ["is_archive", "is_sorted", "for_scales", "for_own_production"]
 
     def get_stars_count(self, obj):
         return Star.objects.filter(
@@ -148,7 +157,7 @@ class ProductSerializer(serializers.ModelSerializer):
     discounted_price = serializers.SerializerMethodField()
     category_read = CategorySerializer(read_only=True, source="category")
     images = ProductImagesSerializer(many=True, required=False)
-    is_sorted = serializers.CharField(write_only=True)
+    is_sorted = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = Product

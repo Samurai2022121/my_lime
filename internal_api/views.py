@@ -8,14 +8,16 @@ from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.status import HTTP_202_ACCEPTED, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_202_ACCEPTED, HTTP_400_BAD_REQUEST, HTTP_201_CREATED
 
 from products.models import Product
 from products.serializers import ProductListSerializer
 from utils.serializers_utils import BulkUpdateSerializer
-from utils.views_utils import (BulkChangeArchiveStatusViewSetMixin,
-                               BulkUpdateViewSetMixin,
-                               ChangeDestroyToArchiveMixin)
+from utils.views_utils import (
+    BulkChangeArchiveStatusViewSetMixin,
+    BulkUpdateViewSetMixin,
+    ChangeDestroyToArchiveMixin,
+)
 
 from . import models, serializers
 
@@ -210,6 +212,22 @@ class SupplyContractViewSet(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelV
     serializer_class = serializers.SupplyContractsSerializer
     lookup_field = "id"
     queryset = models.SupplyContract.objects.all()
+    serializer_action_classes = {
+        "create": serializers.SupplyContractsSerializer,
+    }
+
+    def get_serializer_class(self):
+        return self.serializer_action_classes.get(
+            self.action, super().get_serializer_class()
+        )
+
+    def post(self, request, format=None):
+        data = request.data
+        serializer = self.get_serializer(data=data, many=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=HTTP_201_CREATED)
+        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
 
 class PersonnelDocumentViewSet(

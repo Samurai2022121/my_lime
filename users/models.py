@@ -8,8 +8,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from utils.models_utils import (compress_image, generate_new_password,
-                                phone_regex)
+from utils.models_utils import compress_image, generate_new_password, phone_regex
 
 from .managers import CustomUserManager
 

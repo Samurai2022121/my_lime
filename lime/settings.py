@@ -2,15 +2,25 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+import environ
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
+root = environ.Path(__file__) - 2
+env = environ.Env()
+env.read_env(root(".env"))
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-09kwm1pabqdb#rm-%c_l5ud9jwtmeh&lvt6_oee_l@%rid4d1t"
+SECRET_KEY = env("DJANGO_SECRET_KEY")
 
-DEBUG = True
+DEBUG = env.bool("DJANGO_DEBUG", default=False)
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[])
+
+ENVIRONMENT = env("ENVIRONMENT", default="production")
+
 CORS_ORIGIN_ALLOW_ALL = True
-
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -45,6 +55,15 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+if DEBUG:
+    INSTALLED_APPS += [
+        "debug_toolbar",
+    ]
+    MIDDLEWARE += [
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
+    ]
+    INTERNAL_IPS = ["127.0.0.1"]
+
 ROOT_URLCONF = "lime.urls"
 
 TEMPLATES = [
@@ -65,15 +84,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "lime.wsgi.application"
 
+DB_NAME = env("DB_NAME")
+DB_USER = env("DB_USER")
+DB_PASSWORD = env("DB_PASSWORD")
+DB_HOST = env("DB_HOST")
+DB_PORT = env.int("DB_PORT", default=5432)
 
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "fresh",
-        "USER": "bump",
-        "PASSWORD": "adfadfr@af24323422@",
-        "HOST": "185.246.88.154",
-        "PORT": "5432",
+        "NAME": DB_NAME,
+        "USER": DB_USER,
+        "PASSWORD": DB_PASSWORD,
+        "HOST": DB_HOST,
+        "PORT": DB_PORT,
     }
 }
 
@@ -127,5 +151,20 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "mediafiles")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-SMS_API_KEY = "8a1e5e989559167df45adbda95890c8d"
-SMS_ALPHA_NAME = "1572"
+SMS_API_KEY = env("SMS_API_KEY", default=None)
+SMS_ALPHA_NAME = env("SMS_ALPHA_NAME", default=None)
+
+# Sentry
+# https://docs.sentry.io/platforms/python/django/?platform=python
+
+SENTRY_KEY = env("SENTRY_KEY", default=None)
+SENTRY_PROJECT = env("SENTRY_PROJECT", default=None)
+
+if SENTRY_KEY and SENTRY_PROJECT:
+    sentry_sdk.init(
+        dsn="https://{key}@sentry.io/{project}".format(
+            key=SENTRY_KEY, project=SENTRY_PROJECT
+        ),
+        integrations=[DjangoIntegration()],
+        environment=ENVIRONMENT,
+    )

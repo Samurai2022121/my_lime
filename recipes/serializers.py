@@ -52,6 +52,7 @@ class RecipeListSerializer(serializers.ModelSerializer):
             "fats",
             "calories",
             "video",
+            "is_archive",
         ]
 
     def get_stars_count(self, obj):
@@ -98,22 +99,33 @@ class RecipeListSerializer(serializers.ModelSerializer):
         )
 
 
+class RecipeListAdminSerializer(serializers.ModelSerializer):
+    author = serializers.SerializerMethodField()
+    recipe_category = RecipeCategorySerializer()
+    ingredients_in_stock = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Recipe
+        fields = "__all__"
+
+    def get_author(self, obj):
+        return {"id": obj.author.id, "name": obj.author.name}
+
+    def get_ingredients_in_stock(self, obj):
+        return obj.recipe_products.values("product", "quantity")
+
+
 class RecipeCookingStepsSerializer(serializers.ModelSerializer):
     class Meta:
         model = RecipeCookingSteps
         fields = "__all__"
 
 
-class RecipeSerializer(serializers.ModelSerializer):
-    stars_count = serializers.SerializerMethodField()
-    stared = serializers.SerializerMethodField()
+class RecipeAdminSerializer(serializers.ModelSerializer):
     author = serializers.SerializerMethodField()
     recipe_category = RecipeCategorySerializer(read_only=True)
     recipe_category_id = serializers.IntegerField(write_only=True, required=True)
     ingredients_in_stock = serializers.SerializerMethodField()
-    average_star = serializers.SerializerMethodField()
-    is_favourite = serializers.SerializerMethodField()
-    favourite_count = serializers.SerializerMethodField()
     reviews = serializers.SerializerMethodField()
     recipe_steps = RecipeCookingStepsSerializer(many=True)
 
@@ -146,6 +158,33 @@ class RecipeSerializer(serializers.ModelSerializer):
                 RecipeCookingSteps.objects.create(recipe=instance, **step)
         return instance
 
+    def get_reviews(self, obj):
+        return (
+            Star.objects.filter(
+                content_type=ContentType.objects.get_for_model(obj), object_id=obj.id
+            )
+            .annotate(username=F("user__name"))
+            .values("review", "mark", "created_at", "username")
+        )
+
+    def get_author(self, obj):
+        return {"id": obj.author.id, "name": obj.author.name}
+
+    def get_ingredients_in_stock(self, obj):
+        return obj.recipe_products.values("product", "quantity")
+
+
+class RecipeSerializer(RecipeAdminSerializer):
+    stars_count = serializers.SerializerMethodField()
+    stared = serializers.SerializerMethodField()
+    average_star = serializers.SerializerMethodField()
+    is_favourite = serializers.SerializerMethodField()
+    favourite_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Recipe
+        exclude = ["is_archive"]
+
     def get_stars_count(self, obj):
         return Star.objects.filter(
             content_type=ContentType.objects.get_for_model(obj), object_id=obj.id
@@ -166,21 +205,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         return Star.objects.filter(
             content_type=ContentType.objects.get_for_model(obj), object_id=obj.id
         ).aggregate(value=Round(Avg("mark")))["value"]
-
-    def get_reviews(self, obj):
-        return (
-            Star.objects.filter(
-                content_type=ContentType.objects.get_for_model(obj), object_id=obj.id
-            )
-            .annotate(username=F("user__name"))
-            .values("review", "mark", "created_at", "username")
-        )
-
-    def get_author(self, obj):
-        return {"id": obj.author.id, "name": obj.author.name}
-
-    def get_ingredients_in_stock(self, obj):
-        return obj.recipe_products.values("product", "quantity")
 
     def get_favourite_count(self, obj):
         return Favourite.objects.filter(

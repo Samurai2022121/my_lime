@@ -41,6 +41,17 @@ class NewsSerializer(serializers.ModelSerializer):
         return {"id": obj.author.id, "name": obj.author.name}
 
 
+class NewsAdminSerializer(serializers.ModelSerializer):
+    author = serializers.SerializerMethodField()
+
+    class Meta:
+        model = News
+        fields = "__all__"
+
+    def get_author(self, obj):
+        return {"id": obj.author.id, "name": obj.author.name}
+
+
 class SectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Section
