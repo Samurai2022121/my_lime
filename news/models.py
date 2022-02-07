@@ -7,9 +7,6 @@ from utils.models_utils import Timestampable
 class Section(models.Model):
     name = models.CharField(max_length=50, unique=True, verbose_name="Новостной раздел")
     description = models.TextField(verbose_name="Описание")
-    image = models.ImageField(
-        null=True, blank=True, verbose_name="Изображение", upload_to="news/"
-    )
 
     class Meta:
         verbose_name = "новостной раздел"
@@ -21,6 +18,7 @@ class Section(models.Model):
 
 class News(Timestampable, models.Model):
     headline = models.CharField(max_length=255, unique=True, verbose_name="Заголовок")
+    text = models.TextField(verbose_name="Текст")
     section = models.ForeignKey(
         Section,
         related_name="news",
@@ -30,7 +28,9 @@ class News(Timestampable, models.Model):
     author = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, verbose_name="Автор"
     )
-
+    image = models.ImageField(
+        null=True, blank=True, verbose_name="Изображение", upload_to="news/"
+    )
     is_archive = models.BooleanField(default=False)
 
     class Meta:
@@ -39,20 +39,3 @@ class News(Timestampable, models.Model):
 
     def __str__(self):
         return self.headline
-
-
-class NewsParagraphs(models.Model):
-    news = models.ForeignKey(
-        News, related_name="news_paragraphs", on_delete=models.PROTECT
-    )
-    subheadline = models.CharField(max_length=255, null=True)
-    text = models.TextField(verbose_name="Текст")
-
-
-class NewsParagraphsImages(models.Model):
-    news_paragraphs = models.ForeignKey(
-        NewsParagraphs, related_name="news_paragraphs_images", on_delete=models.PROTECT
-    )
-    image = models.ImageField(
-        null=True, blank=True, verbose_name="Изображение", upload_to="news/"
-    )
