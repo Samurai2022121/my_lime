@@ -246,6 +246,13 @@ class PersonnelDocumentViewSet(BulkChangeArchiveStatusViewSetMixin, viewsets.Mod
     queryset = models.PersonnelDocument.objects.all()
 
 
+class PersonnelDocumentViewSet(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet):
+    permission_classes = (AllowAny,)
+    serializer_class = serializers.PersonnelDocumentSerializer
+    lookup_field = "id"
+    queryset = models.PersonnelDocument.objects.all()
+
+
 class TechCardViewSet(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet):
     permission_classes = (AllowAny,)
     serializer_class = serializers.TechCardSerializer
