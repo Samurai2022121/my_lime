@@ -8,8 +8,18 @@ from utils.permissions import ReadOnlyPermissions
 from utils.views_utils import (BulkChangeArchiveStatusViewSetMixin,
                                BulkUpdateViewSetMixin)
 
-from .models import News, Section
-from .serializers import NewsSerializer, SectionSerializer
+from .models import (
+    News,
+    Section,
+    NewsParagraphs,
+    NewsParagraphsImages,
+)
+from .serializers import(
+    NewsSerializer,
+    SectionSerializer,
+    NewsParagraphsSerializer,
+    NewsParagraphsImagesSerializer,
+)
 
 
 class NewsFilter(django_filters.FilterSet):
@@ -26,6 +36,7 @@ class NewsViewset(
     filter_backends = (DjangoFilterBackend,)
     filterset_class = NewsFilter
     permission_classes = (ReadOnlyPermissions,)
+    # permission_classes = (AllowAny,)
     serializer_class = NewsSerializer
     lookup_field = "id"
     queryset = News.objects.all()
@@ -48,3 +59,21 @@ class SectionViewset(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet)
     serializer_class = SectionSerializer
     lookup_field = "id"
     queryset = Section.objects.all()
+
+
+class NewsParagraphsViewset(
+    BulkChangeArchiveStatusViewSetMixin, BulkUpdateViewSetMixin, viewsets.ModelViewSet
+):
+    permission_classes = (AllowAny,)
+    lookup_field = "id"
+    serializer_class = NewsParagraphsSerializer
+    queryset = NewsParagraphs.objects.all()
+
+
+class NewsParagraphsImagesViewset(
+    BulkChangeArchiveStatusViewSetMixin, BulkUpdateViewSetMixin, viewsets.ModelViewSet
+):
+    permission_classes = (AllowAny,)
+    lookup_field = "id"
+    serializer_class = NewsParagraphsImagesSerializer
+    queryset = NewsParagraphsImages.objects.all()
