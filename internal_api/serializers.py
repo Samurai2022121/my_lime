@@ -11,9 +11,8 @@ class ShopSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class PersonnelDocumentSerializer(
-    WritableNestedModelSerializer, serializers.ModelSerializer
-):
+class PersonnelDocumentSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+
     class Meta:
         model = models.PersonnelDocument
         fields = "__all__"
@@ -33,21 +32,10 @@ class SupplyContractSerializer(
     supplier = serializers.PrimaryKeyRelatedField(
         queryset=models.Supplier.objects.all()
     )
-    contract = Base64FileField()
 
     class Meta:
         model = models.SupplyContract
         fields = "__all__"
-
-
-class SupplyContractsSerializer(serializers.Serializer):
-    files_supply = SupplyContractSerializer(many=True, write_only=True)
-
-    def create(self, validated_data):
-        files = validated_data.pop('files_supply', [])
-        files = [models.SupplyContract(**f) for f in files]
-        supply_contracts = models.SupplyContract.objects.bulk_create(files)
-        return supply_contracts
 
 
 class SupplierSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
@@ -61,9 +49,7 @@ class SupplierSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
 class WarehouseSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source="product.name", read_only=True)
     barcode = serializers.IntegerField(source="product.barcode", read_only=True)
-    price = serializers.DecimalField(
-        source="product.price", read_only=True, max_digits=6, decimal_places=2
-    )
+    price = serializers.FloatField(source="product.price", read_only=True)
     supplier = SupplierSerializer()
 
     class Meta:
@@ -130,7 +116,7 @@ class WarehouseOrderSerializer(serializers.ModelSerializer):
     )
     supplier = SupplierSerializer(read_only=True)
     supplier_id = serializers.IntegerField(write_only=True)
-    total = serializers.DecimalField(read_only=True, max_digits=10, decimal_places=2)
+    total = serializers.FloatField(read_only=True)
     shop_address = serializers.CharField(source="shop.address", read_only=True)
     shop_id = serializers.IntegerField(write_only=True)
     created_at = serializers.DateTimeField(required=False)
@@ -189,7 +175,7 @@ class TechProductSerializer(serializers.ModelSerializer):
 
 
 class TechCardSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
-    tech_card_product = TechProductSerializer(source="tech_product", many=True)
+    tech_card_product = TechProductSerializer(many=True)
 
     class Meta:
         model = models.TechCard
@@ -208,9 +194,3 @@ class DailyMenuSerializer(WritableNestedModelSerializer, serializers.ModelSerial
     class Meta:
         model = models.DailyMenuPlan
         fields = ["author", "menu_dish", "created_at", "updated_at"]
-
-
-class LegalEntitySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.LegalEntities
-        fields = "__all__"
