@@ -180,6 +180,7 @@ class RecipeSerializer(RecipeAdminSerializer):
     average_star = serializers.SerializerMethodField()
     is_favourite = serializers.SerializerMethodField()
     favourite_count = serializers.SerializerMethodField()
+    recipe_steps = RecipeCookingStepsSerializer(many=True)
 
     class Meta:
         model = Recipe
