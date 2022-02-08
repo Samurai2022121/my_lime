@@ -87,7 +87,7 @@ class ProductListAdminSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        exclude = "__all__"
+        fields = "__all__"
 
 
 class ProductListSerializer(serializers.ModelSerializer):
