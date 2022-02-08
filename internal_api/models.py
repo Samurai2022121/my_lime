@@ -13,6 +13,9 @@ class Shop(models.Model):
     date_added = models.DateTimeField(auto_now=True)
     is_archive = models.BooleanField(default=False)
 
+    def __str__(self):
+        return self.name
+
 
 class Personnel(models.Model):
     WORK_STATUSES = (
@@ -230,6 +233,9 @@ class WarehouseOrder(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.order_number
+
 
 class WarehouseOrderPositions(models.Model):
     warehouse_order = models.ForeignKey(
@@ -248,6 +254,9 @@ class WarehouseOrderPositions(models.Model):
         default=0, max_digits=7, decimal_places=2
     )
     margin = models.DecimalField(default=0, max_digits=4, decimal_places=2)
+
+    def __str__(self):
+        return f'{self.product.name} in {self.warehouse_order}'
 
 
 class LegalEntities(models.Model):

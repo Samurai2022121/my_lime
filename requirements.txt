@@ -1,19 +1,26 @@
+amqp==5.0.9
 appdirs==1.4.4
 asgiref==3.5.0
 atomicwrites==1.4.0
 attrs==21.4.0
 beautifulsoup4==4.10.0
+billiard==3.6.4.0
 black==22.1.0
+celery==5.2.3
 certifi==2021.10.8
 cffi==1.15.0
 cfgv==3.3.1
 chardet==4.0.0
 charset-normalizer==2.0.11
 click==8.0.3
+click-didyoumean==0.3.0
+click-plugins==1.1.1
+click-repl==0.2.0
 colorama==0.4.4
 coreapi==2.3.3
 coreschema==0.0.4
 cryptography==36.0.1
+Deprecated==1.2.13
 distlib==0.3.4
 Django==4.0.1
 django-cors-headers==3.11.0
@@ -24,6 +31,7 @@ django-mptt==0.13.4
 djangorestframework==3.13.1
 djangorestframework-simplejwt==5.0.0
 drf-base64==2.0
+drf-nested-routers==0.93.4
 drf-writable-nested==0.6.3
 drf-yasg==1.20.0
 filelock==3.4.2
@@ -38,6 +46,7 @@ iniconfig==1.1.1
 isort==5.10.1
 itypes==1.2.0
 Jinja2==3.0.3
+kombu==5.2.3
 lxml==4.7.1
 Markdown==3.3.6
 MarkupSafe==2.0.1
@@ -55,6 +64,7 @@ pipupgrade==1.11.0
 platformdirs==2.4.1
 pluggy==1.0.0
 pre-commit==2.17.0
+prompt-toolkit==3.0.27
 psycopg2-binary==2.9.3
 py==1.11.0
 pycodestyle==2.8.0
@@ -68,6 +78,7 @@ python-environ==0.4.54
 python-magic==0.4.24
 pytz==2021.3
 PyYAML==6.0
+redis==4.1.2
 requests==2.27.1
 ruamel.yaml==0.17.20
 ruamel.yaml.clib==0.2.6
@@ -85,5 +96,7 @@ uritemplate==4.1.1
 urllib3==1.26.8
 vine==5.0.0
 virtualenv==20.13.0
+wcwidth==0.2.5
 webencodings==0.5.1
+wrapt==1.13.3
 zipp==3.7.0

@@ -113,6 +113,15 @@ REST_FRAMEWORK = {
     "TIME_FORMAT": "%H:%M",
 }
 
+CELERY_BROKER_URL = env('CELERY_BROKER_URL')
+CELERY_TASK_ALWAYS_EAGER = env.bool('CELERY_TASK_ALWAYS_EAGER', default=False)
+CELERY_BEAT_SCHEDULE = {
+    'auto_order': {
+        'task': 'internal_api.tasks.auto_order',
+        'schedule': 60.0,
+    },
+}
+
 ACCESS_TOKEN_LIFETIME = timedelta(days=10)
 REFRESH_TOKEN_LIFETIME = timedelta(days=11)
 
