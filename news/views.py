@@ -24,10 +24,21 @@ from .serializers import(
 
 class NewsFilter(django_filters.FilterSet):
     section = django_filters.CharFilter(field_name="section__id", lookup_expr="iexact")
+    s = django_filters.CharFilter(
+        method="search",
+        label="поиск по автору, заголовку",
+    )
 
     class Meta:
         model = News
-        fields = {}
+        fields = {"is_archive": ["exact"]}
+
+    def search(self, qs, name, value):
+        return qs.filter(
+            Q(author__name__icontains=value)
+            | Q(author__surname__icontains=value)
+            | Q(headline__icontains=value)
+        )
 
 
 class NewsViewset(
@@ -40,17 +51,6 @@ class NewsViewset(
     serializer_class = NewsSerializer
     lookup_field = "id"
     queryset = News.objects.all()
-
-    def get_queryset(self):
-        qs = self.queryset
-        if "s" in self.request.query_params:
-            search_value = self.request.query_params["s"]
-            qs = qs.filter(
-                Q(author__name__icontains=search_value)
-                | Q(author__surname__icontains=search_value)
-                | Q(headline__icontains=search_value)
-            )
-        return qs.order_by("created_at")
 
 
 class SectionViewset(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet):
