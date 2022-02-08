@@ -60,6 +60,7 @@ class NewsSerializer(WritableNestedModelSerializer, serializers.ModelSerializer)
 
 class NewsAdminSerializer(serializers.ModelSerializer):
     author = serializers.SerializerMethodField()
+    news_paragraphs = NewsParagraphsSerializer(many=True)
 
     class Meta:
         model = News
