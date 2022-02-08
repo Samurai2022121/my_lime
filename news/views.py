@@ -2,15 +2,24 @@ import django_filters
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
-from utils.views_utils import (
-    BulkChangeArchiveStatusViewSetMixin,
-    BulkUpdateViewSetMixin,
+from utils.permissions import ReadOnlyPermissions
+from utils.views_utils import (BulkChangeArchiveStatusViewSetMixin,
+                               BulkUpdateViewSetMixin)
+
+from .models import (
+    News,
+    Section,
+    NewsParagraphs,
+    NewsParagraphsImages,
 )
-
-from .models import News, Section
-from .serializers import NewsAdminSerializer, NewsSerializer, SectionSerializer
+from .serializers import(
+    NewsSerializer,
+    SectionSerializer,
+    NewsParagraphsSerializer,
+    NewsParagraphsImagesSerializer,
+)
 
 
 class NewsFilter(django_filters.FilterSet):
@@ -32,31 +41,16 @@ class NewsFilter(django_filters.FilterSet):
         )
 
 
-class NewsViewset(viewsets.ReadOnlyModelViewSet):
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = NewsFilter
-    serializer_class = NewsSerializer
-    lookup_field = "id"
-    queryset = News.objects.all()
-
-    def get_queryset(self):
-        qs = self.queryset.filter(is_archive=False)
-        return qs.order_by("created_at")
-
-
-class NewsAdminViewset(
+class NewsViewset(
     BulkChangeArchiveStatusViewSetMixin, BulkUpdateViewSetMixin, viewsets.ModelViewSet
 ):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = NewsFilter
-    serializer_class = NewsAdminSerializer
+    # permission_classes = (ReadOnlyPermissions,)
+    permission_classes = (AllowAny,)
+    serializer_class = NewsSerializer
     lookup_field = "id"
     queryset = News.objects.all()
-
-    def get_queryset(self):
-        if "is_archive" not in self.request.query_params:
-            self.queryset = self.queryset.filter(is_archive=False)
-        return self.queryset.order_by("created_at")
 
 
 class SectionViewset(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet):
@@ -65,3 +59,21 @@ class SectionViewset(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet)
     serializer_class = SectionSerializer
     lookup_field = "id"
     queryset = Section.objects.all()
+
+
+class NewsParagraphsViewset(
+    BulkChangeArchiveStatusViewSetMixin, BulkUpdateViewSetMixin, viewsets.ModelViewSet
+):
+    permission_classes = (AllowAny,)
+    lookup_field = "id"
+    serializer_class = NewsParagraphsSerializer
+    queryset = NewsParagraphs.objects.all()
+
+
+class NewsParagraphsImagesViewset(
+    BulkChangeArchiveStatusViewSetMixin, BulkUpdateViewSetMixin, viewsets.ModelViewSet
+):
+    permission_classes = (AllowAny,)
+    lookup_field = "id"
+    serializer_class = NewsParagraphsImagesSerializer
+    queryset = NewsParagraphsImages.objects.all()
