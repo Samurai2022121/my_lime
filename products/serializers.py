@@ -156,32 +156,11 @@ class ProductSerializer(serializers.ModelSerializer):
     reviews = serializers.SerializerMethodField()
     discounted_price = serializers.SerializerMethodField()
     category_read = CategorySerializer(read_only=True, source="category")
-    images = ProductImagesSerializer(many=True, required=False)
-    is_sorted = serializers.CharField(write_only=True, required=False)
+    images = ProductImagesSerializer(many=True)
 
     class Meta:
         model = Product
-        exclude = ["is_archive"]
-
-    def create(self, validated_data):
-        images_data = validated_data.pop("images", [])
-        product = Product.objects.create(**validated_data)
-
-        for image in images_data:
-            ProductImages.objects.create(product=product, **image)
-        return product
-
-    def update(self, instance, validated_data):
-        images_data = validated_data.pop("images", [])
-
-        for image_obj in images_data:
-            image_id = image_obj.get("id", "")
-            if image_id:
-                ProductImages.objects.filter(id=image_id).update(**image_obj)
-            else:
-                ProductImages.objects.create(product=instance, **image_obj)
-        super().update(instance, validated_data)
-        return instance
+        exclude = ["is_archive", "is_sorted", "for_own_production", "for_scales"]
 
     def get_average_star(self, obj):
         return Star.objects.filter(
@@ -229,6 +208,35 @@ class ProductSerializer(serializers.ModelSerializer):
         return (
             round((obj.price * (1 - obj.discount / 100)), 2) if obj.discount else None
         )
+
+
+class ProductAdminSerializer(serializers.ModelSerializer):
+    category_read = CategorySerializer(read_only=True, source="category")
+    images = ProductImagesSerializer(many=True, required=False)
+
+    class Meta:
+        model = Product
+        fields = "__all__"
+
+    def create(self, validated_data):
+        images_data = validated_data.pop("images", [])
+        product = Product.objects.create(**validated_data)
+
+        for image in images_data:
+            ProductImages.objects.create(product=product, **image)
+        return product
+
+    def update(self, instance, validated_data):
+        images_data = validated_data.pop("images", [])
+
+        for image_obj in images_data:
+            image_id = image_obj.get("id", "")
+            if image_id:
+                ProductImages.objects.filter(id=image_id).update(**image_obj)
+            else:
+                ProductImages.objects.create(product=instance, **image_obj)
+        super().update(instance, validated_data)
+        return instance
 
 
 class BulkActionProductSerializer(serializers.Serializer):

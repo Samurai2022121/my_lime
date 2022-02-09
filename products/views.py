@@ -29,7 +29,7 @@ class ProductAdminViewset(
     permission_classes = (AllowAny,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ProductFilter
-    serializer_class = serializers.ProductSerializer
+    serializer_class = serializers.ProductAdminSerializer
     serializer_action_classes = {
         "list": serializers.ProductListAdminSerializer,
         "change_category": serializers.BulkChangeProductCategorySerializer,
