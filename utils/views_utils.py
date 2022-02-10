@@ -29,7 +29,9 @@ class OrderingModelViewsetMixin:
                 continue
             parts = orderby_part.split("-")
             field = parts[1] if len(parts) == 2 else parts[0]
-            if hasattr(self.queryset.model, field):
+            if field.find("supplier__name") != (-1):
+                ordering_values.append(orderby_part)
+            elif hasattr(self.queryset.model, field):
                 ordering_values.append(orderby_part)
         return ordering_values
 

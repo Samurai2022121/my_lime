@@ -1,4 +1,5 @@
 from decimal import Decimal
+# import pdb; pdb.set_trace()
 
 import pandas as pd
 from django.db.models import F, Q, Sum
@@ -17,6 +18,7 @@ from utils.views_utils import (
     BulkChangeArchiveStatusViewSetMixin,
     BulkUpdateViewSetMixin,
     ChangeDestroyToArchiveMixin,
+    OrderingModelViewsetMixin
 )
 
 from . import models, serializers
@@ -27,6 +29,7 @@ class ShopViewSet(
     BulkChangeArchiveStatusViewSetMixin,
     BulkUpdateViewSetMixin,
     viewsets.ModelViewSet,
+    OrderingModelViewsetMixin,
 ):
     permission_classes = (AllowAny,)
     serializer_class = serializers.ShopSerializer
@@ -42,6 +45,9 @@ class ShopViewSet(
                 | Q(address__icontains=search_value)
                 | Q(id__icontains=search_value)
             )
+        ordering_fields = self.get_ordering_fields()
+        if ordering_fields:
+            return qs.order_by(*ordering_fields)
         return qs
 
 
@@ -49,6 +55,7 @@ class PersonnelViewSet(
     ChangeDestroyToArchiveMixin,
     BulkChangeArchiveStatusViewSetMixin,
     viewsets.ModelViewSet,
+    OrderingModelViewsetMixin,
 ):
     permission_classes = (AllowAny,)
     serializer_class = serializers.PersonnelSerializer
@@ -162,7 +169,11 @@ class UploadCSVGenericView(GenericAPIView):
         return Response(status=HTTP_202_ACCEPTED, data=serializer.data)
 
 
-class WarehouseOrderViewSet(ChangeDestroyToArchiveMixin, viewsets.ModelViewSet):
+class WarehouseOrderViewSet(
+    ChangeDestroyToArchiveMixin,
+    viewsets.ModelViewSet,
+    OrderingModelViewsetMixin,
+):
     permission_classes = (AllowAny,)
     serializer_class = serializers.WarehouseOrderSerializer
     lookup_field = "id"
@@ -181,6 +192,9 @@ class WarehouseOrderViewSet(ChangeDestroyToArchiveMixin, viewsets.ModelViewSet):
         if "s" in self.request.query_params:
             search_value = self.request.query_params["s"]
             qs = qs.filter(Q(order_number__icontains=search_value))
+        ordering_fields = self.get_ordering_fields()
+        if ordering_fields:
+            return qs.order_by(*ordering_fields)
         return qs
 
 
@@ -189,6 +203,7 @@ class SupplierViewSet(
     BulkChangeArchiveStatusViewSetMixin,
     BulkUpdateViewSetMixin,
     viewsets.ModelViewSet,
+    OrderingModelViewsetMixin,
 ):
     permission_classes = (AllowAny,)
     serializer_class = serializers.SupplierSerializer
@@ -204,6 +219,9 @@ class SupplierViewSet(
                 | Q(email__icontains=search_value)
                 | Q(phone__icontains=search_value)
             )
+        ordering_fields = self.get_ordering_fields()
+        if ordering_fields:
+            return qs.order_by(*ordering_fields)
         return qs.order_by("name")
 
 
