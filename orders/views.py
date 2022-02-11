@@ -9,6 +9,7 @@ from utils.views_utils import (
 
 from .models import Order
 from .serializers import OrdersSerializer
+from .filters import OrderFilter
 
 
 class OrderViewset(
@@ -16,6 +17,7 @@ class OrderViewset(
     OrderingModelViewsetMixin,
     viewsets.ModelViewSet,
 ):
+    filterset_class = OrderFilter
     permission_classes = (AllowAny,)
     serializer_class = OrdersSerializer
     lookup_field = "id"
@@ -26,13 +28,10 @@ class OrderViewset(
 
     def get_queryset(self):
         qs = self.queryset
-        if "s" in self.request.query_params:
-            search_value = self.request.query_params["s"]
-            qs = qs.filter(
-                Q(customer__surname__icontains=search_value)
-                | Q(id__icontains=search_value)
-                | Q(customer__phone_number__icontains=search_value)
-            )
+
+        if "is_archive" not in self.request.query_params:
+            qs = qs.filter(is_archive=False)
+
         ordering_fields = self.get_ordering_fields()
         if ordering_fields:
             return qs.order_by(*ordering_fields)

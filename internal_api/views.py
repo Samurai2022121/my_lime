@@ -21,6 +21,12 @@ from utils.views_utils import (
     OrderingModelViewsetMixin
 )
 
+from.filters import (
+    PersonnelFilter,
+    SupplierFilter,
+    TechCardFilter,
+    WarehouseOrderFilter,
+)
 from . import models, serializers
 
 
@@ -57,10 +63,17 @@ class PersonnelViewSet(
     viewsets.ModelViewSet,
     OrderingModelViewsetMixin,
 ):
+    filterset_class = PersonnelFilter
     permission_classes = (AllowAny,)
     serializer_class = serializers.PersonnelSerializer
     lookup_field = "id"
     queryset = models.Personnel.objects.all()
+
+    def get_queryset(self):
+        qs = self.queryset
+        if "is_archive" not in self.request.query_params:
+            qs = qs.filter(is_archive=False)
+        return qs
 
 
 class WarehouseViewSet(viewsets.ModelViewSet):
@@ -174,6 +187,7 @@ class WarehouseOrderViewSet(
     viewsets.ModelViewSet,
     OrderingModelViewsetMixin,
 ):
+    filterset_class = WarehouseOrderFilter
     permission_classes = (AllowAny,)
     serializer_class = serializers.WarehouseOrderSerializer
     lookup_field = "id"
@@ -189,9 +203,11 @@ class WarehouseOrderViewSet(
                 )
             )
         )
-        if "s" in self.request.query_params:
-            search_value = self.request.query_params["s"]
-            qs = qs.filter(Q(order_number__icontains=search_value))
+
+        if "is_archive" not in self.request.query_params:
+            qs = qs.filter(is_archive=False)
+            return qs
+
         ordering_fields = self.get_ordering_fields()
         if ordering_fields:
             return qs.order_by(*ordering_fields)
@@ -205,6 +221,7 @@ class SupplierViewSet(
     viewsets.ModelViewSet,
     OrderingModelViewsetMixin,
 ):
+    filterset_class = SupplierFilter
     permission_classes = (AllowAny,)
     serializer_class = serializers.SupplierSerializer
     lookup_field = "id"
@@ -212,13 +229,8 @@ class SupplierViewSet(
 
     def get_queryset(self):
         qs = self.queryset
-        if "s" in self.request.query_params:
-            search_value = self.request.query_params["s"]
-            qs = qs.filter(
-                Q(name__icontains=search_value)
-                | Q(email__icontains=search_value)
-                | Q(phone__icontains=search_value)
-            )
+        if "is_archive" not in self.request.query_params:
+            qs = qs.filter(is_archive=False)
         ordering_fields = self.get_ordering_fields()
         if ordering_fields:
             return qs.order_by(*ordering_fields)
@@ -261,7 +273,14 @@ class TechCardViewSet(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet
     permission_classes = (AllowAny,)
     serializer_class = serializers.TechCardSerializer
     lookup_field = "id"
-    queryset = models.TechCard.objects.filter(is_archive=False)
+    filterset_class = TechCardFilter
+    queryset = models.TechCard.objects.all()
+
+    def get_queryset(self):
+        qs = self.queryset
+        if "is_archive" not in self.request.query_params:
+            qs = qs.filter(is_archive=False)
+        return qs
 
 
 class DailyMenuViewSet(viewsets.ModelViewSet):

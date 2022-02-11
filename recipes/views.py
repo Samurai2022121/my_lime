@@ -42,7 +42,11 @@ class RecipeViewset(
         return self.queryset.get(id=self.kwargs["id"])
 
     def get_queryset(self):
-        qs = self.queryset.filter(is_archive=False)
+        qs = self.queryset
+
+        if "is_archive" not in self.request.query_params:
+            qs = qs.filter(is_archive=False)
+
         ordering_fields = self.get_ordering_fields()
         if ordering_fields:
             qs = qs.order_by(*ordering_fields)
