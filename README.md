@@ -12,10 +12,10 @@ $ pip-compile requirements.in
 ## Code style
 
 We use the following tools to maintain code style:
-black - code formatter
-flake8 - code style enforcer
-isort - to keep imports sorted
-pre-commit - to manager pre-commit hooks
+black - code formatter  
+flake8 - code style enforcer  
+isort - to keep imports sorted  
+pre-commit - to manager pre-commit hooks  
 
 To install pre-commit hooks to your local repository, run:
 
