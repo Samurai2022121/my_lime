@@ -1,20 +1,23 @@
 from django.contrib.contenttypes.models import ContentType
-from rest_framework import serializers
 from drf_writable_nested import WritableNestedModelSerializer
+from rest_framework import serializers
 
 from reviews.models import Star
 
-from .models import News, Section, NewsParagraphs, NewsParagraphsImages
+from .models import News, NewsParagraphs, NewsParagraphsImages, Section
 
 
-class NewsParagraphsImagesSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
-
+class NewsParagraphsImagesSerializer(
+    WritableNestedModelSerializer, serializers.ModelSerializer
+):
     class Meta:
         model = NewsParagraphsImages
         fields = "__all__"
 
 
-class NewsParagraphsSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+class NewsParagraphsSerializer(
+    WritableNestedModelSerializer, serializers.ModelSerializer
+):
     news_paragraps_images = NewsParagraphsImagesSerializer(many=True)
 
     class Meta:

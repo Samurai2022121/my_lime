@@ -1,6 +1,7 @@
 import django_filters
 from django.db.models import Q
-from .models import User, CustomerDeliveryAddress
+
+from .models import CustomerDeliveryAddress, User
 
 
 class UserFilter(django_filters.FilterSet):

@@ -1,5 +1,4 @@
 from decimal import Decimal
-# import pdb; pdb.set_trace()
 
 import pandas as pd
 from django.db.models import F, Q, Sum
@@ -9,7 +8,11 @@ from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.status import HTTP_202_ACCEPTED, HTTP_400_BAD_REQUEST, HTTP_201_CREATED
+from rest_framework.status import (
+    HTTP_201_CREATED,
+    HTTP_202_ACCEPTED,
+    HTTP_400_BAD_REQUEST,
+)
 
 from products.models import Product
 from products.serializers import ProductListSerializer
@@ -18,16 +21,18 @@ from utils.views_utils import (
     BulkChangeArchiveStatusViewSetMixin,
     BulkUpdateViewSetMixin,
     ChangeDestroyToArchiveMixin,
-    OrderingModelViewsetMixin
+    OrderingModelViewsetMixin,
 )
 
-from.filters import (
+from . import models, serializers
+from .filters import (
     PersonnelFilter,
     SupplierFilter,
     TechCardFilter,
     WarehouseOrderFilter,
 )
-from . import models, serializers
+
+# import pdb; pdb.set_trace()
 
 
 class ShopViewSet(
@@ -148,7 +153,7 @@ class UploadCSVGenericView(GenericAPIView):
         products = []
         row_num = data.get("first_row", None)
 
-        for index, row in file.iloc[row_num:].iterrows():
+        for _, row in file.iloc[row_num:].iterrows():
 
             if row[data.get("name_col", 0)] and row[data.get("price_col", 0)]:
 
@@ -293,6 +298,7 @@ class DailyMenuViewSet(viewsets.ModelViewSet):
 class LegalEntityFilterSet(filters.FilterSet):
 
     """Searches through `registration_id` and/or `name` fields."""
+
     s = filters.CharFilter(
         method="search_by_id_or_name",
         label="регистрационный номер или наименование",

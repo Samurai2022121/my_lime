@@ -1,23 +1,20 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny
-from .filters import NewsFilter
 
-from utils.views_utils import (BulkChangeArchiveStatusViewSetMixin,
-                               BulkUpdateViewSetMixin)
-
-from .models import (
-    News,
-    Section,
-    NewsParagraphs,
-    NewsParagraphsImages,
+from utils.views_utils import (
+    BulkChangeArchiveStatusViewSetMixin,
+    BulkUpdateViewSetMixin,
 )
-from .serializers import(
+
+from .filters import NewsFilter
+from .models import News, NewsParagraphs, NewsParagraphsImages, Section
+from .serializers import (
+    NewsAdminSerializer,
+    NewsParagraphsImagesSerializer,
+    NewsParagraphsSerializer,
     NewsSerializer,
     SectionSerializer,
-    NewsParagraphsSerializer,
-    NewsParagraphsImagesSerializer,
-    NewsAdminSerializer,
 )
 
 

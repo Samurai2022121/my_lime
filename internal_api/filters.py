@@ -1,11 +1,7 @@
 import django_filters
 from django.db.models import Q
-from .models import (
-    Supplier,
-    Personnel,
-    TechCard,
-    WarehouseOrder,
-)
+
+from .models import Personnel, Supplier, TechCard, WarehouseOrder
 
 
 class SupplierFilter(django_filters.FilterSet):
@@ -55,9 +51,7 @@ class TechCardFilter(django_filters.FilterSet):
         fields = {"is_archive": ["exact"]}
 
     def search(self, qs, name, value):
-        return qs.filter(
-            Q(name__icontains=value)
-        )
+        return qs.filter(Q(name__icontains=value))
 
 
 class WarehouseOrderFilter(django_filters.FilterSet):

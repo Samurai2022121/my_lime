@@ -256,7 +256,7 @@ class WarehouseOrderPositions(models.Model):
     margin = models.DecimalField(default=0, max_digits=4, decimal_places=2)
 
     def __str__(self):
-        return f'{self.product.name} in {self.warehouse_order}'
+        return f"{self.product.name} in {self.warehouse_order}"
 
 
 class LegalEntities(models.Model):

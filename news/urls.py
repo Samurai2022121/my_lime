@@ -1,6 +1,11 @@
 from rest_framework import routers
 
-from .views import NewsViewset, SectionViewset, NewsParagraphsViewset, NewsParagraphsImagesViewset
+from .views import (
+    NewsParagraphsImagesViewset,
+    NewsParagraphsViewset,
+    NewsViewset,
+    SectionViewset,
+)
 
 router = routers.SimpleRouter()
 router.register("news", NewsViewset)

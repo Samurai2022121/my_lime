@@ -44,7 +44,7 @@ class SupplyContractsSerializer(serializers.Serializer):
     files_supply = SupplyContractSerializer(many=True, write_only=True)
 
     def create(self, validated_data):
-        files = validated_data.pop('files_supply', [])
+        files = validated_data.pop("files_supply", [])
         files = [models.SupplyContract(**f) for f in files]
         supply_contracts = models.SupplyContract.objects.bulk_create(files)
         return supply_contracts
