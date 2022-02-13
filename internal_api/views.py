@@ -2,7 +2,7 @@ from decimal import Decimal
 
 import pandas as pd
 from django.db.models import F, Q, Sum
-from django_filters import rest_framework as filters
+from django_filters import rest_framework as df_filters
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
@@ -25,14 +25,7 @@ from utils.views_utils import (
 )
 
 from . import models, serializers
-from .filters import (
-    PersonnelFilter,
-    SupplierFilter,
-    TechCardFilter,
-    WarehouseOrderFilter,
-)
-
-# import pdb; pdb.set_trace()
+from . import filters
 
 
 class ShopViewSet(
@@ -44,22 +37,19 @@ class ShopViewSet(
 ):
     permission_classes = (AllowAny,)
     serializer_class = serializers.ShopSerializer
+    filter_backends = (df_filters.DjangoFilterBackend,)
+    filterset_class = filters.ShopFilter
     lookup_field = "id"
     queryset = models.Shop.objects.all()
 
     def get_queryset(self):
         qs = self.queryset
-        if "s" in self.request.query_params:
-            search_value = self.request.query_params["s"]
-            qs = qs.filter(
-                Q(name__icontains=search_value)
-                | Q(address__icontains=search_value)
-                | Q(id__icontains=search_value)
-            )
+        if "is_archive" not in self.request.query_params:
+            qs = qs.filter(is_archive=False)
         ordering_fields = self.get_ordering_fields()
         if ordering_fields:
             return qs.order_by(*ordering_fields)
-        return qs
+        return qs.order_by("name")
 
 
 class PersonnelViewSet(
@@ -68,7 +58,8 @@ class PersonnelViewSet(
     viewsets.ModelViewSet,
     OrderingModelViewsetMixin,
 ):
-    filterset_class = PersonnelFilter
+    filter_backends = (df_filters.DjangoFilterBackend,)
+    filterset_class = filters.PersonnelFilter
     permission_classes = (AllowAny,)
     serializer_class = serializers.PersonnelSerializer
     lookup_field = "id"
@@ -84,6 +75,8 @@ class PersonnelViewSet(
 class WarehouseViewSet(viewsets.ModelViewSet):
     permission_classes = (AllowAny,)
     serializer_class = serializers.WarehouseSerializer
+    filter_backends = (df_filters.DjangoFilterBackend,)
+    filterset_class = filters.WarehouseFilter
     lookup_field = "id"
     queryset = models.Warehouse.objects.all()
 
@@ -94,13 +87,6 @@ class WarehouseViewSet(viewsets.ModelViewSet):
             qs = qs.filter(shop=outlet_id, product__is_archive=False)
         else:
             qs = qs.none()
-        if "s" in self.request.query_params:
-            search_value = self.request.query_params["s"]
-            qs = qs.filter(
-                Q(product__name__icontains=search_value)
-                | Q(product__barcode__icontains=search_value)
-                | Q(product__id__icontains=search_value)
-            )
         qs = qs.order_by("product__name")
         return qs
 
@@ -192,7 +178,8 @@ class WarehouseOrderViewSet(
     viewsets.ModelViewSet,
     OrderingModelViewsetMixin,
 ):
-    filterset_class = WarehouseOrderFilter
+    filter_backends = (df_filters.DjangoFilterBackend,)
+    filterset_class = filters.WarehouseOrderFilter
     permission_classes = (AllowAny,)
     serializer_class = serializers.WarehouseOrderSerializer
     lookup_field = "id"
@@ -201,7 +188,6 @@ class WarehouseOrderViewSet(
     def get_queryset(self):
         qs = (
             self.queryset.prefetch_related("warehouse_order")
-            .filter(is_archive=False)
             .annotate(
                 total=Sum(
                     F("warehouse_order__quantity") * F("warehouse_order__buying_price")
@@ -211,12 +197,11 @@ class WarehouseOrderViewSet(
 
         if "is_archive" not in self.request.query_params:
             qs = qs.filter(is_archive=False)
-            return qs
 
         ordering_fields = self.get_ordering_fields()
         if ordering_fields:
             return qs.order_by(*ordering_fields)
-        return qs
+        return qs.order_by("product__name")
 
 
 class SupplierViewSet(
@@ -226,7 +211,8 @@ class SupplierViewSet(
     viewsets.ModelViewSet,
     OrderingModelViewsetMixin,
 ):
-    filterset_class = SupplierFilter
+    filter_backends = (df_filters.DjangoFilterBackend,)
+    filterset_class = filters.SupplierFilter
     permission_classes = (AllowAny,)
     serializer_class = serializers.SupplierSerializer
     lookup_field = "id"
@@ -278,14 +264,15 @@ class TechCardViewSet(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet
     permission_classes = (AllowAny,)
     serializer_class = serializers.TechCardSerializer
     lookup_field = "id"
-    filterset_class = TechCardFilter
+    filter_backends = (df_filters.DjangoFilterBackend,)
+    filterset_class = filters.TechCardFilter
     queryset = models.TechCard.objects.all()
 
     def get_queryset(self):
         qs = self.queryset
         if "is_archive" not in self.request.query_params:
             qs = qs.filter(is_archive=False)
-        return qs
+        return qs.order_by("name")
 
 
 class DailyMenuViewSet(viewsets.ModelViewSet):
@@ -295,30 +282,13 @@ class DailyMenuViewSet(viewsets.ModelViewSet):
     queryset = models.DailyMenuPlan.objects.all()
 
 
-class LegalEntityFilterSet(filters.FilterSet):
-
-    """Searches through `registration_id` and/or `name` fields."""
-
-    s = filters.CharFilter(
-        method="search_by_id_or_name",
-        label="регистрационный номер или наименование",
-    )
-
-    class Meta:
-        model = models.LegalEntities
-        fields = ("s",)
-
-    def search_by_id_or_name(self, qs, name, value):
-        return qs.filter(Q(registration_id__contains=value) | Q(name__icontains=value))
-
-
 class LegalEntityViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (AllowAny,)
     serializer_class = serializers.LegalEntitySerializer
     lookup_field = "registration_id"
     queryset = models.LegalEntities.objects.filter(active="+")
-    filter_backends = (filters.DjangoFilterBackend,)
-    filterset_class = LegalEntityFilterSet
+    filter_backends = (df_filters.DjangoFilterBackend,)
+    filterset_class = filters.LegalEntityFilterSet
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

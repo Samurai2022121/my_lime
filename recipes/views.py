@@ -64,6 +64,8 @@ class RecipeAdminViewset(
 ):
     permission_classes = (AllowAny,)
     serializer_class = RecipeAdminSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RecipeFilter
     serializer_action_classes = {
         "list": RecipeListAdminSerializer,
     }

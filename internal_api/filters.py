@@ -1,7 +1,7 @@
 import django_filters
 from django.db.models import Q
 
-from .models import Personnel, Supplier, TechCard, WarehouseOrder
+from . import models
 
 
 class SupplierFilter(django_filters.FilterSet):
@@ -11,7 +11,7 @@ class SupplierFilter(django_filters.FilterSet):
     )
 
     class Meta:
-        model = Supplier
+        model = models.Supplier
         fields = {"is_archive": ["exact"]}
 
     def search(self, qs, name, value):
@@ -29,7 +29,7 @@ class PersonnelFilter(django_filters.FilterSet):
     )
 
     class Meta:
-        model = Personnel
+        model = models.Personnel
         fields = {"is_archive": ["exact"]}
 
     def search(self, qs, name, value):
@@ -47,7 +47,7 @@ class TechCardFilter(django_filters.FilterSet):
     )
 
     class Meta:
-        model = TechCard
+        model = models.TechCard
         fields = {"is_archive": ["exact"]}
 
     def search(self, qs, name, value):
@@ -57,12 +57,65 @@ class TechCardFilter(django_filters.FilterSet):
 class WarehouseOrderFilter(django_filters.FilterSet):
     s = django_filters.CharFilter(
         method="search",
-        label="поиск по номеру ордера",
+        label="поиск по номеру заказа",
     )
 
     class Meta:
-        model = WarehouseOrder
+        model = models.WarehouseOrder
         fields = {"is_archive": ["exact"]}
 
     def search(self, qs, name, value):
         return qs.filter(Q(order_number__icontains=value))
+
+
+class LegalEntityFilterSet(django_filters.FilterSet):
+
+    """Searches through `registration_id` and/or `name` fields."""
+
+    s = django_filters.CharFilter(
+        method="search_by_id_or_name",
+        label="регистрационный номер или наименование",
+    )
+
+    class Meta:
+        model = models.LegalEntities
+        fields = ("s",)
+
+    def search_by_id_or_name(self, qs, name, value):
+        return qs.filter(Q(registration_id__contains=value) | Q(name__icontains=value))
+
+
+class ShopFilter(django_filters.FilterSet):
+    s = django_filters.CharFilter(
+        method="search",
+        label="поиск по названию, адресу, id",
+    )
+
+    class Meta:
+        model = models.WarehouseOrder
+        fields = {"is_archive": ["exact"]}
+
+    def search(self, qs, name, value):
+        return qs.filter(
+            Q(name__icontains=value)
+            | Q(address__icontains=value)
+            | Q(id__icontains=value)
+        )
+
+
+class WarehouseFilter(django_filters.FilterSet):
+    s = django_filters.CharFilter(
+        method="search",
+        label="поиск по наименованию продукта, штрихкоду проудукта, id продукта",
+    )
+
+    class Meta:
+        model = models.WarehouseOrder
+        fields = {"is_archive": ["exact"]}
+
+    def search(self, qs, name, value):
+        return qs.filter(
+            Q(product__name__icontains=value)
+            | Q(product__barcode__icontains=value)
+            | Q(product__id__icontains=value)
+        )

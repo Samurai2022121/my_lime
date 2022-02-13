@@ -185,7 +185,7 @@ class WarehouseOrderSerializer(serializers.ModelSerializer):
 class TechProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.TechCardProduct
-        fields = ["product", "quantity"]
+        fields = ["product", "quantity", "id"]
 
 
 class TechCardSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
@@ -193,13 +193,15 @@ class TechCardSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
 
     class Meta:
         model = models.TechCard
-        fields = ["name", "amount", "author", "created_at", "tech_card_product"]
+        fields = ["name", "amount", "author", "created_at", "tech_card_product", "id"]
 
 
 class MenuDishSerializer(serializers.ModelSerializer):
+    dish = TechCardSerializer()
+
     class Meta:
         model = models.MenuDish
-        fields = ["dish", "quantity"]
+        fields = ["dish", "quantity", "id"]
 
 
 class DailyMenuSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
@@ -207,7 +209,7 @@ class DailyMenuSerializer(WritableNestedModelSerializer, serializers.ModelSerial
 
     class Meta:
         model = models.DailyMenuPlan
-        fields = ["author", "menu_dish", "created_at", "updated_at"]
+        fields = ["id", "author", "menu_dish", "created_at", "updated_at"]
 
 
 class LegalEntitySerializer(serializers.ModelSerializer):
