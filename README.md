@@ -11,7 +11,7 @@ $ pip-compile requirements.in
 
 ## Code style
 
-We use the following tools to maintain code style:
+We use the following tools to maintain code style:  
 black - code formatter  
 flake8 - code style enforcer  
 isort - to keep imports sorted  
@@ -30,4 +30,10 @@ To reproduce the environment on testing or deployment stage, do
 
 ```shell
 $ pip install -r requirements.txt
+```
+
+## Testing
+
+```shell
+$ pytest
 ```

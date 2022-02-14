@@ -12,9 +12,7 @@ class ProductFilter(django_filters.FilterSet):
         method="search",
         label="поиск по наименованию, штрихкоду, id",
     )
-    is_sorted = django_filters.CharFilter(
-        method="is_sorted_filter"
-    )
+    is_sorted = django_filters.CharFilter(method="is_sorted_filter")
 
     class Meta:
         model = Product

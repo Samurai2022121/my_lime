@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 import pandas as pd
-from django.db.models import F, Q, Sum
+from django.db.models import F, Sum
 from django_filters import rest_framework as df_filters
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -24,8 +24,7 @@ from utils.views_utils import (
     OrderingModelViewsetMixin,
 )
 
-from . import models, serializers
-from . import filters
+from . import filters, models, serializers
 
 
 class ShopViewSet(
@@ -186,12 +185,9 @@ class WarehouseOrderViewSet(
     queryset = models.WarehouseOrder.objects.all()
 
     def get_queryset(self):
-        qs = (
-            self.queryset.prefetch_related("warehouse_order")
-            .annotate(
-                total=Sum(
-                    F("warehouse_order__quantity") * F("warehouse_order__buying_price")
-                )
+        qs = self.queryset.prefetch_related("warehouse_order").annotate(
+            total=Sum(
+                F("warehouse_order__quantity") * F("warehouse_order__buying_price")
             )
         )
 

@@ -41,3 +41,4 @@ repos:
   - id: no-commit-to-branch
     args: [--branch=main]
   - id: trailing-whitespace
+    exclude_types: [markdown]
