@@ -201,7 +201,7 @@ class WarehouseOrderViewSet(
         ordering_fields = self.get_ordering_fields()
         if ordering_fields:
             return qs.order_by(*ordering_fields)
-        return qs.order_by("product__name")
+        return qs
 
 
 class SupplierViewSet(
