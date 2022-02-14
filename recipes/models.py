@@ -1,6 +1,6 @@
 from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
-
+from django.core.validators import FileExtensionValidator
 from products.models import Product
 from users.models import User
 from utils.models_utils import Timestampable
@@ -22,6 +22,7 @@ class RecipeCategory(MPTTModel):
         null=True,
         verbose_name="Изображение категории рецепта",
         upload_to="recipe/categories/",
+        validators=[FileExtensionValidator(['svg', 'png', 'jpg'])]
     )
     is_archive = models.BooleanField(default=False)
 

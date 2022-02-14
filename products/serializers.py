@@ -2,6 +2,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Avg
 from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
+from django.core.validators import FileExtensionValidator
 
 from reviews.models import Favourite, Star
 from utils.models_utils import Round
@@ -24,7 +25,7 @@ class CategoryListSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     parents = serializers.SerializerMethodField()
     parent_id = serializers.CharField(write_only=True, required=False)
-    image = serializers.ImageField(write_only=True)
+    image = serializers.FileField(write_only=True, validators=[FileExtensionValidator(['svg', 'png', 'jpg'])])
 
     class Meta:
         model = Category

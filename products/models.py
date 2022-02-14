@@ -1,5 +1,9 @@
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import (
+    FileExtensionValidator,
+    MaxValueValidator,
+    MinValueValidator,
+)
 from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
 
@@ -22,6 +26,7 @@ class Category(MPTTModel):
         null=True,
         verbose_name="Изображение категории",
         upload_to="products/categories/",
+        validators=[FileExtensionValidator(["svg", "png", "jpg"])],
     )
     is_archive = models.BooleanField(default=False)
 

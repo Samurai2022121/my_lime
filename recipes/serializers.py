@@ -27,7 +27,7 @@ class RecipeCategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RecipeCategory
-        fields = ["id", "name", "parents"]
+        fields = ["id", "name", "parents", "image"]
 
     def get_parents(self, obj):
         serializer = RecipeCategorySerializer(instance=obj.parent)
