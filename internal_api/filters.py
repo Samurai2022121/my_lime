@@ -110,7 +110,7 @@ class WarehouseFilter(django_filters.FilterSet):
     )
 
     class Meta:
-        model = models.WarehouseOrder
+        model = models.Warehouse
         fields = {"is_archive": ["exact"]}
 
     def search(self, qs, name, value):
