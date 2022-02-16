@@ -5,6 +5,7 @@ from django.core.validators import (
     MinValueValidator,
 )
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 from mptt.models import MPTTModel, TreeForeignKey
 
 from utils.models_utils import Timestampable
@@ -132,7 +133,12 @@ class Product(Timestampable, models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
+        self.full_clean()
         super(Product, self).save()
+
+    def clean(self):
+        if self.for_scales and (not self.short_name or not self.category):
+            raise ValidationError(_("Обязательны параметры short_name и category."))
 
 
 class ProductImages(models.Model):

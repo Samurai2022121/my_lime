@@ -1,8 +1,8 @@
 from django.contrib.contenttypes.models import ContentType
+from django.core.validators import FileExtensionValidator
 from django.db.models import Avg
 from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
-from django.core.validators import FileExtensionValidator
 
 from reviews.models import Favourite, Star
 from utils.models_utils import Round
@@ -25,7 +25,9 @@ class CategoryListSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     parents = serializers.SerializerMethodField()
     parent_id = serializers.CharField(write_only=True, required=False)
-    image = serializers.FileField(write_only=True, validators=[FileExtensionValidator(['svg', 'png', 'jpg'])])
+    image = serializers.FileField(
+        write_only=True, validators=[FileExtensionValidator(["svg", "png", "jpg"])]
+    )
 
     class Meta:
         model = Category
@@ -238,6 +240,19 @@ class ProductAdminSerializer(serializers.ModelSerializer):
                 ProductImages.objects.create(product=instance, **image_obj)
         super().update(instance, validated_data)
         return instance
+
+    def validate(self, data):
+        for_scales = data.get("for_scales")
+        short_name = data.get("short_name")
+        category = data.get("category")
+
+        if for_scales and not short_name:
+            raise serializers.ValidationError("Введите short_name.")
+
+        if for_scales and not category:
+            raise serializers.ValidationError("Введите category.")
+
+        return data
 
 
 class BulkActionProductSerializer(serializers.Serializer):

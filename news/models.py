@@ -1,5 +1,6 @@
-from django.db import models
 from django.core.validators import FileExtensionValidator
+from django.db import models
+
 from users.models import User
 from utils.models_utils import Timestampable
 
@@ -8,8 +9,11 @@ class Section(models.Model):
     name = models.CharField(max_length=50, unique=True, verbose_name="Новостной раздел")
     description = models.TextField(verbose_name="Описание")
     image = models.FileField(
-        null=True, blank=True, verbose_name="Изображение", upload_to="news/",
-        validators=[FileExtensionValidator(['svg', 'png', 'jpg'])]
+        null=True,
+        blank=True,
+        verbose_name="Изображение",
+        upload_to="news/",
+        validators=[FileExtensionValidator(["svg", "png", "jpg"])],
     )
 
     class Meta:
