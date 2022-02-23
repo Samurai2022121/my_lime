@@ -52,7 +52,9 @@ django==4.0.1
     #   -r requirements.in
     #   django-cors-headers
     #   django-debug-toolbar
+    #   django-extensions
     #   django-filter
+    #   django-sql-utils
     #   djangorestframework
     #   djangorestframework-simplejwt
     #   drf-base64
@@ -62,6 +64,8 @@ django-cors-headers==3.11.0
     # via -r requirements.in
 django-debug-toolbar==3.2.4
     # via -r requirements.in
+django-extensions==3.1.5
+    # via -r requirements.in
 django-filter==21.1
     # via -r requirements.in
 django-js-asset==1.2.2
@@ -69,6 +73,8 @@ django-js-asset==1.2.2
     #   -r requirements.in
     #   django-mptt
 django-mptt==0.13.4
+    # via -r requirements.in
+django-sql-utils==0.6.1
     # via -r requirements.in
 djangorestframework==3.13.1
     # via
@@ -153,6 +159,8 @@ pycodestyle==2.8.0
     # via flake8
 pyflakes==2.4.0
     # via flake8
+pygraphviz==1.9
+    # via -r requirements.in
 pyjwt==2.3.0
     # via djangorestframework-simplejwt
 pyparsing==3.0.7
@@ -211,6 +219,7 @@ sqlparse==0.4.2
     # via
     #   django
     #   django-debug-toolbar
+    #   django-sql-utils
 toml==0.10.2
     # via
     #   pre-commit

@@ -3,7 +3,7 @@ from secrets import token_hex
 
 from django.db import models
 
-from products.models import Product
+from products.models import ProductUnit
 from utils.models_utils import Timestampable, phone_regex
 
 
@@ -121,11 +121,8 @@ class SupplyContract(Timestampable, models.Model):
 
 
 class Warehouse(models.Model):
-    product = models.ForeignKey(
-        Product, on_delete=models.PROTECT, related_name="warehouse"
-    )
-    shop = models.ForeignKey(Shop, on_delete=models.PROTECT, related_name="warehouse")
-    remaining = models.DecimalField(default=0, max_digits=7, decimal_places=2)
+    product_unit = models.ForeignKey(ProductUnit, on_delete=models.PROTECT)
+    shop = models.ForeignKey(Shop, on_delete=models.PROTECT)
     min_remaining = models.DecimalField(default=0, max_digits=7, decimal_places=2)
     max_remaining = models.DecimalField(default=0, max_digits=7, decimal_places=2)
     supplier = models.ForeignKey(
@@ -138,72 +135,61 @@ class Warehouse(models.Model):
     margin = models.DecimalField(blank=True, null=True, max_digits=4, decimal_places=2)
     auto_order = models.BooleanField(default=False)
 
-
-class RemainingProduct(Timestampable, models.Model):
-    product = models.ForeignKey(
-        Product, on_delete=models.PROTECT, related_name="remaining_product"
-    )
-    remaining = models.DecimalField(default=1, max_digits=7, decimal_places=2)
-
-
-class TechCard(Timestampable, models.Model):
-    name = models.CharField(max_length=255)
-    amount = models.DecimalField(default=1, max_digits=7, decimal_places=2)
-    author = models.ForeignKey(
-        Personnel, on_delete=models.PROTECT, related_name="tech_card"
-    )
-    is_archive = models.BooleanField(default=False)
-    product = models.ManyToManyField(Product, through="TechCardProduct")
-
     class Meta:
-        verbose_name = "Техкарта"
-        verbose_name_plural = "Техкарты"
+        verbose_name = "Запас"
+        verbose_name_plural = "Запасы"
+        default_related_name = "warehouses"
 
     def __str__(self):
-        return self.name
+        return f"{self.product_unit} in {self.shop}"
 
 
-class TechCardProduct(models.Model):
-    tech_card = models.ForeignKey(
-        TechCard, on_delete=models.PROTECT, related_name="tech_product"
-    )
-    product = models.ForeignKey(
-        Product, on_delete=models.PROTECT, related_name="tech_card_product"
-    )
-    quantity = models.DecimalField(max_digits=7, decimal_places=2)
-
-
-class DailyMenuPlan(Timestampable, models.Model):
-    dishes = models.ManyToManyField(TechCard, through="MenuDish")
-    author = models.ForeignKey(
-        Personnel, on_delete=models.PROTECT, related_name="daily_menu_plan"
-    )
+class PrimaryDocument(models.Model):
+    created_at = models.DateField("создан", auto_now_add=True, editable=True)
+    number = models.CharField("номер", max_length=255, unique=True)
 
     class Meta:
-        verbose_name = "План меню на день"
-        verbose_name_plural = "Планы меню на день"
+        verbose_name = "Документ первичного учёта"
+        verbose_name_plural = "Документы первичного учёта"
+        ordering = ("created_at", "number")
 
     def __str__(self):
-        return self.author.first_name
+        return f"{self.number} от {self.created_at}"
 
 
-class MenuDish(models.Model):
-    dish = models.ForeignKey(
-        TechCard, on_delete=models.PROTECT, related_name="menu_dish"
-    )
-    menu = models.ForeignKey(
-        DailyMenuPlan,
+class ProductionDocument(PrimaryDocument):
+    daily_menu_plan = models.ForeignKey(
+        "production.DailyMenuPlan",
         on_delete=models.PROTECT,
-        related_name="menu_dish",
+        related_name="production_documents",
+        verbose_name="план меню на день",
     )
-    quantity = models.IntegerField(default=1)
 
     class Meta:
-        verbose_name = "Заявка меню на день"
-        verbose_name_plural = "Заявки меню на день"
+        verbose_name = "Документ учёта произведённой продукции"
+        verbose_name_plural = "Документы учёта произведённой продукции"
+
+
+class WarehouseRecord(Timestampable, models.Model):
+    warehouse = models.ForeignKey(
+        Warehouse,
+        on_delete=models.PROTECT,
+        verbose_name="запас",
+    )
+    quantity = models.DecimalField("количество", max_digits=7, decimal_places=2)
+    document = models.ForeignKey(
+        PrimaryDocument,
+        on_delete=models.CASCADE,
+        verbose_name="первичный документ",
+    )
+
+    class Meta:
+        verbose_name = "Изменение запаса"
+        verbose_name_plural = "Изменения запаса"
+        default_related_name = "warehouse_records"
 
     def __str__(self):
-        return self.dish.name
+        return f"Изменение {self.warehouse}"
 
 
 class WarehouseOrder(models.Model):
@@ -220,10 +206,10 @@ class WarehouseOrder(models.Model):
         on_delete=models.PROTECT,
         blank=True,
         null=True,
-        related_name="warehouse_order",
+        related_name="warehouse_orders",
     )
     order_positions = models.ManyToManyField(
-        Product, through="WarehouseOrderPositions", blank=True
+        ProductUnit, through="WarehouseOrderPositions", blank=True
     )
     shop = models.ForeignKey(Shop, on_delete=models.PROTECT)
     waybill = models.CharField(max_length=255, null=True, blank=True)
@@ -239,11 +225,10 @@ class WarehouseOrder(models.Model):
 
 class WarehouseOrderPositions(models.Model):
     warehouse_order = models.ForeignKey(
-        WarehouseOrder, on_delete=models.PROTECT, related_name="warehouse_order"
+        WarehouseOrder,
+        on_delete=models.PROTECT,
     )
-    product = models.ForeignKey(
-        Product, on_delete=models.PROTECT, related_name="warehouse_order_product"
-    )
+    product_unit = models.ForeignKey(ProductUnit, on_delete=models.PROTECT)
     quantity = models.DecimalField(default=0, max_digits=7, decimal_places=2)
     bonus = models.IntegerField(default=0)
     special = models.DecimalField(default=0, max_digits=7, decimal_places=2)
@@ -254,6 +239,11 @@ class WarehouseOrderPositions(models.Model):
         default=0, max_digits=7, decimal_places=2
     )
     margin = models.DecimalField(default=0, max_digits=4, decimal_places=2)
+
+    class Meta:
+        verbose_name = "Строка заказа"
+        verbose_name_plural = "Строки заказа"
+        default_related_name = "warehouse_order_positions"
 
     def __str__(self):
         return f"{self.product.name} in {self.warehouse_order}"

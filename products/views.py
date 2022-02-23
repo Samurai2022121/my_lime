@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework_nested.viewsets import NestedViewSetMixin
 
 from internal_api.models import Warehouse
 from utils.views_utils import (
@@ -16,7 +17,20 @@ from utils.views_utils import (
 
 from . import serializers
 from .filters import ProductFilter
-from .models import Category, Product, ProductImages
+from .models import (
+    Category,
+    MeasurementUnit,
+    Product,
+    ProductImages,
+    ProductUnit,
+    ProductUnitConversion,
+)
+
+
+class MeasurementUnitViewset(viewsets.ModelViewSet):
+    permission_classes = (AllowAny,)
+    queryset = MeasurementUnit.objects.order_by("name")
+    serializer_class = serializers.MeasurementUnitSerializer
 
 
 class ProductAdminViewset(
@@ -67,6 +81,45 @@ class ProductAdminViewset(
         new_category = serialized_data.data["new_category"]
         Product.objects.filter(id__in=product_ids).update(category=new_category)
         return Response(status=status.HTTP_200_OK)
+
+
+class ProductUnitViewset(NestedViewSetMixin, viewsets.ModelViewSet):
+    permission_classes = (AllowAny,)
+    serializer_class = serializers.ProductUnitSerializer
+    queryset = ProductUnit.objects.all()
+    lookup_field = "id"
+    parent_lookup_kwargs = {"product_id": "product__id"}
+
+    def perform_create(self, serializer):
+        serializer.save(**self.kwargs)
+
+
+class ConversionSourceViewset(NestedViewSetMixin, viewsets.ModelViewSet):
+    permission_classes = (AllowAny,)
+    serializer_class = serializers.ConversionSourceSerializer
+    queryset = ProductUnitConversion.objects.order_by("target_unit__unit__name")
+    lookup_field = "id"
+    parent_lookup_kwargs = {
+        "product_id": "source_unit__product_id",
+        "unit_id": "source_unit",
+    }
+
+    def perform_create(self, serializer):
+        serializer.save(target_unit_id=self.kwargs.get("unit_id", None))
+
+
+class ConversionTargetViewset(NestedViewSetMixin, viewsets.ModelViewSet):
+    permission_classes = (AllowAny,)
+    serializer_class = serializers.ConversionTargetSerializer
+    queryset = ProductUnitConversion.objects.order_by("source_unit__unit__name")
+    lookup_field = "id"
+    parent_lookup_kwargs = {
+        "product_id": "target_unit__product_id",
+        "unit_id": "target_unit",
+    }
+
+    def perform_create(self, serializer):
+        serializer.save(source_unit_id=self.kwargs.get("unit_id", None))
 
 
 class ProductViewset(

@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "drf_yasg",
     "django_filters",
     "rest_framework_simplejwt",
+    "django_extensions",
     "news",
     "orders",
     "products",
@@ -42,6 +43,7 @@ INSTALLED_APPS = [
     "reviews",
     "internal_api",
     "users",
+    "production",
 ]
 
 MIDDLEWARE = [

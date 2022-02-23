@@ -1,4 +1,8 @@
+from decimal import Decimal
+
 from django.contrib import admin
+from django.db.models import DecimalField, Sum
+from django.db.models.functions import Coalesce
 
 from utils.models_utils import ListDisplayAllModelFieldsAdminMixin
 
@@ -15,38 +19,51 @@ class PersonnelAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
     pass
 
 
+@admin.register(models.PrimaryDocument)
+class PrimaryDocumentAdmin(
+    ListDisplayAllModelFieldsAdminMixin,
+    admin.ModelAdmin,
+):
+    pass
+
+
+class WarehouseRecordInline(admin.TabularInline):
+    model = models.WarehouseRecord
+    extra = 1
+
+
 @admin.register(models.Warehouse)
-class WarehouseAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
-    pass
-
-
-class ProductForTechCardInline(admin.StackedInline):
-    model = models.TechCardProduct
-    extra = 1
-
-
-@admin.register(models.TechCard)
-class TechCardAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
-    inlines = [
-        ProductForTechCardInline,
+class WarehouseAdmin(admin.ModelAdmin):
+    list_display = [
+        "product_unit",
+        "shop",
+        "remaining",
+        "min_remaining",
+        "max_remaining",
+        "auto_order",
+        "supplier",
+        "margin",
     ]
+    inlines = [WarehouseRecordInline]
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        # TODO: implement this as a custom queryset method
+        return qs.annotate(
+            remaining=Coalesce(
+                Sum("warehouse_records__quantity"),
+                Decimal(0),
+                output_field=DecimalField(
+                    max_digits=7,
+                    decimal_places=2,
+                ),
+            )
+        )
 
-@admin.register(models.MenuDish)
-class MenuDishesAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
-    pass
+    def remaining(self, obj):
+        return obj.remaining
 
-
-class MenuDishInline(admin.StackedInline):
-    model = models.MenuDish
-    extra = 1
-
-
-@admin.register(models.DailyMenuPlan)
-class DailyMenuPlanAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
-    inlines = [
-        MenuDishInline,
-    ]
+    remaining.short_description = "остаток"
 
 
 @admin.register(models.WarehouseOrder)

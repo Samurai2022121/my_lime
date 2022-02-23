@@ -111,7 +111,6 @@ class Product(Timestampable, models.Model):
     extra_info = models.JSONField(null=True, blank=True)
     is_archive = models.BooleanField(default=False)
     is_sorted = models.BooleanField(default=False)
-    measure_unit = models.CharField(max_length=35, blank=True, null=True)
     vat_value = models.DecimalField(
         null=True, blank=True, max_digits=7, decimal_places=2
     )
@@ -139,6 +138,70 @@ class Product(Timestampable, models.Model):
     def clean(self):
         if self.for_scales and (not self.short_name or not self.category):
             raise ValidationError(_("Обязательны параметры short_name и category."))
+
+
+class MeasurementUnit(models.Model):
+    name = models.CharField("наименование", max_length=255, unique=True)
+
+    class Meta:
+        verbose_name = "Единица измерения"
+        verbose_name_plural = "Единицы измерения"
+
+    def __str__(self):
+        return self.name
+
+
+class ProductUnit(models.Model):
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="units",
+    )
+    unit = models.ForeignKey(
+        MeasurementUnit,
+        on_delete=models.CASCADE,
+        related_name="product_units",
+    )
+    for_resale = models.BooleanField("допустима продажа", default=True)
+
+    class Meta:
+        verbose_name = "Единица хранения"
+        verbose_name_plural = "Единицы хранения"
+
+    def __str__(self):
+        return f"{self.unit} of {self.product}"
+
+
+class ProductUnitConversion(models.Model):
+    source_unit = models.ForeignKey(
+        ProductUnit,
+        on_delete=models.CASCADE,
+        related_name="conversion_sources",
+        verbose_name="из",
+    )
+    target_unit = models.ForeignKey(
+        ProductUnit,
+        on_delete=models.CASCADE,
+        related_name="conversion_targets",
+        verbose_name="в",
+    )
+    factor = models.DecimalField(
+        "множитель",
+        max_digits=7,
+        decimal_places=2,
+    )
+
+    class Meta:
+        verbose_name = "Перевод единиц хранения"
+        verbose_name_plural = "Переводы единиц хранения"
+        unique_together = ("source_unit", "target_unit")
+
+    def __str__(self):
+        return (
+            f"{self.source_unit.product.name}:"
+            f" 1 {self.source_unit.unit.name} ="
+            f" {self.factor} {self.target_unit.unit.name}"
+        )
 
 
 class ProductImages(models.Model):

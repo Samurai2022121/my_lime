@@ -1,18 +1,24 @@
 from decimal import Decimal
 
 import pandas as pd
-from django.db.models import F, Sum
+from django.db import transaction
+from django.db.models import DecimalField, F, Sum
+from django.db.models.functions import Coalesce
 from django_filters import rest_framework as df_filters
-from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import APIException
 from rest_framework.generics import GenericAPIView
+from rest_framework.mixins import CreateModelMixin, DestroyModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.reverse import reverse
 from rest_framework.status import (
     HTTP_201_CREATED,
     HTTP_202_ACCEPTED,
     HTTP_400_BAD_REQUEST,
+    HTTP_409_CONFLICT,
 )
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from products.models import Product
 from products.serializers import ProductListSerializer
@@ -31,7 +37,7 @@ class ShopViewSet(
     ChangeDestroyToArchiveMixin,
     BulkChangeArchiveStatusViewSetMixin,
     BulkUpdateViewSetMixin,
-    viewsets.ModelViewSet,
+    ModelViewSet,
     OrderingModelViewsetMixin,
 ):
     permission_classes = (AllowAny,)
@@ -54,7 +60,7 @@ class ShopViewSet(
 class PersonnelViewSet(
     ChangeDestroyToArchiveMixin,
     BulkChangeArchiveStatusViewSetMixin,
-    viewsets.ModelViewSet,
+    ModelViewSet,
     OrderingModelViewsetMixin,
 ):
     filter_backends = (df_filters.DjangoFilterBackend,)
@@ -71,7 +77,7 @@ class PersonnelViewSet(
         return qs
 
 
-class WarehouseViewSet(viewsets.ModelViewSet):
+class WarehouseViewSet(ModelViewSet):
     permission_classes = (AllowAny,)
     serializer_class = serializers.WarehouseSerializer
     filter_backends = (df_filters.DjangoFilterBackend,)
@@ -83,14 +89,25 @@ class WarehouseViewSet(viewsets.ModelViewSet):
         qs = self.queryset
         outlet_id = self.request.query_params.get("outlet", None)
         if outlet_id:
-            qs = qs.filter(shop=outlet_id, product__is_archive=False)
+            qs = qs.filter(
+                shop=outlet_id,
+                product_unit__product__is_archive=False,
+            )
         else:
             qs = qs.none()
-        qs = qs.order_by("product__name")
+        # TODO: implement this as a custom queryset method
+        qs = qs.annotate(
+            remaining=Coalesce(
+                Sum("warehouse_records__quantity"),
+                Decimal(0),
+                output_field=DecimalField(max_digits=7, decimal_places=2),
+            ),
+        ).order_by("product_unit__product__name")
         return qs
 
     @action(detail=False, methods=["post"], url_path="bulk_update")
     def bulk_update(self, request, **kwargs):
+        # TODO: this is broken due to the introduction of product units
         serialized_data = BulkUpdateSerializer(data=request.data)
         serialized_data.is_valid(raise_exception=True)
         instances = serialized_data.data["instances"]
@@ -113,7 +130,7 @@ class WarehouseViewSet(viewsets.ModelViewSet):
 class UploadCSVGenericView(GenericAPIView):
     permission_classes = (AllowAny,)
     serializer_class = serializers.UploadCSVSerializer
-    queryset = models.Product.objects.all()
+    queryset = Product.objects.all()
 
     product_fields_mapping = {
         "price_col": "price",
@@ -155,8 +172,8 @@ class UploadCSVGenericView(GenericAPIView):
                         if data.get("vat_col", None)
                         else None,
                         measure_unit=row[data["measure_unit_col"]]
-                        if data.get("measure_unit_col", None)
-                        else None,
+                        # TODO: fix creation of measurement units
+                        if data.get("measure_unit_col", None) else None,
                         origin=row[data["origin_col"]]
                         if data.get("origin_col", None)
                         else None,
@@ -174,7 +191,7 @@ class UploadCSVGenericView(GenericAPIView):
 
 class WarehouseOrderViewSet(
     ChangeDestroyToArchiveMixin,
-    viewsets.ModelViewSet,
+    ModelViewSet,
     OrderingModelViewsetMixin,
 ):
     filter_backends = (df_filters.DjangoFilterBackend,)
@@ -204,7 +221,7 @@ class SupplierViewSet(
     ChangeDestroyToArchiveMixin,
     BulkChangeArchiveStatusViewSetMixin,
     BulkUpdateViewSetMixin,
-    viewsets.ModelViewSet,
+    ModelViewSet,
     OrderingModelViewsetMixin,
 ):
     filter_backends = (df_filters.DjangoFilterBackend,)
@@ -224,7 +241,7 @@ class SupplierViewSet(
         return qs.order_by("name")
 
 
-class SupplyContractViewSet(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet):
+class SupplyContractViewSet(BulkChangeArchiveStatusViewSetMixin, ModelViewSet):
     permission_classes = (AllowAny,)
     serializer_class = serializers.SupplyContractsSerializer
     lookup_field = "id"
@@ -247,38 +264,14 @@ class SupplyContractViewSet(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelV
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
 
-class PersonnelDocumentViewSet(
-    BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet
-):
+class PersonnelDocumentViewSet(BulkChangeArchiveStatusViewSetMixin, ModelViewSet):
     permission_classes = (AllowAny,)
     serializer_class = serializers.PersonnelDocumentSerializer
     lookup_field = "id"
     queryset = models.PersonnelDocument.objects.all()
 
 
-class TechCardViewSet(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet):
-    permission_classes = (AllowAny,)
-    serializer_class = serializers.TechCardSerializer
-    lookup_field = "id"
-    filter_backends = (df_filters.DjangoFilterBackend,)
-    filterset_class = filters.TechCardFilter
-    queryset = models.TechCard.objects.all()
-
-    def get_queryset(self):
-        qs = self.queryset
-        if "is_archive" not in self.request.query_params:
-            qs = qs.filter(is_archive=False)
-        return qs.order_by("name")
-
-
-class DailyMenuViewSet(viewsets.ModelViewSet):
-    permission_classes = (AllowAny,)
-    serializer_class = serializers.DailyMenuSerializer
-    lookup_field = "id"
-    queryset = models.DailyMenuPlan.objects.all()
-
-
-class LegalEntityViewSet(viewsets.ReadOnlyModelViewSet):
+class LegalEntityViewSet(ReadOnlyModelViewSet):
     permission_classes = (AllowAny,)
     serializer_class = serializers.LegalEntitySerializer
     lookup_field = "registration_id"
@@ -289,3 +282,72 @@ class LegalEntityViewSet(viewsets.ReadOnlyModelViewSet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.paginator.page_size = 30
+
+
+class CreateProductionDocumentException(APIException):
+    status_code = HTTP_409_CONFLICT
+
+
+class ProductionDocumentViewSet(
+    CreateModelMixin,
+    DestroyModelMixin,
+    ReadOnlyModelViewSet,
+):
+    permission_classes = (AllowAny,)
+    queryset = models.ProductionDocument.objects.order_by("created_at", "number")
+    serializer_class = serializers.ProductionDocumentSerializer
+
+    @staticmethod
+    def get_or_create_warehouse(shop, product_unit, **kwargs):
+        return models.Warehouse.objects.get_or_create(
+            shop=shop,
+            product_unit_id=product_unit,
+            defaults=kwargs,
+        )[0]
+
+    @transaction.atomic()
+    def perform_create(self, serializer):
+        # try to write off the ingredients and register the produce
+        menu = serializer.validated_data.get("daily_menu_plan")
+        ingredients = menu._meta.model.layout.filter(id=menu.id)
+        if ingredients.filter(shortage__gt=0).exists():
+            # missing some ingredients
+            view_url = reverse("production:dailymenuplan-layout", args=[menu.id])
+            raise CreateProductionDocumentException(
+                detail={"url": f"{view_url}?shortage=true"},
+                code="Недостаточно сырья",
+            )
+
+        document = serializer.save()
+
+        write_offs = []
+        for ingredient in ingredients:
+            write_offs.append(
+                models.WarehouseRecord(
+                    document=document,
+                    # there should be a better method of getting `warehouse_id`
+                    # considering the `Warehouse` object must exist at this point
+                    # (via the ingredient query?)
+                    warehouse=self.get_or_create_warehouse(
+                        menu.shop,
+                        ingredient["dishes__tech_products__product_unit"],
+                    ),
+                    quantity=-ingredient["total"],
+                )
+            )
+        models.WarehouseRecord.objects.bulk_create(write_offs)
+
+        # register the produce
+        produce = []
+        for end_product in menu._meta.model.produce.filter(id=menu.id):
+            produce.append(
+                models.WarehouseRecord(
+                    document=document,
+                    warehouse=self.get_or_create_warehouse(
+                        menu.shop,
+                        end_product["dishes__end_product"],
+                    ),
+                    quantity=end_product["produce"],
+                )
+            )
+        models.WarehouseRecord.objects.bulk_create(produce)

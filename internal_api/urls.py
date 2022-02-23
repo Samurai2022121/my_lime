@@ -19,14 +19,13 @@ router.register("matrix", views.WarehouseViewSet)
 router.register("product-orders", views.WarehouseOrderViewSet)
 router.register("supplier", views.SupplierViewSet)
 router.register("supply-contracts", views.SupplyContractViewSet)
-router.register("tech-card", views.TechCardViewSet)
-router.register("daily-menu", views.DailyMenuViewSet)
 router.register("legal-entities", views.LegalEntityViewSet)
 
 router.register("product", ProductAdminViewset)
 router.register("product-images", EditProductImagesViewset)
 router.register("news", NewsAdminViewset)
 router.register("recipes", RecipeAdminViewset)
+router.register(r"primary-documents/production", views.ProductionDocumentViewSet)
 
 urlpatterns = [
     path("upload-csv/", views.UploadCSVGenericView.as_view(), name="csv-upload"),

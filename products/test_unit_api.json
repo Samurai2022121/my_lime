@@ -1,0 +1,195 @@
+[
+    {
+        "model": "products.category",
+        "pk": 1,
+        "fields": {
+            "name": "Сырьё",
+            "parent": null,
+            "description": "",
+            "image": "",
+            "is_archive": false,
+            "lft": 1,
+            "rght": 2,
+            "tree_id": 2,
+            "level": 0
+        }
+    },
+    {
+        "model": "products.category",
+        "pk": 2,
+        "fields": {
+            "name": "Розничный товар",
+            "parent": null,
+            "description": "",
+            "image": "",
+            "is_archive": false,
+            "lft": 1,
+            "rght": 2,
+            "tree_id": 1,
+            "level": 0
+        }
+    },
+    {
+        "model": "products.product",
+        "pk": 1,
+        "fields": {
+            "created_at": "2022-02-15T10:17:51.016Z",
+            "updated_at": "2022-02-15T10:17:51.016Z",
+            "name": "Тестовый штучный товар",
+            "short_name": null,
+            "category": 2,
+            "description": "",
+            "price": "98.90",
+            "protein": null,
+            "carbohydrates": null,
+            "fats": null,
+            "calories": null,
+            "energy": null,
+            "barcode": null,
+            "manufacturer": null,
+            "origin": null,
+            "expiration_date": null,
+            "production_date": null,
+            "weight": null,
+            "in_stock": false,
+            "own_production": false,
+            "discount": null,
+            "extra_info": null,
+            "is_archive": false,
+            "is_sorted": true,
+            "vat_value": null,
+            "for_scales": false,
+            "for_own_production": false
+        }
+    },
+    {
+        "model": "products.product",
+        "pk": 2,
+        "fields": {
+            "created_at": "2022-02-15T10:18:52.939Z",
+            "updated_at": "2022-02-15T10:18:52.939Z",
+            "name": "Тестовое сырьё",
+            "short_name": null,
+            "category": 1,
+            "description": "",
+            "price": "55.50",
+            "protein": null,
+            "carbohydrates": null,
+            "fats": null,
+            "calories": null,
+            "energy": null,
+            "barcode": null,
+            "manufacturer": null,
+            "origin": null,
+            "expiration_date": null,
+            "production_date": null,
+            "weight": null,
+            "in_stock": false,
+            "own_production": false,
+            "discount": null,
+            "extra_info": null,
+            "is_archive": false,
+            "is_sorted": true,
+            "vat_value": null,
+            "for_scales": false,
+            "for_own_production": true
+        }
+    },
+    {
+        "model": "products.product",
+        "pk": 3,
+        "fields": {
+            "created_at": "2022-02-15T10:19:55.300Z",
+            "updated_at": "2022-02-15T10:19:55.300Z",
+            "name": "Товар для разукомплектации",
+            "short_name": null,
+            "category": 2,
+            "description": "",
+            "price": "26.10",
+            "protein": null,
+            "carbohydrates": null,
+            "fats": null,
+            "calories": null,
+            "energy": null,
+            "barcode": null,
+            "manufacturer": null,
+            "origin": null,
+            "expiration_date": null,
+            "production_date": null,
+            "weight": null,
+            "in_stock": false,
+            "own_production": false,
+            "discount": null,
+            "extra_info": null,
+            "is_archive": false,
+            "is_sorted": true,
+            "vat_value": null,
+            "for_scales": false,
+            "for_own_production": false
+        }
+    },
+    {
+        "model": "products.measurementunit",
+        "pk": 1,
+        "fields": {
+            "name": "Шт."
+        }
+    },
+    {
+        "model": "products.measurementunit",
+        "pk": 2,
+        "fields": {
+            "name": "г"
+        }
+    },
+    {
+        "model": "products.measurementunit",
+        "pk": 3,
+        "fields": {
+            "name": "Кор."
+        }
+    },
+    {
+        "model": "products.measurementunit",
+        "pk": 4,
+        "fields": {
+            "name": "Ящ."
+        }
+    },
+    {
+        "model": "products.productunit",
+        "pk": 1,
+        "fields": {
+            "product": 1,
+            "unit": 1,
+            "for_resale": true
+        }
+    },
+    {
+        "model": "products.productunit",
+        "pk": 2,
+        "fields": {
+            "product": 2,
+            "unit": 2,
+            "for_resale": false
+        }
+    },
+    {
+        "model": "products.productunit",
+        "pk": 3,
+        "fields": {
+            "product": 3,
+            "unit": 3,
+            "for_resale": true
+        }
+    },
+    {
+        "model": "products.productunit",
+        "pk": 4,
+        "fields": {
+            "product": 3,
+            "unit": 2,
+            "for_resale": false
+        }
+    }
+]

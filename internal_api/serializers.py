@@ -2,6 +2,8 @@ from drf_base64.fields import Base64FileField
 from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework import serializers
 
+from products.models import Product
+
 from . import models
 
 
@@ -50,7 +52,10 @@ class SupplyContractsSerializer(serializers.Serializer):
         return supply_contracts
 
 
-class SupplierSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+class SupplierSerializer(
+    WritableNestedModelSerializer,
+    serializers.ModelSerializer,
+):
     supply_contract = SupplyContractSerializer(many=True, read_only=True)
 
     class Meta:
@@ -58,13 +63,38 @@ class SupplierSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
         fields = "__all__"
 
 
+class WarehouseRecordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.WarehouseRecord
+        fields = "__all__"
+
+
 class WarehouseSerializer(serializers.ModelSerializer):
-    product_name = serializers.CharField(source="product.name", read_only=True)
-    barcode = serializers.IntegerField(source="product.barcode", read_only=True)
+    product_name = serializers.CharField(
+        source="product_unit.product.name",
+        read_only=True,
+    )
+    unit_name = serializers.CharField(
+        source="product_unit.unit.name",
+        read_only=True,
+    )
+    barcode = serializers.IntegerField(
+        source="product_unit.product.barcode",
+        read_only=True,
+    )
+    remaining = serializers.DecimalField(
+        read_only=True,
+        max_digits=7,
+        decimal_places=2,
+    )
     price = serializers.DecimalField(
-        source="product.price", read_only=True, max_digits=6, decimal_places=2
+        source="product_unit.product.price",
+        read_only=True,
+        max_digits=6,
+        decimal_places=2,
     )
     supplier = SupplierSerializer()
+    warehouse_records = WarehouseRecordSerializer(many=True)
 
     class Meta:
         model = models.Warehouse
@@ -149,7 +179,7 @@ class WarehouseOrderSerializer(serializers.ModelSerializer):
         order = models.WarehouseOrder.objects.create(**validated_data)
         for order_position in order_positions:
             product_id = order_position.pop("product")["id"]
-            product = models.Product.objects.filter(id=product_id)
+            product = Product.objects.filter(id=product_id)
             if not product:
                 raise serializers.ValidationError(
                     f"Product does {product_id} not exists."
@@ -170,7 +200,7 @@ class WarehouseOrderSerializer(serializers.ModelSerializer):
         for order_position in order_positions:
             product_id = order_position.pop("product")["id"]
             order_position_id = order_position.pop("id", None)
-            product = models.Product.objects.get(id=product_id)
+            product = Product.objects.get(id=product_id)
             if order_position_id:
                 models.WarehouseOrderPositions.objects.filter(
                     id=order_position_id
@@ -182,37 +212,15 @@ class WarehouseOrderSerializer(serializers.ModelSerializer):
         return instance
 
 
-class TechProductSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.TechCardProduct
-        fields = ["product", "quantity", "id"]
-
-
-class TechCardSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
-    tech_card_product = TechProductSerializer(source="tech_product", many=True)
-
-    class Meta:
-        model = models.TechCard
-        fields = ["name", "amount", "author", "created_at", "tech_card_product", "id"]
-
-
-class MenuDishSerializer(serializers.ModelSerializer):
-    dish = TechCardSerializer()
-
-    class Meta:
-        model = models.MenuDish
-        fields = ["dish", "quantity", "id"]
-
-
-class DailyMenuSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
-    menu_dish = MenuDishSerializer(many=True)
-
-    class Meta:
-        model = models.DailyMenuPlan
-        fields = ["id", "author", "menu_dish", "created_at", "updated_at"]
-
-
 class LegalEntitySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.LegalEntities
+        fields = "__all__"
+
+
+class ProductionDocumentSerializer(serializers.ModelSerializer):
+    warehouse_records = WarehouseRecordSerializer(many=True)
+
+    class Meta:
+        model = models.ProductionDocument
         fields = "__all__"

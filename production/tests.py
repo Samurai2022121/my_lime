@@ -4,7 +4,6 @@ import pytest
 from django.core.management import call_command
 from pytest_drf import (
     Returns200,
-    Returns404,
     UsesDetailEndpoint,
     UsesGetMethod,
     UsesListEndpoint,
@@ -14,29 +13,29 @@ from pytest_drf.util import url_for
 from pytest_lambda import lambda_fixture, static_fixture
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def django_db_setup(request, django_db_setup, django_db_blocker):
     # load a fixture from current directory
     with django_db_blocker.unblock():
         call_command(
             "loaddata",
-            Path(request.fspath).parent / "test_shop_api.json",
+            Path(request.fspath).parent / "test_production_api.json",
         )
     yield
     with django_db_blocker.unblock():
         call_command("flush", "--no-input")
 
 
-class TestShopViewset(ViewSetTest):
+class TestDailyMenuViewset(ViewSetTest):
     @pytest.fixture
     def common_subject(self, db, get_response):
         # this test set is going to use database
         return get_response
 
-    list_url = lambda_fixture(lambda: url_for("internal_api:shop-list"))
+    list_url = lambda_fixture(lambda: url_for("production:dailymenuplan-list"))
 
     detail_url = lambda_fixture(
-        lambda shop_id: url_for("internal_api:shop-detail", shop_id)
+        lambda menu_id: url_for("production:dailymenuplan-detail", menu_id)
     )
 
     class TestList(
@@ -47,18 +46,19 @@ class TestShopViewset(ViewSetTest):
         # check if list endpoint returns 200
         pass
 
-    class TestRetrieveExistingShop(
+    class TestDetail(
         UsesGetMethod,
         UsesDetailEndpoint,
         Returns200,
     ):
-        # check if detail endpoint returns 200
-        shop_id = static_fixture(1)  # this Id is in fixture
+        menu_id = static_fixture(2)
 
-    class TestRetrieveNonExistingShop(
+    class TestLayout(
         UsesGetMethod,
         UsesDetailEndpoint,
-        Returns404,
+        Returns200,
     ):
-        # check if detail endpoint returns 404
-        shop_id = static_fixture(2)  # this Id is not in fixture
+        detail_url = lambda_fixture(
+            lambda menu_id: url_for("production:dailymenuplan-layout", menu_id)
+        )
+        menu_id = static_fixture(2)

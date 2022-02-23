@@ -3,11 +3,19 @@ from django.core.validators import FileExtensionValidator
 from django.db.models import Avg
 from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
+from rest_framework_nested.serializers import NestedHyperlinkedIdentityField
 
 from reviews.models import Favourite, Star
 from utils.models_utils import Round
 
-from .models import Category, Product, ProductImages
+from .models import (
+    Category,
+    MeasurementUnit,
+    Product,
+    ProductImages,
+    ProductUnit,
+    ProductUnitConversion,
+)
 
 
 class CategoryListSerializer(serializers.ModelSerializer):
@@ -84,7 +92,81 @@ class ProductImagesSerializer(serializers.ModelSerializer):
         fields = ("id", "image_1000", "image_500", "image_150", "main", "description")
 
 
+class MeasurementUnitSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MeasurementUnit
+        fields = "__all__"
+
+
+class ProductUnitSerializer(serializers.ModelSerializer):
+    unit = serializers.SlugRelatedField(
+        slug_field="name",
+        queryset=MeasurementUnit.objects,
+    )
+    product = serializers.HyperlinkedIdentityField(
+        view_name="products:product-detail",
+        read_only=True,
+        lookup_field="product_id",
+        lookup_url_kwarg="id",
+    )
+    conversion_sources = NestedHyperlinkedIdentityField(
+        view_name="products:sources-list",
+        read_only=True,
+        lookup_url_kwarg="unit_id",
+        lookup_field="id",
+        parent_lookup_kwargs={
+            "product_id": "product__id",
+        },
+    )
+    conversion_targets = NestedHyperlinkedIdentityField(
+        view_name="products:targets-list",
+        read_only=True,
+        lookup_url_kwarg="unit_id",
+        lookup_field="id",
+        parent_lookup_kwargs={
+            "product_id": "product__id",
+        },
+    )
+
+    class Meta:
+        model = ProductUnit
+        fields = "__all__"
+
+
+class ConversionSourceSerializer(serializers.ModelSerializer):
+    target_unit = NestedHyperlinkedIdentityField(
+        view_name="products:productunit-detail",
+        read_only=True,
+        lookup_field="target_unit_id",
+        lookup_url_kwarg="id",
+        parent_lookup_kwargs={
+            "product_id": "target_unit__product__id",
+        },
+    )
+
+    class Meta:
+        model = ProductUnitConversion
+        fields = "__all__"
+
+
+class ConversionTargetSerializer(serializers.ModelSerializer):
+    source_unit = NestedHyperlinkedIdentityField(
+        view_name="products:productunit-detail",
+        read_only=True,
+        lookup_field="source_unit_id",
+        lookup_url_kwarg="id",
+        parent_lookup_kwargs={
+            "product_id": "target_unit__product__id",
+        },
+    )
+
+    class Meta:
+        model = ProductUnitConversion
+        fields = "__all__"
+
+
 class ProductListAdminSerializer(serializers.ModelSerializer):
+    units = ProductUnitSerializer(many=True)
     category = CategorySerializer()
     images = ProductImagesSerializer(many=True, required=False)
 
@@ -94,6 +176,10 @@ class ProductListAdminSerializer(serializers.ModelSerializer):
 
 
 class ProductListSerializer(serializers.ModelSerializer):
+    units = serializers.HyperlinkedIdentityField(
+        view_name="products:productunit-list",
+        lookup_url_kwarg="product_id",
+    )
     stars_count = serializers.SerializerMethodField()
     stared = serializers.SerializerMethodField()
     average_star = serializers.SerializerMethodField()
@@ -151,6 +237,10 @@ class ProductListSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    units = serializers.HyperlinkedIdentityField(
+        view_name="products:productunit-list",
+        lookup_url_kwarg="product_id",
+    )
     stars_count = serializers.SerializerMethodField()
     stared = serializers.SerializerMethodField()
     average_star = serializers.SerializerMethodField()
@@ -214,6 +304,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class ProductAdminSerializer(serializers.ModelSerializer):
+    units = ProductUnitSerializer(many=True)
     category_read = CategorySerializer(read_only=True, source="category")
     images = ProductImagesSerializer(many=True, required=False)
 

@@ -40,20 +40,6 @@ class PersonnelFilter(django_filters.FilterSet):
         )
 
 
-class TechCardFilter(django_filters.FilterSet):
-    s = django_filters.CharFilter(
-        method="search",
-        label="поиск по имени",
-    )
-
-    class Meta:
-        model = models.TechCard
-        fields = {"is_archive": ["exact"]}
-
-    def search(self, qs, name, value):
-        return qs.filter(Q(name__icontains=value))
-
-
 class WarehouseOrderFilter(django_filters.FilterSet):
     s = django_filters.CharFilter(
         method="search",
@@ -106,16 +92,20 @@ class ShopFilter(django_filters.FilterSet):
 class WarehouseFilter(django_filters.FilterSet):
     s = django_filters.CharFilter(
         method="search",
-        label="поиск по наименованию продукта, штрихкоду проудукта, id продукта",
+        label="поиск по наименованию продукта, штрихкоду продукта, id продукта",
+    )
+    is_archive = django_filters.BooleanFilter(
+        field_name="product__is_archive",
+        label="показывать архивные запасы",
     )
 
     class Meta:
         model = models.Warehouse
-        fields = {"product__is_archive": ["exact"]}
+        fields = ("s",)
 
     def search(self, qs, name, value):
         return qs.filter(
-            Q(product__name__icontains=value)
-            | Q(product__barcode__icontains=value)
-            | Q(product__id__icontains=value)
+            Q(product_unit__product__name__icontains=value)
+            | Q(product_unit__product__barcode__icontains=value)
+            | Q(product_unit__product__id__icontains=value)
         )

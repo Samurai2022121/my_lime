@@ -34,6 +34,10 @@ urlpatterns = [
         include(("internal_api.urls", "internal_api"), namespace="internal_api"),
     ),
     path(
+        "production/",
+        include(("production.urls", "production"), namespace="production"),
+    ),
+    path(
         "docs/",
         schema_view.with_ui("swagger", cache_timeout=0),
         name="schema-swagger-ui",
