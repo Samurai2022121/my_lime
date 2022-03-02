@@ -1,6 +1,7 @@
 from drf_base64.fields import Base64FileField
-from drf_writable_nested import WritableNestedModelSerializer
+from drf_writable_nested import NestedCreateMixin, WritableNestedModelSerializer
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from products.models import Product
 
@@ -219,8 +220,303 @@ class LegalEntitySerializer(serializers.ModelSerializer):
 
 
 class ProductionDocumentSerializer(serializers.ModelSerializer):
-    warehouse_records = WarehouseRecordSerializer(many=True)
+    """
+    Related production records are created in the view. You only need to pass
+    a proper `daily_menu_plan` into this serializer.
+    """
+
+    warehouse_records = WarehouseRecordSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.ProductionDocument
+        fields = "__all__"
+
+
+class InventoryRecordSerializer(serializers.ModelSerializer):
+    """
+    Creates inventory records inside inventory document.
+
+    Inventory records are essentially `WarehouseRecord` objects, but the
+    corresponding `Warehouse` object may not exist, hence the use of
+    `Manager.get_or_create()`.
+
+    All records in the inventory document must be of the same shop, that's
+    why the `Shop` object is passed from the parent serializer through
+    the context.
+    """
+
+    product_unit = serializers.PrimaryKeyRelatedField(
+        queryset=models.ProductUnit.objects,
+        write_only=True,
+    )
+    supplier = serializers.PrimaryKeyRelatedField(
+        queryset=models.Supplier.objects,
+        write_only=True,
+        allow_null=True,
+        required=False,
+    )
+    warehouse = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model = models.WarehouseRecord
+        fields = ("product_unit", "supplier", "warehouse", "quantity")
+
+    def create(self, validated_data):
+        product_unit = validated_data.pop("product_unit")
+        supplier = validated_data.pop("supplier", None)
+        warehouse, _ = models.Warehouse.objects.get_or_create(
+            product_unit=product_unit,
+            supplier=supplier,
+            shop=self.context.get("shop", None),
+        )
+        validated_data["warehouse"] = warehouse
+        return super().create(validated_data)
+
+
+class InventoryDocumentSerializer(NestedCreateMixin, serializers.ModelSerializer):
+    shop = serializers.PrimaryKeyRelatedField(
+        queryset=models.Shop.objects,
+        write_only=True,
+    )
+    warehouse_records = InventoryRecordSerializer(many=True)
+
+    class Meta:
+        model = models.InventoryDocument
+        fields = "__all__"
+
+    def create(self, validated_data):
+        self.context["shop"] = validated_data.pop("shop")
+        return super().create(validated_data)
+
+
+class WriteOffRecordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.WarehouseRecord
+        exclude = ("document",)
+
+
+class WriteOffDocumentSerializer(NestedCreateMixin, serializers.ModelSerializer):
+    """
+    Nothing special is going on here. Each write-off line may be created by
+    stating `warehouse` Id and `quantity`.
+    """
+
+    warehouse_records = WriteOffRecordSerializer(many=True)
+
+    class Meta:
+        model = models.WriteOffDocument
+        fields = "__all__"
+
+    def create(self, validated_data):
+        # negate quantity
+        for each in validated_data.get("warehouse_records", []):
+            each["quantity"] = -each["quantity"]
+        return super().create(validated_data)
+
+
+class ConversionRecordSerializer(serializers.ModelSerializer):
+    """
+    Gathers data to convert `Warehouse` to target warehouse, which in turn
+    may not exist.
+    """
+
+    target_unit = serializers.PrimaryKeyRelatedField(
+        queryset=models.ProductUnit.objects,
+        write_only=True,
+    )
+    target_supplier = serializers.PrimaryKeyRelatedField(
+        queryset=models.Supplier.objects,
+        write_only=True,
+        allow_null=True,
+        required=False,
+    )
+
+    class Meta:
+        model = models.WarehouseRecord
+        fields = ("target_unit", "target_supplier", "warehouse", "quantity")
+
+
+class ConversionDocumentSerializer(serializers.ModelSerializer):
+    warehouse_records = ConversionRecordSerializer(many=True)
+
+    class Meta:
+        model = models.ConversionDocument
+        fields = "__all__"
+
+    def create(self, validated_data):
+        source_records = validated_data.pop("warehouse_records", [])
+        document = super().create(validated_data)
+        for source_record in source_records:
+            target_unit = source_record.pop("target_unit")
+            target_supplier = source_record.pop("target_supplier", None)
+
+            # source and target product units must belong to the same product
+            source_unit = source_record["warehouse"].product_unit
+            if source_unit.product != target_unit.product:
+                raise ValidationError("Product mismatch.")
+
+            target_warehouse, _ = models.Warehouse.objects.get_or_create(
+                product_unit=target_unit,
+                supplier=target_supplier,
+                shop=source_record["warehouse"].shop,
+            )
+            conversion_qs = source_unit.conversion_sources.filter(
+                target_unit=target_unit,
+            )
+            if conversion_qs.count() > 1:
+                raise ValidationError("Ambiguous conversion.")
+
+            conversion = conversion_qs.first()
+            if conversion is None:
+                raise ValidationError("No way to convert.")
+
+            target_record = {
+                "warehouse": target_warehouse.id,
+                "quantity": round(source_record["quantity"] * conversion.factor, 2),
+                "document": document.id,
+            }
+            # write off initially supplied quantity
+            source_record = {
+                "warehouse": source_record["warehouse"].id,
+                "quantity": -source_record["quantity"],
+                "document": document.id,
+            }
+            for data in (source_record, target_record):
+                serializer = WarehouseRecordSerializer(data=data)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+
+        return document
+
+
+class MoveRecordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.WarehouseRecord
+        exclude = ("document",)
+
+
+class MoveDocumentSerializer(serializers.ModelSerializer):
+    """
+    Doubles the `WarehouseRecord` lines while negating their quantities
+    similar to `ConversionDocumentSerializer`, but targets another shop.
+    """
+
+    warehouse_records = MoveRecordSerializer(many=True)
+    target_shop = serializers.PrimaryKeyRelatedField(
+        queryset=models.Shop.objects,
+        write_only=True,
+    )
+
+    class Meta:
+        model = models.MoveDocument
+        fields = "__all__"
+
+    def create(self, validated_data):
+        source_records = validated_data.pop("warehouse_records", [])
+        target_shop = validated_data.pop("target_shop")
+        document = super().create(validated_data)
+        for source_record in source_records:
+            product_unit = source_record["warehouse"].product_unit
+            supplier = source_record["warehouse"].supplier
+            target_warehouse, _ = models.Warehouse.objects.get_or_create(
+                product_unit=product_unit,
+                supplier=supplier,
+                shop=target_shop,
+            )
+            target_record = source_record.copy()
+            target_record["warehouse"] = target_warehouse.id
+            target_record["document"] = document.id
+            source_record = {
+                "warehouse": source_record["warehouse"].id,
+                "quantity": -source_record["quantity"],
+                "document": document.id,
+            }
+            for data in (source_record, target_record):
+                serializer = WarehouseRecordSerializer(data=data)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+
+        return document
+
+
+class ReceiptRecordSerializer(serializers.ModelSerializer):
+    product_unit = serializers.PrimaryKeyRelatedField(
+        queryset=models.ProductUnit.objects,
+        write_only=True,
+    )
+    warehouse = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model = models.WarehouseRecord
+        fields = ("product_unit", "warehouse", "quantity")
+
+
+class ReceiptDocumentSerializer(serializers.ModelSerializer):
+    warehouse_records = ReceiptRecordSerializer(many=True)
+    shop = serializers.PrimaryKeyRelatedField(
+        queryset=models.Shop.objects,
+        write_only=True,
+    )
+
+    def create(self, validated_data):
+        warehouse_records = validated_data.pop("warehouse_records", [])
+        shop = validated_data.pop("shop")
+        document = super().create(validated_data)
+        # deduct supplier object
+        supplier = validated_data["order"].supplier
+        for record in warehouse_records:
+            product_unit = record["product_unit"]
+            warehouse, _ = models.Warehouse.objects.get_or_create(
+                product_unit=product_unit,
+                supplier=supplier,
+                shop=shop,
+            )
+            serializer = WarehouseRecordSerializer(
+                data={
+                    "warehouse": warehouse.id,
+                    "quantity": record["quantity"],
+                    "document": document.id,
+                }
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+        return document
+
+    class Meta:
+        model = models.ReceiptDocument
+        fields = "__all__"
+
+
+class SaleRecordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.WarehouseRecord
+        exclude = ("document",)
+
+
+class SaleDocumentSerializer(NestedCreateMixin, serializers.ModelSerializer):
+    warehouse_records = SaleRecordSerializer(many=True)
+
+    class Meta:
+        model = models.SaleDocument
+        fields = "__all__"
+
+    def create(self, validated_data):
+        # invert quantity (same as write-off)
+        for each in validated_data.get("warehouse_records", []):
+            each["quantity"] = -each["quantity"]
+        return super().create(validated_data)
+
+
+class CancelRecordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.WarehouseRecord
+        exclude = ("document",)
+
+
+class CancelDocumentSerializer(serializers.ModelSerializer):
+    warehouse_records = CancelRecordSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = models.CancelDocument
         fields = "__all__"

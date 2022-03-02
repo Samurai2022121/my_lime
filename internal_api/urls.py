@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import include, path
 from rest_framework import routers
 
 from news.views import NewsAdminViewset
@@ -25,9 +25,19 @@ router.register("product", ProductAdminViewset)
 router.register("product-images", EditProductImagesViewset)
 router.register("news", NewsAdminViewset)
 router.register("recipes", RecipeAdminViewset)
-router.register(r"primary-documents/production", views.ProductionDocumentViewSet)
+
+docs_router = routers.SimpleRouter()
+docs_router.register("production", views.ProductionDocumentViewSet)
+docs_router.register("inventory", views.InventoryDocumentViewSet)
+docs_router.register("write-offs", views.WriteOffDocumentViewSet)
+docs_router.register("conversion", views.ConversionDocumentViewSet)
+docs_router.register("move", views.MoveDocumentViewSet)
+docs_router.register("receipts", views.ReceiptDocumentViewSet)
+docs_router.register("sales", views.SaleDocumentViewSet)
+docs_router.register("cancel", views.CancelDocumentViewSet)
 
 urlpatterns = [
+    path("primary-documents/", include(docs_router.urls)),
     path("upload-csv/", views.UploadCSVGenericView.as_view(), name="csv-upload"),
     path("matrix-products/", ProductMatrixViewset.as_view(), name="matrix-products"),
 ]

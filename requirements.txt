@@ -54,6 +54,7 @@ django==4.0.1
     #   django-debug-toolbar
     #   django-extensions
     #   django-filter
+    #   django-model-utils
     #   django-sql-utils
     #   djangorestframework
     #   djangorestframework-simplejwt
@@ -72,6 +73,8 @@ django-js-asset==1.2.2
     # via
     #   -r requirements.in
     #   django-mptt
+django-model-utils==4.2.0
+    # via -r requirements.in
 django-mptt==0.13.4
     # via -r requirements.in
 django-sql-utils==0.6.1

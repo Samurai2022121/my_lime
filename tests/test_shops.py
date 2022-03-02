@@ -20,7 +20,7 @@ def django_db_setup(request, django_db_setup, django_db_blocker):
     with django_db_blocker.unblock():
         call_command(
             "loaddata",
-            Path(request.fspath).parent / "test_shop_api.json",
+            Path(request.fspath).parent / "fixtures" / "shops.json",
         )
     yield
     with django_db_blocker.unblock():
@@ -61,4 +61,4 @@ class TestShopViewset(ViewSetTest):
         Returns404,
     ):
         # check if detail endpoint returns 404
-        shop_id = static_fixture(2)  # this Id is not in fixture
+        shop_id = static_fixture(99)  # this Id is not in fixture

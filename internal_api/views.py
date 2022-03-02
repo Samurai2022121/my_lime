@@ -4,6 +4,7 @@ import pandas as pd
 from django.db import transaction
 from django.db.models import DecimalField, F, Sum
 from django.db.models.functions import Coalesce
+from django.utils.decorators import method_decorator
 from django_filters import rest_framework as df_filters
 from rest_framework.decorators import action
 from rest_framework.exceptions import APIException
@@ -326,8 +327,8 @@ class ProductionDocumentViewSet(
                 models.WarehouseRecord(
                     document=document,
                     # there should be a better method of getting `warehouse_id`
-                    # considering the `Warehouse` object must exist at this point
-                    # (via the ingredient query?)
+                    # considering the `Warehouse` object must exist at this
+                    # point (via the ingredient query?)
                     warehouse=self.get_or_create_warehouse(
                         menu.shop,
                         ingredient["dishes__tech_products__product_unit"],
@@ -351,3 +352,95 @@ class ProductionDocumentViewSet(
                 )
             )
         models.WarehouseRecord.objects.bulk_create(produce)
+
+
+@method_decorator(transaction.atomic, "perform_create")
+class InventoryDocumentViewSet(
+    CreateModelMixin,
+    DestroyModelMixin,
+    ReadOnlyModelViewSet,
+):
+    permission_classes = (AllowAny,)
+    queryset = models.InventoryDocument.objects.order_by("created_at", "number")
+    serializer_class = serializers.InventoryDocumentSerializer
+
+
+@method_decorator(transaction.atomic, "perform_create")
+class WriteOffDocumentViewSet(
+    CreateModelMixin,
+    DestroyModelMixin,
+    ReadOnlyModelViewSet,
+):
+    permission_classes = (AllowAny,)
+    queryset = models.WriteOffDocument.objects.order_by("created_at", "number")
+    serializer_class = serializers.WriteOffDocumentSerializer
+
+
+@method_decorator(transaction.atomic, "perform_create")
+class ConversionDocumentViewSet(
+    CreateModelMixin,
+    DestroyModelMixin,
+    ReadOnlyModelViewSet,
+):
+    permission_classes = (AllowAny,)
+    queryset = models.ConversionDocument.objects.order_by("created_at", "number")
+    serializer_class = serializers.ConversionDocumentSerializer
+
+
+@method_decorator(transaction.atomic, "perform_create")
+class MoveDocumentViewSet(
+    CreateModelMixin,
+    DestroyModelMixin,
+    ReadOnlyModelViewSet,
+):
+    permission_classes = (AllowAny,)
+    queryset = models.MoveDocument.objects.order_by("created_at", "number")
+    serializer_class = serializers.MoveDocumentSerializer
+
+
+@method_decorator(transaction.atomic, "perform_create")
+class ReceiptDocumentViewSet(
+    CreateModelMixin,
+    DestroyModelMixin,
+    ReadOnlyModelViewSet,
+):
+    permission_classes = (AllowAny,)
+    queryset = models.ReceiptDocument.objects.order_by("created_at", "number")
+    serializer_class = serializers.ReceiptDocumentSerializer
+
+
+@method_decorator(transaction.atomic, "perform_create")
+class SaleDocumentViewSet(
+    CreateModelMixin,
+    DestroyModelMixin,
+    ReadOnlyModelViewSet,
+):
+    permission_classes = (AllowAny,)
+    queryset = models.SaleDocument.objects.order_by("created_at", "number")
+    serializer_class = serializers.SaleDocumentSerializer
+
+
+class CancelDocumentViewSet(
+    CreateModelMixin,
+    DestroyModelMixin,
+    ReadOnlyModelViewSet,
+):
+    permission_classes = (AllowAny,)
+    queryset = models.CancelDocument.objects.order_by("created_at", "number")
+    serializer_class = serializers.CancelDocumentSerializer
+
+    @transaction.atomic
+    def perform_create(self, serializer):
+        document = serializer.save()
+        records = []
+        for item in document.cancels.warehouse_records.all():
+            # create a record that cancels a record from the document
+            # being cancelled:
+            records.append(
+                models.WarehouseRecord(
+                    warehouse=item.warehouse,
+                    quantity=-item.quantity,
+                    document=document,
+                )
+            )
+        models.WarehouseRecord.objects.bulk_create(records)

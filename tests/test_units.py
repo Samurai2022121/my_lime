@@ -22,7 +22,9 @@ from pytest_lambda import lambda_fixture, static_fixture
 @pytest.fixture(scope="module")
 def django_db_setup(request, django_db_setup, django_db_blocker):
     with django_db_blocker.unblock():
-        call_command("loaddata", Path(request.fspath).parent / "test_unit_api.json")
+        call_command(
+            "loaddata", Path(request.fspath).parent / "fixtures" / "units.json"
+        )
     yield
     with django_db_blocker.unblock():
         call_command("flush", "--no-input")

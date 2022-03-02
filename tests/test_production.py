@@ -19,7 +19,7 @@ def django_db_setup(request, django_db_setup, django_db_blocker):
     with django_db_blocker.unblock():
         call_command(
             "loaddata",
-            Path(request.fspath).parent / "test_production_api.json",
+            Path(request.fspath).parent / "fixtures" / "production.json",
         )
     yield
     with django_db_blocker.unblock():

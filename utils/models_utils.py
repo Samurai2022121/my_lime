@@ -67,3 +67,8 @@ def compress_image(image, sizes, field, image_format):
 
 def generate_new_password():
     return str(randint(10000, 99999))
+
+
+class classproperty(property):
+    def __get__(self, cls, owner):
+        return self.fget.__get__(None, owner)()
