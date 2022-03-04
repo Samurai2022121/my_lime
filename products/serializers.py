@@ -249,7 +249,7 @@ class ProductSerializer(serializers.ModelSerializer):
     reviews = serializers.SerializerMethodField()
     discounted_price = serializers.SerializerMethodField()
     category_read = CategorySerializer(read_only=True, source="category")
-    images = ProductImagesSerializer(many=True)
+    images = ProductImagesSerializer(many=True, required=False)
 
     class Meta:
         model = Product
