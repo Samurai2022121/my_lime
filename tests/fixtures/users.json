@@ -1,0 +1,25 @@
+[
+    {
+        "model": "users.user",
+        "pk": 1,
+        "fields": {
+            "password": "!invalid",
+            "last_login": null,
+            "is_superuser": true,
+            "is_staff": true,
+            "is_active": true,
+            "date_joined": "2022-03-04T00:47:38.690Z",
+            "phone_number": "79010000000",
+            "email": "admin@localhost",
+            "name": null,
+            "surname": null,
+            "fathers_name": null,
+            "date_of_birth": null,
+            "avatar": "",
+            "registration_date": "2022-03-04T00:47:38.976Z",
+            "is_archive": false,
+            "groups": [],
+            "user_permissions": []
+        }
+    }
+]

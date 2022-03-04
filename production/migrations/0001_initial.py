@@ -156,14 +156,14 @@ class Migration(migrations.Migration):
                 (
                     "dish",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.PROTECT,
+                        on_delete=django.db.models.deletion.CASCADE,
                         to="production.techcard",
                     ),
                 ),
                 (
                     "menu",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.PROTECT,
+                        on_delete=django.db.models.deletion.CASCADE,
                         to="production.dailymenuplan",
                     ),
                 ),

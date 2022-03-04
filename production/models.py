@@ -181,8 +181,8 @@ class DailyMenuPlan(Timestampable, models.Model):
 
 
 class MenuDish(models.Model):
-    dish = models.ForeignKey(TechCard, on_delete=models.PROTECT)
-    menu = models.ForeignKey(DailyMenuPlan, on_delete=models.PROTECT)
+    dish = models.ForeignKey(TechCard, on_delete=models.CASCADE)
+    menu = models.ForeignKey(DailyMenuPlan, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
 
     class Meta:

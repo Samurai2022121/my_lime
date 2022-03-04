@@ -19,11 +19,19 @@ class TechCardSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
 
 
 class MenuDishSerializer(serializers.ModelSerializer):
-    dish = TechCardSerializer(read_only=True)
+    dish = serializers.PrimaryKeyRelatedField(queryset=TechCard.objects)
+    dish_on_read = TechCardSerializer(source="dish", read_only=True)
 
     class Meta:
         model = MenuDish
-        fields = ["dish", "quantity", "id"]
+        fields = ["dish", "dish_on_read", "quantity", "id"]
+        read_only_fields = ["id"]
+
+    def to_representation(self, instance):
+        result = super().to_representation(instance)
+        # replace `dish` with nested read-only representation
+        result["dish"] = result.pop("dish_on_read")
+        return result
 
 
 class DailyMenuSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
@@ -31,7 +39,7 @@ class DailyMenuSerializer(WritableNestedModelSerializer, serializers.ModelSerial
 
     class Meta:
         model = DailyMenuPlan
-        fields = ["id", "author", "menu_dishes", "created_at", "updated_at"]
+        fields = ["id", "shop", "author", "menu_dishes", "created_at", "updated_at"]
 
 
 class DailyMenuLayoutSerializer(serializers.Serializer):

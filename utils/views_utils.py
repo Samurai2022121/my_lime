@@ -1,4 +1,8 @@
+from functools import partial
+
+import pytest
 from django.db.models import Q
+from pytest_drf import views as test_views
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
@@ -63,3 +67,29 @@ class BulkChangeArchiveStatusViewSetMixin(object):
         instances = serialized_data.data["instances"]
         self.queryset.filter(id__in=instances).update(is_archive=Q(is_archive=False))
         return Response(status=status.HTTP_200_OK)
+
+
+class APIViewTest(test_views.APIViewTest):
+    """Temporary workaround (possible pytest-django or drf bug)."""
+
+    @pytest.fixture
+    def format(self):
+        # request format (JSON by default)
+        return "json"
+
+    @pytest.fixture
+    def get_response(self, http_method, format, client):
+        # set request format
+        return partial(getattr(client, http_method), format=format)
+
+
+class ViewSetTest(APIViewTest):
+    """Taken from 'pytest-drf'."""
+
+    @pytest.fixture
+    def list_url(self):
+        raise NotImplementedError("Please define a list_url fixture")
+
+    @pytest.fixture
+    def detail_url(self):
+        raise NotImplementedError("Please define a detail_url fixture")

@@ -1,4 +1,3 @@
-from functools import partial
 from pathlib import Path
 
 import pytest
@@ -9,11 +8,12 @@ from pytest_drf import (
     UsesGetMethod,
     UsesListEndpoint,
     UsesPostMethod,
-    ViewSetTest,
 )
 from pytest_drf.util import url_for
 from pytest_lambda import lambda_fixture, static_fixture
 from rest_framework import status
+
+from utils.views_utils import ViewSetTest
 
 
 @pytest.fixture(scope="module")
@@ -23,9 +23,6 @@ def django_db_setup(request, django_db_setup, django_db_blocker):
         call_command(
             "loaddata",
             Path(request.fspath).parent / "fixtures" / "shops.json",
-        )
-        call_command(
-            "loaddata",
             Path(request.fspath).parent / "fixtures" / "units.json",
         )
     yield
@@ -36,8 +33,7 @@ def django_db_setup(request, django_db_setup, django_db_blocker):
 class TestInventoryDocumentViewset(ViewSetTest):
     @pytest.fixture
     def common_subject(self, db, get_response):
-        # TODO: temporary workaround (possible pytest-django or drf bug)
-        return partial(get_response, format="json")
+        return get_response
 
     list_url = lambda_fixture(lambda: url_for("internal_api:inventorydocument-list"))
 
@@ -73,7 +69,7 @@ class TestInventoryDocumentViewset(ViewSetTest):
 class TestReceiptDocumentViewset(ViewSetTest):
     @pytest.fixture
     def common_subject(self, db, load_order, get_response):
-        return partial(get_response, format="json")
+        return get_response
 
     @pytest.fixture
     def load_order(self, request, django_db_blocker):
@@ -119,7 +115,7 @@ class TestReceiptDocumentViewset(ViewSetTest):
 class TestWriteOffDocumentViewset(ViewSetTest):
     @pytest.fixture
     def common_subject(self, db, load_inventory, get_response):
-        return partial(get_response, format="json")
+        return get_response
 
     @pytest.fixture
     def load_inventory(self, request, django_db_blocker):
@@ -155,7 +151,7 @@ class TestWriteOffDocumentViewset(ViewSetTest):
 class TestConversionDocumentViewset(ViewSetTest):
     @pytest.fixture
     def common_subject(self, db, load_inventory, create_conversion, get_response):
-        return partial(get_response, format="json")
+        return get_response
 
     @pytest.fixture
     def create_conversion(self, client):
@@ -201,7 +197,7 @@ class TestConversionDocumentViewset(ViewSetTest):
 class TestMoveDocumentViewset(ViewSetTest):
     @pytest.fixture
     def common_subject(self, db, load_inventory, get_response):
-        return partial(get_response, format="json")
+        return get_response
 
     @pytest.fixture
     def load_inventory(self, request, django_db_blocker):
@@ -238,7 +234,7 @@ class TestMoveDocumentViewset(ViewSetTest):
 class TestSaleDocumentViewset(ViewSetTest):
     @pytest.fixture
     def common_subject(self, db, load_inventory, get_response):
-        return partial(get_response, format="json")
+        return get_response
 
     @pytest.fixture
     def load_inventory(self, request, django_db_blocker):
