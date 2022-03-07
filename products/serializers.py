@@ -304,13 +304,18 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class ProductAdminSerializer(serializers.ModelSerializer):
-    units = ProductUnitSerializer(many=True)
+    units = ProductUnitSerializer(many=True, read_only=True)
     category_read = CategorySerializer(read_only=True, source="category")
     images = ProductImagesSerializer(many=True, required=False)
 
     class Meta:
         model = Product
         fields = "__all__"
+
+    def to_representation(self, instance):
+        result = super().to_representation(instance)
+        result["category"] = result.pop("category_read")
+        return result
 
     def create(self, validated_data):
         images_data = validated_data.pop("images", [])

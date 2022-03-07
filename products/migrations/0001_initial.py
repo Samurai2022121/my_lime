@@ -160,6 +160,7 @@ class Migration(migrations.Migration):
                 (
                     "category",
                     models.ForeignKey(
+                        blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="products",

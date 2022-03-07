@@ -6,7 +6,6 @@ from .views import (
     ConversionSourceViewset,
     ConversionTargetViewset,
     MeasurementUnitViewset,
-    ProductAdminViewset,
     ProductUnitViewset,
     ProductViewset,
 )
@@ -15,7 +14,6 @@ router = routers.SimpleRouter()
 router.register("units", MeasurementUnitViewset)
 router.register("products", ProductViewset)
 router.register("categories", CategoryViewset)
-router.register("admin-products", ProductAdminViewset)
 
 product_unit_router = NestedSimpleRouter(router, "products", lookup="product")
 product_unit_router.register("units", ProductUnitViewset)

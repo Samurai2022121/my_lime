@@ -54,6 +54,7 @@ class Product(Timestampable, models.Model):
         on_delete=models.SET_NULL,
         verbose_name="Категория",
         null=True,
+        blank=True,
     )
     description = models.TextField(blank=True, null=True, verbose_name="Описание")
     price = models.DecimalField(
