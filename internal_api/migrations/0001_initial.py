@@ -302,7 +302,11 @@ class Migration(migrations.Migration):
                 (
                     "margin",
                     models.DecimalField(
-                        blank=True, decimal_places=2, max_digits=4, null=True
+                        verbose_name="наценка, %",
+                        blank=True,
+                        decimal_places=2,
+                        max_digits=4,
+                        null=True,
                     ),
                 ),
                 ("auto_order", models.BooleanField(default=False)),

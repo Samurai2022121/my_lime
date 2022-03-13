@@ -1,11 +1,6 @@
 from django.core.exceptions import ValidationError
-from django.core.validators import (
-    FileExtensionValidator,
-    MaxValueValidator,
-    MinValueValidator,
-)
+from django.core.validators import FileExtensionValidator
 from django.db import models
-from django.utils.translation import gettext_lazy as _
 from mptt.models import MPTTModel, TreeForeignKey
 
 from utils.models_utils import Timestampable
@@ -57,12 +52,6 @@ class Product(Timestampable, models.Model):
         blank=True,
     )
     description = models.TextField(blank=True, null=True, verbose_name="Описание")
-    price = models.DecimalField(
-        decimal_places=2,
-        max_digits=6,
-        verbose_name="Цена",
-        validators=[MinValueValidator(0.01), MaxValueValidator(9999.99)],
-    )
     protein = models.DecimalField(
         blank=True, null=True, verbose_name="Белки", max_digits=4, decimal_places=2
     )
@@ -86,23 +75,21 @@ class Product(Timestampable, models.Model):
         max_digits=6,
         decimal_places=2,
     )
-    barcode = models.BigIntegerField(blank=True, null=True, verbose_name="Штрихкод")
     manufacturer = models.CharField(
         max_length=250, blank=True, null=True, verbose_name="Производитель"
     )
     origin = models.CharField(
         max_length=50, blank=True, null=True, verbose_name="Страна происхождения"
     )
+
+    # TODO: these two belongs to proposed `Batch` model (for batch accounting)
     expiration_date = models.DateField(
         blank=True, null=True, verbose_name="Срок годности"
     )
     production_date = models.DateField(
         blank=True, null=True, verbose_name="Дата производства"
     )
-    weight = models.DecimalField(
-        blank=True, null=True, verbose_name="Вес, грамм", max_digits=7, decimal_places=2
-    )
-    in_stock = models.BooleanField(verbose_name="Наличие", default=False)
+
     own_production = models.BooleanField(
         default=False, verbose_name="Собственное производство"
     )
@@ -115,30 +102,14 @@ class Product(Timestampable, models.Model):
     vat_value = models.DecimalField(
         null=True, blank=True, max_digits=7, decimal_places=2
     )
-    for_scales = models.BooleanField(default=False)
     for_own_production = models.BooleanField(default=False)
 
     class Meta:
-        unique_together = ["manufacturer", "name", "barcode"]
         verbose_name = "товар"
         verbose_name_plural = "товары"
-        constraints = (
-            models.CheckConstraint(
-                check=models.Q(price__gte=0.01) & models.Q(price__lte=9999.99),
-                name="price_range",
-            ),
-        )
 
     def __str__(self):
         return self.name
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super(Product, self).save()
-
-    def clean(self):
-        if self.for_scales and (not self.short_name or not self.category):
-            raise ValidationError(_("Обязательны параметры short_name и category."))
 
 
 class MeasurementUnit(models.Model):
@@ -164,6 +135,15 @@ class ProductUnit(models.Model):
         related_name="product_units",
     )
     for_resale = models.BooleanField("допустима продажа", default=True)
+    for_scales = models.BooleanField("весовой товар", default=False)
+    barcode = models.BigIntegerField("штрихкод", blank=True, null=True)
+    weight = models.DecimalField(
+        "вес с упаковкой, г",
+        blank=True,
+        null=True,
+        max_digits=7,
+        decimal_places=2,
+    )
 
     class Meta:
         verbose_name = "Единица хранения"
@@ -171,6 +151,24 @@ class ProductUnit(models.Model):
 
     def __str__(self):
         return f"{self.unit} of {self.product}"
+
+    def save(self, *args, **kwargs):
+        # TODO: `ValidationError` is for serializers/views,
+        #   placing it in model feels uneasy
+        if self.for_scales:
+            if not self.product.short_name:
+                raise ValidationError(
+                    {
+                        "for_scales": "Весовой товар должен иметь краткое наименование.",
+                    }
+                )
+            if not self.product.category:
+                raise ValidationError(
+                    {
+                        "for_scales": "Весовой товар должен иметь категорию.",
+                    }
+                )
+        super().save(*args, **kwargs)
 
 
 class ProductUnitConversion(models.Model):

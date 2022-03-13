@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from drf_base64.fields import Base64FileField
 from drf_writable_nested import NestedCreateMixin, WritableNestedModelSerializer
 from rest_framework import serializers
@@ -88,10 +90,10 @@ class WarehouseSerializer(serializers.ModelSerializer):
         max_digits=7,
         decimal_places=2,
     )
-    price = serializers.DecimalField(
-        source="product_unit.product.price",
+    recommended_price = serializers.DecimalField(
         read_only=True,
-        max_digits=6,
+        allow_null=True,
+        max_digits=7,
         decimal_places=2,
     )
     supplier = SupplierSerializer()
@@ -255,19 +257,64 @@ class InventoryRecordSerializer(serializers.ModelSerializer):
         allow_null=True,
         required=False,
     )
+    cost = serializers.DecimalField(
+        required=False,
+        allow_null=True,
+        decimal_places=2,
+        max_digits=7,
+    )
+    price = serializers.DecimalField(
+        write_only=True,
+        required=False,
+        allow_null=True,
+        decimal_places=2,
+        max_digits=6,
+        max_value=Decimal("9999.99"),
+        min_value=Decimal("0.01"),
+    )
+    margin = serializers.DecimalField(
+        write_only=True,
+        required=False,
+        allow_null=True,
+        decimal_places=2,
+        max_digits=7,
+    )
     warehouse = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = models.WarehouseRecord
-        fields = ("product_unit", "supplier", "warehouse", "quantity")
+        fields = (
+            "product_unit",
+            "supplier",
+            "warehouse",
+            "quantity",
+            "price",
+            "cost",
+            "margin",
+        )
 
     def create(self, validated_data):
+        cost = validated_data.get("cost", None)
+
+        # get fields for constructing `Warehouse` object
         product_unit = validated_data.pop("product_unit")
         supplier = validated_data.pop("supplier", None)
+        margin = validated_data.pop("margin", None)
+
+        # price can be calculated based on record cost and margin,
+        # or set separately. If no price, cost, or margin is provided,
+        # the operation can still succeed with existing `Warehouse` object
+        price = validated_data.pop(
+            "price",
+            round(cost * (margin + Decimal(100)) / Decimal(100), 2)
+            if margin and cost
+            else None,
+        )
         warehouse, _ = models.Warehouse.objects.get_or_create(
             product_unit=product_unit,
             supplier=supplier,
             shop=self.context.get("shop", None),
+            defaults={"price": price, "margin": margin},
         )
         validated_data["warehouse"] = warehouse
         return super().create(validated_data)
@@ -333,7 +380,13 @@ class ConversionRecordSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.WarehouseRecord
-        fields = ("target_unit", "target_supplier", "warehouse", "quantity")
+        fields = (
+            "target_unit",
+            "target_supplier",
+            "warehouse",
+            "quantity",
+            "cost",
+        )
 
 
 class ConversionDocumentSerializer(serializers.ModelSerializer):
@@ -349,17 +402,15 @@ class ConversionDocumentSerializer(serializers.ModelSerializer):
         for source_record in source_records:
             target_unit = source_record.pop("target_unit")
             target_supplier = source_record.pop("target_supplier", None)
+            source_warehouse = source_record["warehouse"]
+            source_quantity = source_record["quantity"]
+            source_cost = source_record.get("cost", None)
 
             # source and target product units must belong to the same product
-            source_unit = source_record["warehouse"].product_unit
+            source_unit = source_warehouse.product_unit
             if source_unit.product != target_unit.product:
                 raise ValidationError("Product mismatch.")
 
-            target_warehouse, _ = models.Warehouse.objects.get_or_create(
-                product_unit=target_unit,
-                supplier=target_supplier,
-                shop=source_record["warehouse"].shop,
-            )
             conversion_qs = source_unit.conversion_sources.filter(
                 target_unit=target_unit,
             )
@@ -370,15 +421,29 @@ class ConversionDocumentSerializer(serializers.ModelSerializer):
             if conversion is None:
                 raise ValidationError("No way to convert.")
 
+            target_warehouse, _ = models.Warehouse.objects.get_or_create(
+                product_unit=target_unit,
+                supplier=target_supplier,
+                shop=source_warehouse.shop,
+                defaults={
+                    "price": round(source_warehouse.price / conversion.factor, 2),
+                    "margin": source_warehouse.margin,
+                },
+            )
+
             target_record = {
                 "warehouse": target_warehouse.id,
-                "quantity": round(source_record["quantity"] * conversion.factor, 2),
+                "quantity": round(source_quantity * conversion.factor, 2),
+                "cost": round(source_cost / conversion.factor, 2)
+                if source_cost
+                else None,
                 "document": document.id,
             }
             # write off initially supplied quantity
             source_record = {
-                "warehouse": source_record["warehouse"].id,
-                "quantity": -source_record["quantity"],
+                "warehouse": source_warehouse.id,
+                "quantity": -source_quantity,
+                "cost": source_cost,
                 "document": document.id,
             }
             for data in (source_record, target_record):
@@ -422,6 +487,10 @@ class MoveDocumentSerializer(serializers.ModelSerializer):
                 product_unit=product_unit,
                 supplier=supplier,
                 shop=target_shop,
+                defaults={
+                    "price": source_record["warehouse"].price,
+                    "margin": source_record["warehouse"].margin,
+                },
             )
             target_record = source_record.copy()
             target_record["warehouse"] = target_warehouse.id
@@ -445,10 +514,19 @@ class ReceiptRecordSerializer(serializers.ModelSerializer):
         write_only=True,
     )
     warehouse = serializers.PrimaryKeyRelatedField(read_only=True)
+    price = serializers.DecimalField(
+        write_only=True,
+        required=False,
+        allow_null=True,
+        decimal_places=2,
+        max_digits=6,
+        max_value=Decimal("9999.99"),
+        min_value=Decimal("0.01"),
+    )
 
     class Meta:
         model = models.WarehouseRecord
-        fields = ("product_unit", "warehouse", "quantity")
+        fields = ("product_unit", "warehouse", "quantity", "price")
 
 
 class ReceiptDocumentSerializer(serializers.ModelSerializer):
@@ -470,6 +548,7 @@ class ReceiptDocumentSerializer(serializers.ModelSerializer):
                 product_unit=product_unit,
                 supplier=supplier,
                 shop=shop,
+                defaults={"price": record.get("price", None)},
             )
             serializer = WarehouseRecordSerializer(
                 data={

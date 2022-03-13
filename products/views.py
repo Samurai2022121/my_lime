@@ -70,7 +70,7 @@ class ProductAdminViewset(
         ordering_fields = self.get_ordering_fields()
         if ordering_fields:
             return qs.order_by(*ordering_fields)
-        return qs.order_by("in_stock")
+        return qs.order_by("name")
 
     @action(detail=False, methods=["post"], url_path="bulk-change-category")
     def change_category(self, request, **kwargs):
@@ -151,7 +151,7 @@ class ProductViewset(
         ordering_fields = self.get_ordering_fields()
         if ordering_fields:
             return qs.order_by(*ordering_fields)
-        return qs.order_by("in_stock")
+        return qs.order_by("name")
 
 
 class CategoryViewset(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet):

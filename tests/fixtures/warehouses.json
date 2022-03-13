@@ -9,7 +9,8 @@
             "max_remaining": "0.00",
             "supplier": null,
             "margin": null,
-            "auto_order": false
+            "auto_order": false,
+            "price": 100.15
         }
     },
     {
@@ -22,7 +23,8 @@
             "max_remaining": "0.00",
             "supplier": null,
             "margin": null,
-            "auto_order": false
+            "auto_order": false,
+            "price": 50.05
         }
     },
     {
@@ -35,7 +37,8 @@
             "max_remaining": "0.00",
             "supplier": null,
             "margin": null,
-            "auto_order": false
+            "auto_order": false,
+            "price": 25.52
         }
     },
     {
@@ -48,7 +51,8 @@
             "max_remaining": "0.00",
             "supplier": null,
             "margin": null,
-            "auto_order": false
+            "auto_order": false,
+            "price": 25.52
         }
     },
     {

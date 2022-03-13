@@ -1,7 +1,9 @@
 from datetime import date
+from decimal import Decimal
 from secrets import token_hex
 
 from django.conf import settings
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from model_utils.managers import InheritanceManager
 
@@ -122,6 +124,23 @@ class SupplyContract(Timestampable, models.Model):
         return self.supplier.name
 
 
+class WarehouseManager(models.Manager):
+    """Apply margin on highest income record cost."""
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return qs.annotate(
+            recommended_price=(
+                (models.F("margin") + Decimal(100))
+                * models.Max(
+                    "warehouse_records__cost",
+                    filter=models.Q(warehouse_records__quantity__gt=Decimal(0)),
+                )
+                / Decimal(100)
+            )
+        )
+
+
 class Warehouse(models.Model):
     product_unit = models.ForeignKey(ProductUnit, on_delete=models.PROTECT)
     shop = models.ForeignKey(Shop, on_delete=models.PROTECT)
@@ -134,13 +153,33 @@ class Warehouse(models.Model):
         null=True,
         related_name="warehouse",
     )
-    margin = models.DecimalField(blank=True, null=True, max_digits=4, decimal_places=2)
+    margin = models.DecimalField(
+        "наценка, %",
+        blank=True,
+        null=True,
+        max_digits=4,
+        decimal_places=2,
+    )
     auto_order = models.BooleanField(default=False)
+    price = models.DecimalField(
+        decimal_places=2,
+        max_digits=6,
+        verbose_name="Цена",
+        validators=[MinValueValidator(0.01), MaxValueValidator(9999.99)],
+    )
+
+    objects = WarehouseManager()
 
     class Meta:
         verbose_name = "Запас"
         verbose_name_plural = "Запасы"
         default_related_name = "warehouses"
+        constraints = (
+            models.CheckConstraint(
+                check=models.Q(price__gte=0.01) & models.Q(price__lte=9999.99),
+                name="price_range",
+            ),
+        )
 
     def __str__(self):
         return f"{self.product_unit} in {self.shop}"
@@ -370,7 +409,18 @@ class WarehouseRecord(Timestampable, models.Model):
         on_delete=models.PROTECT,
         verbose_name="запас",
     )
-    quantity = models.DecimalField("количество", max_digits=7, decimal_places=2)
+    quantity = models.DecimalField(
+        "количество",
+        max_digits=7,
+        decimal_places=2,
+    )
+    cost = models.DecimalField(
+        "стоимость",
+        null=True,
+        blank=True,
+        max_digits=7,
+        decimal_places=2,
+    )
     document = models.ForeignKey(
         PrimaryDocument,
         on_delete=models.CASCADE,

@@ -17,11 +17,9 @@ class ProductFilter(django_filters.FilterSet):
     class Meta:
         model = Product
         fields = {
-            "price": ["lt", "lte", "gt", "gte", "exact"],
             "is_sorted": ["exact"],
             "is_archive": ["exact"],
             "for_own_production": ["exact"],
-            "for_scales": ["exact"],
         }
 
     def search(self, qs, name, value):

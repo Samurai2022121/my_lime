@@ -39,27 +39,21 @@
             "short_name": null,
             "category": 2,
             "description": "",
-            "price": "98.90",
             "protein": null,
             "carbohydrates": null,
             "fats": null,
             "calories": null,
             "energy": null,
-            "barcode": null,
             "manufacturer": null,
             "origin": null,
             "expiration_date": null,
             "production_date": null,
-            "weight": null,
-            "in_stock": false,
             "own_production": false,
             "discount": null,
             "extra_info": null,
             "is_archive": false,
             "is_sorted": true,
-            "vat_value": null,
-            "for_scales": false,
-            "for_own_production": false
+            "vat_value": null
         }
     },
     {
@@ -72,27 +66,21 @@
             "short_name": null,
             "category": 1,
             "description": "",
-            "price": "55.50",
             "protein": null,
             "carbohydrates": null,
             "fats": null,
             "calories": null,
             "energy": null,
-            "barcode": null,
             "manufacturer": null,
             "origin": null,
             "expiration_date": null,
             "production_date": null,
-            "weight": null,
-            "in_stock": false,
             "own_production": false,
             "discount": null,
             "extra_info": null,
             "is_archive": false,
             "is_sorted": true,
-            "vat_value": null,
-            "for_scales": false,
-            "for_own_production": true
+            "vat_value": null
         }
     },
     {
@@ -105,27 +93,21 @@
             "short_name": null,
             "category": 2,
             "description": "",
-            "price": "26.10",
             "protein": null,
             "carbohydrates": null,
             "fats": null,
             "calories": null,
             "energy": null,
-            "barcode": null,
             "manufacturer": null,
             "origin": null,
             "expiration_date": null,
             "production_date": null,
-            "weight": null,
-            "in_stock": false,
             "own_production": false,
             "discount": null,
             "extra_info": null,
             "is_archive": false,
             "is_sorted": true,
-            "vat_value": null,
-            "for_scales": false,
-            "for_own_production": false
+            "vat_value": null
         }
     },
     {
@@ -162,7 +144,10 @@
         "fields": {
             "product": 1,
             "unit": 1,
-            "for_resale": true
+            "weight": null,
+            "barcode": null,
+            "for_resale": true,
+            "for_scales": false
         }
     },
     {
@@ -171,7 +156,10 @@
         "fields": {
             "product": 2,
             "unit": 2,
-            "for_resale": false
+            "weight": null,
+            "barcode": null,
+            "for_resale": false,
+            "for_scales": false
         }
     },
     {
@@ -180,7 +168,10 @@
         "fields": {
             "product": 3,
             "unit": 3,
-            "for_resale": true
+            "weight": null,
+            "barcode": null,
+            "for_resale": true,
+            "for_scales": false
         }
     },
     {
@@ -189,7 +180,10 @@
         "fields": {
             "product": 3,
             "unit": 2,
-            "for_resale": false
+            "weight": null,
+            "barcode": null,
+            "for_resale": false,
+            "for_scales": false
         }
     }
 ]

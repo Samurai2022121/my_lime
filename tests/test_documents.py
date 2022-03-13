@@ -48,18 +48,22 @@ class TestInventoryDocumentViewset(ViewSetTest):
                     {
                         "product_unit": 1,
                         "quantity": 100,
+                        "price": "99.95",
                     },
                     {
                         "product_unit": 2,
                         "quantity": 50,
+                        "price": "48.50",
                     },
                     {
                         "product_unit": 3,
                         "quantity": 25,
+                        "price": "23.32",
                     },
                     {
                         "product_unit": 4,
                         "quantity": 13,
+                        "price": "23.32",
                     },
                 ],
             }
@@ -94,18 +98,22 @@ class TestReceiptDocumentViewset(ViewSetTest):
                     {
                         "product_unit": 1,
                         "quantity": 100,
+                        "price": "99.95",
                     },
                     {
                         "product_unit": 2,
                         "quantity": 50,
+                        "price": "48.50",
                     },
                     {
                         "product_unit": 3,
                         "quantity": 25,
+                        "price": "23.32",
                     },
                     {
                         "product_unit": 4,
                         "quantity": 13,
+                        "price": "23.32",
                     },
                 ],
             }
