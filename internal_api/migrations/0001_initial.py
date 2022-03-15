@@ -375,6 +375,7 @@ class Migration(migrations.Migration):
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
             ],
+            options={"verbose_name": "Заказ", "verbose_name_plural": "Заказы"},
         ),
         migrations.CreateModel(
             name="CancelDocument",

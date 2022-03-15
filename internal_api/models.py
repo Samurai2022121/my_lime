@@ -469,6 +469,10 @@ class WarehouseOrder(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        verbose_name = "Заказ"
+        verbose_name_plural = "Заказы"
+
     def __str__(self):
         return self.order_number or "-"
 
@@ -496,7 +500,7 @@ class WarehouseOrderPositions(models.Model):
         default_related_name = "warehouse_order_positions"
 
     def __str__(self):
-        return f"{self.product.name} in {self.warehouse_order}"
+        return f"{self.product_unit.product.name} in {self.warehouse_order}"
 
 
 class LegalEntities(models.Model):

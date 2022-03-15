@@ -190,14 +190,20 @@ class WarehouseOrderViewSet(
     permission_classes = (AllowAny,)
     serializer_class = serializers.WarehouseOrderSerializer
     lookup_field = "id"
-    queryset = models.WarehouseOrder.objects.all()
+    queryset = models.WarehouseOrder.objects
 
     def get_queryset(self):
-        qs = self.queryset.prefetch_related("warehouse_order_positions",).annotate(
-            total=Sum(
-                F("warehouse_order_positions__quantity")
-                * F("warehouse_order_positions__buying_price")
+        qs = (
+            super()
+            .get_queryset()
+            .prefetch_related("warehouse_order_positions")
+            .annotate(
+                total=Sum(
+                    F("warehouse_order_positions__quantity")
+                    * F("warehouse_order_positions__buying_price")
+                )
             )
+            .order_by("created_at")
         )
 
         if "is_archive" not in self.request.query_params:

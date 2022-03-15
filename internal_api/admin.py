@@ -157,9 +157,14 @@ class WarehouseAdmin(admin.ModelAdmin):
     remaining.short_description = "остаток"
 
 
+class WarehouseOrderPositionsInline(admin.TabularInline):
+    model = models.WarehouseOrderPositions
+    extra = 1
+
+
 @admin.register(models.WarehouseOrder)
 class WarehouseOrderAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
-    pass
+    inlines = [WarehouseOrderPositionsInline]
 
 
 @admin.register(models.WarehouseOrderPositions)

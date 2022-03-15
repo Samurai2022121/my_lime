@@ -6,7 +6,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_nested.serializers import NestedHyperlinkedIdentityField
 
-from products.models import Product
+from products.serializers import ProductUnitSerializer
 
 from . import models
 
@@ -23,15 +23,13 @@ class ShopSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class PersonnelDocumentSerializer(
-    WritableNestedModelSerializer, serializers.ModelSerializer
-):
+class PersonnelDocumentSerializer(WritableNestedModelSerializer):
     class Meta:
         model = models.PersonnelDocument
         fields = "__all__"
 
 
-class PersonnelSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+class PersonnelSerializer(WritableNestedModelSerializer):
     personnel_document = PersonnelDocumentSerializer(many=True)
 
     class Meta:
@@ -39,9 +37,7 @@ class PersonnelSerializer(WritableNestedModelSerializer, serializers.ModelSerial
         fields = "__all__"
 
 
-class SupplyContractSerializer(
-    WritableNestedModelSerializer, serializers.ModelSerializer
-):
+class SupplyContractSerializer(WritableNestedModelSerializer):
     supplier = serializers.PrimaryKeyRelatedField(
         queryset=models.Supplier.objects.all()
     )
@@ -62,10 +58,7 @@ class SupplyContractsSerializer(serializers.Serializer):
         return supply_contracts
 
 
-class SupplierSerializer(
-    WritableNestedModelSerializer,
-    serializers.ModelSerializer,
-):
+class SupplierSerializer(WritableNestedModelSerializer):
     supply_contract = SupplyContractSerializer(many=True, read_only=True)
 
     class Meta:
@@ -128,86 +121,54 @@ class UploadCSVSerializer(serializers.Serializer):
     first_row = serializers.IntegerField()
 
 
-class WarehouseOrderPositionsSerializer(serializers.HyperlinkedModelSerializer):
-    product_name = serializers.ReadOnlyField(source="product.name")
-    product_barcode = serializers.ReadOnlyField(source="product.barcode")
-    product_id = serializers.IntegerField(source="product.id")
-    id = serializers.CharField(required=False)
+class WarehouseOrderPositionsSerializer(serializers.ModelSerializer):
+    product_unit = serializers.PrimaryKeyRelatedField(
+        queryset=models.ProductUnit.objects,
+        write_only=True,
+    )
+    product_unit_on_read = ProductUnitSerializer(
+        source="product_unit",
+        read_only=True,
+    )
+
+    def to_representation(self, instance):
+        result = super().to_representation(instance)
+        result["product_unit"] = result.pop("product_unit_on_read")
+        return result
 
     class Meta:
         model = models.WarehouseOrderPositions
-        fields = (
-            "product_id",
-            "product_name",
-            "buying_price",
-            "product_barcode",
-            "quantity",
-            "special",
-            "bonus",
-            "flaw",
-            "id",
-            "value_added_tax",
-            "value_added_tax_value",
-            "margin",
-        )
+        exclude = ("warehouse_order",)
 
 
-class WarehouseOrderSerializer(serializers.ModelSerializer):
+class WarehouseOrderSerializer(WritableNestedModelSerializer):
     order_positions = WarehouseOrderPositionsSerializer(
-        many=True, source="warehouse_order"
+        many=True,
+        source="warehouse_order_positions",
     )
-    supplier = SupplierSerializer(read_only=True)
-    supplier_id = serializers.IntegerField(write_only=True)
-    total = serializers.DecimalField(read_only=True, max_digits=10, decimal_places=2)
+    supplier_on_read = SupplierSerializer(source="supplier", read_only=True)
+    supplier = serializers.PrimaryKeyRelatedField(
+        queryset=models.Supplier.objects,
+        allow_null=True,
+        required=False,
+    )
+    total = serializers.DecimalField(
+        read_only=True,
+        max_digits=10,
+        decimal_places=2,
+    )
     shop_address = serializers.CharField(source="shop.address", read_only=True)
-    shop_id = serializers.IntegerField(write_only=True)
+    shop = serializers.PrimaryKeyRelatedField(queryset=models.Shop.objects)
     created_at = serializers.DateTimeField(required=False)
 
     class Meta:
         model = models.WarehouseOrder
         fields = "__all__"
 
-    def create(self, validated_data):
-        order_positions = validated_data.pop("warehouse_order")
-        supplier_id = validated_data.pop("supplier_id")
-        shop_id = validated_data.pop("shop_id")
-        shop = models.Shop.objects.get(id=shop_id)
-        supplier = models.Supplier.objects.get(id=supplier_id)
-        validated_data.update({"supplier": supplier, "shop": shop})
-        order = models.WarehouseOrder.objects.create(**validated_data)
-        for order_position in order_positions:
-            product_id = order_position.pop("product")["id"]
-            product = Product.objects.filter(id=product_id)
-            if not product:
-                raise serializers.ValidationError(
-                    f"Product does {product_id} not exists."
-                )
-            models.WarehouseOrderPositions.objects.create(
-                product=product.first(), warehouse_order=order, **order_position
-            )
-        return order
-
-    def update(self, instance, validated_data):
-        order_positions = validated_data.pop("warehouse_order")
-        supplier_id = validated_data.pop("supplier_id")
-        shop_id = validated_data.pop("shop_id")
-        shop = models.Shop.objects.get(id=shop_id)
-        supplier = models.Supplier.objects.get(id=supplier_id)
-        validated_data.update({"supplier": supplier, "shop": shop})
-        instance = super().update(instance, validated_data)
-        for order_position in order_positions:
-            product_id = order_position.pop("product")["id"]
-            order_position_id = order_position.pop("id", None)
-            product = Product.objects.get(id=product_id)
-            if order_position_id:
-                models.WarehouseOrderPositions.objects.filter(
-                    id=order_position_id
-                ).update(product=product, **order_position)
-            else:
-                models.WarehouseOrderPositions.objects.create(
-                    product=product, warehouse_order=instance, **order_position
-                )
-        return instance
+    def to_representation(self, instance):
+        result = super().to_representation(instance)
+        result["supplier"] = result.pop("supplier_on_read", None)
+        return result
 
 
 class LegalEntitySerializer(serializers.ModelSerializer):
