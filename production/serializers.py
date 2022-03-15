@@ -7,7 +7,7 @@ from .models import DailyMenuPlan, MenuDish, TechCard, TechCardProduct
 class TechProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = TechCardProduct
-        fields = "__all__"
+        exclude = ("tech_card",)
 
 
 class TechCardSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):

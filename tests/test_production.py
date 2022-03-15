@@ -88,3 +88,34 @@ class TestDailyMenuViewset(ViewSetTest):
             lambda menu_id: url_for("production:dailymenuplan-layout", menu_id)
         )
         menu_id = static_fixture(2)
+
+
+class TestTechCardViewset(ViewSetTest):
+    @pytest.fixture
+    def common_subject(self, db, get_response):
+        return get_response
+
+    list_url = lambda_fixture(lambda: url_for("production:techcard-list"))
+
+    detail_url = lambda_fixture(lambda id: url_for("production:techcard-detail", id=id))
+
+    class TestList(UsesGetMethod, UsesListEndpoint, Returns200):
+        pass
+
+    class TestDetail(UsesGetMethod, UsesDetailEndpoint, Returns200):
+        id = static_fixture(2)
+
+    class TestCreate(UsesPostMethod, UsesListEndpoint, Returns201):
+        data = static_fixture(
+            {
+                "name": "Test Product 666 Tech Card",
+                "author": 1,
+                "ingredients": [
+                    {
+                        "product_unit": 22,
+                        "quantity": 1,
+                    },
+                ],
+                "end_product": 9,
+            }
+        )
