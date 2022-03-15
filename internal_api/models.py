@@ -5,6 +5,7 @@ from secrets import token_hex
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.db.models.functions import Coalesce
 from model_utils.managers import InheritanceManager
 
 from products.models import ProductUnit
@@ -137,7 +138,12 @@ class WarehouseManager(models.Manager):
                     filter=models.Q(warehouse_records__quantity__gt=Decimal(0)),
                 )
                 / Decimal(100)
-            )
+            ),
+            remaining=Coalesce(
+                models.Sum("warehouse_records__quantity"),
+                Decimal(0),
+                output_field=models.DecimalField(max_digits=7, decimal_places=2),
+            ),
         )
 
 

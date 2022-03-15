@@ -1,12 +1,9 @@
 from django.urls import include, path
 from rest_framework import routers
+from rest_framework_nested.routers import NestedSimpleRouter
 
 from news.views import NewsAdminViewset
-from products.views import (
-    EditProductImagesViewset,
-    ProductAdminViewset,
-    ProductMatrixViewset,
-)
+from products.views import EditProductImagesViewset, ProductAdminViewset
 from recipes.views import RecipeAdminViewset
 
 from . import views
@@ -15,11 +12,20 @@ router = routers.SimpleRouter()
 router.register("outlets", views.ShopViewSet)
 router.register("personnel", views.PersonnelViewSet)
 router.register("personnel-document", views.PersonnelDocumentViewSet)
-router.register("matrix", views.WarehouseViewSet)
 router.register("product-orders", views.WarehouseOrderViewSet)
 router.register("supplier", views.SupplierViewSet)
 router.register("supply-contracts", views.SupplyContractViewSet)
 router.register("legal-entities", views.LegalEntityViewSet)
+
+warehouse_router = NestedSimpleRouter(router, "outlets", lookup="shop")
+warehouse_router.register("warehouses", views.WarehouseViewSet)
+
+warehouse_record_router = NestedSimpleRouter(
+    warehouse_router,
+    "warehouses",
+    lookup="warehouse",
+)
+warehouse_record_router.register("records", views.WarehouseRecordViewSet)
 
 router.register("product", ProductAdminViewset)
 router.register("product-images", EditProductImagesViewset)
@@ -39,7 +45,8 @@ docs_router.register("cancel", views.CancelDocumentViewSet)
 urlpatterns = [
     path("primary-documents/", include(docs_router.urls)),
     path("upload-csv/", views.UploadCSVGenericView.as_view(), name="csv-upload"),
-    path("matrix-products/", ProductMatrixViewset.as_view(), name="matrix-products"),
 ]
 
 urlpatterns += router.urls
+urlpatterns += warehouse_router.urls
+urlpatterns += warehouse_record_router.urls

@@ -2,11 +2,9 @@ from decimal import Decimal
 
 import pandas as pd
 from django.db import transaction
-from django.db.models import DecimalField, F, Sum
-from django.db.models.functions import Coalesce
+from django.db.models import F, Sum
 from django.utils.decorators import method_decorator
 from django_filters import rest_framework as df_filters
-from rest_framework.decorators import action
 from rest_framework.exceptions import APIException
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import CreateModelMixin, DestroyModelMixin
@@ -20,10 +18,11 @@ from rest_framework.status import (
     HTTP_409_CONFLICT,
 )
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from rest_framework_nested.viewsets import NestedViewSetMixin
 
 from products.models import Product
 from products.serializers import ProductListSerializer
-from utils.serializers_utils import BulkUpdateSerializer
+from utils.serializers_utils import exclude_field
 from utils.views_utils import (
     BulkChangeArchiveStatusViewSetMixin,
     BulkUpdateViewSetMixin,
@@ -78,54 +77,45 @@ class PersonnelViewSet(
         return qs
 
 
-class WarehouseViewSet(ModelViewSet):
+class WarehouseViewSet(NestedViewSetMixin, ModelViewSet):
     permission_classes = (AllowAny,)
     serializer_class = serializers.WarehouseSerializer
     filter_backends = (df_filters.DjangoFilterBackend,)
     filterset_class = filters.WarehouseFilter
     lookup_field = "id"
-    queryset = models.Warehouse.objects.all()
+    parent_lookup_kwargs = {"shop_id": "shop__id"}
+    queryset = models.Warehouse.objects
 
     def get_queryset(self):
-        qs = self.queryset
-        outlet_id = self.request.query_params.get("outlet", None)
-        if outlet_id:
-            qs = qs.filter(
-                shop=outlet_id,
-                product_unit__product__is_archive=False,
-            )
-        else:
-            qs = qs.none()
-        # TODO: implement this as a custom queryset method
-        qs = qs.annotate(
-            remaining=Coalesce(
-                Sum("warehouse_records__quantity"),
-                Decimal(0),
-                output_field=DecimalField(max_digits=7, decimal_places=2),
-            ),
-        ).order_by("product_unit__product__name")
+        qs = super().get_queryset().order_by("product_unit__product__name")
         return qs
 
-    @action(detail=False, methods=["post"], url_path="bulk_update")
-    def bulk_update(self, request, **kwargs):
-        # TODO: this is broken due to the introduction of product units
-        serialized_data = BulkUpdateSerializer(data=request.data)
-        serialized_data.is_valid(raise_exception=True)
-        instances = serialized_data.data["instances"]
-        for instance in instances:
-            image_id = instance.pop("id", None)
-            product_id = instance.pop("product")
-            if not product_id:
-                return Response(
-                    status=HTTP_400_BAD_REQUEST, data={"message": "Товар не существует"}
-                )
-            product = Product.objects.get(id=product_id)
-            instance.update({"product": product})
-            if image_id:
-                self.queryset.filter(id=image_id).update(**instance)
-            else:
-                models.Warehouse.objects.create(**instance)
-        return Response(status=HTTP_202_ACCEPTED)
+    def get_serializer_class(self):
+        serializer = super().get_serializer_class()
+        return exclude_field(serializer, "shop")
+
+    def perform_create(self, serializer):
+        serializer.save(shop_id=self.kwargs.get("shop_id", None))
+
+
+class WarehouseRecordViewSet(NestedViewSetMixin, ModelViewSet):
+    permission_classes = (AllowAny,)
+    serializer_class = serializers.WarehouseRecordSerializer
+    lookup_field = "id"
+    parent_lookup_kwargs = {
+        "shop_id": "warehouse__shop_id",
+        "warehouse_id": "warehouse__id",
+    }
+    queryset = models.WarehouseRecord.objects
+
+    def get_serializer_class(self):
+        serializer = super().get_serializer_class()
+        return exclude_field(serializer, "warehouse")
+
+    def perform_create(self, serializer):
+        serializer.save(
+            warehouse_id=self.kwargs.get("warehouse_id", None),
+        )
 
 
 class UploadCSVGenericView(GenericAPIView):
@@ -203,9 +193,10 @@ class WarehouseOrderViewSet(
     queryset = models.WarehouseOrder.objects.all()
 
     def get_queryset(self):
-        qs = self.queryset.prefetch_related("warehouse_order").annotate(
+        qs = self.queryset.prefetch_related("warehouse_order_positions",).annotate(
             total=Sum(
-                F("warehouse_order__quantity") * F("warehouse_order__buying_price")
+                F("warehouse_order_positions__quantity")
+                * F("warehouse_order_positions__buying_price")
             )
         )
 

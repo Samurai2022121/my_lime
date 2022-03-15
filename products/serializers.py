@@ -191,7 +191,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        exclude = ["is_archive", "is_sorted", "for_scales", "for_own_production"]
+        exclude = ["is_archive", "is_sorted", "for_own_production"]
 
     def get_stars_count(self, obj):
         return Star.objects.filter(
@@ -253,7 +253,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        exclude = ["is_archive", "is_sorted", "for_own_production", "for_scales"]
+        exclude = ["is_archive", "is_sorted", "for_own_production"]
 
     def get_average_star(self, obj):
         return Star.objects.filter(
@@ -357,38 +357,6 @@ class BulkActionProductSerializer(serializers.Serializer):
 
 class BulkChangeProductCategorySerializer(BulkActionProductSerializer):
     new_category = serializers.IntegerField(required=True)
-
-
-class ProductMatrixSerializer(serializers.ModelSerializer):
-    product = serializers.IntegerField(source="id")
-    product_name = serializers.CharField(source="name")
-    margin = serializers.ReadOnlyField(default=0)
-    max_remaining = serializers.ReadOnlyField(default=0)
-    min_remaining = serializers.ReadOnlyField(default=0)
-    remaining = serializers.ReadOnlyField(default=0)
-    shop = serializers.ReadOnlyField(default=None)
-    supplier = serializers.ReadOnlyField(default=None)
-    supplier_email = serializers.ReadOnlyField(default=None)
-    supplier_phone = serializers.ReadOnlyField(default=None)
-    auto_order = serializers.ReadOnlyField(default=False)
-
-    class Meta:
-        model = Product
-        fields = (
-            "product_name",
-            "price",
-            "barcode",
-            "product",
-            "margin",
-            "max_remaining",
-            "min_remaining",
-            "remaining",
-            "shop",
-            "supplier",
-            "supplier_email",
-            "supplier_phone",
-            "auto_order",
-        )
 
 
 class BulkActionProductImageSerializer(serializers.Serializer):

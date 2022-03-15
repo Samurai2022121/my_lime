@@ -98,6 +98,9 @@ class WarehouseFilter(django_filters.FilterSet):
         field_name="product__is_archive",
         label="показывать архивные запасы",
     )
+    remaining = django_filters.RangeFilter(
+        label="отобрать по количеству на складе",
+    )
 
     class Meta:
         model = models.Warehouse

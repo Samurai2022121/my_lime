@@ -4,6 +4,7 @@ from drf_base64.fields import Base64FileField
 from drf_writable_nested import NestedCreateMixin, WritableNestedModelSerializer
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from rest_framework_nested.serializers import NestedHyperlinkedIdentityField
 
 from products.models import Product
 
@@ -11,6 +12,12 @@ from . import models
 
 
 class ShopSerializer(serializers.ModelSerializer):
+    warehouses = serializers.HyperlinkedIdentityField(
+        read_only=True,
+        view_name="internal_api:warehouse-list",
+        lookup_url_kwarg="shop_id",
+    )
+
     class Meta:
         model = models.Shop
         fields = "__all__"
@@ -96,29 +103,17 @@ class WarehouseSerializer(serializers.ModelSerializer):
         max_digits=7,
         decimal_places=2,
     )
-    supplier = SupplierSerializer()
-    warehouse_records = WarehouseRecordSerializer(many=True)
+    supplier = SupplierSerializer(allow_null=True, required=False)
+    warehouse_records = NestedHyperlinkedIdentityField(
+        read_only=True,
+        view_name="internal_api:warehouserecord-list",
+        lookup_url_kwarg="warehouse_id",
+        parent_lookup_kwargs={"shop_id": "shop__id"},
+    )
 
     class Meta:
         model = models.Warehouse
         fields = "__all__"
-
-    def create(self, validated_data):
-        supplier = None
-        supplier_data = validated_data.pop("supplier", None)
-        if supplier_data:
-            supplier = models.Supplier.objects.get(id=supplier_data["id"])
-        models.WarehouseOrder.objects.create(**validated_data)
-        return models.Warehouse.objects.create(**validated_data, supplier=supplier)
-
-    def update(self, instance, validated_data):
-        supplier = None
-        supplier_data = validated_data.pop("supplier", None)
-        if supplier_data:
-            supplier = models.Supplier.objects.get(id=supplier_data["id"])
-        validated_data.update({"supplier": supplier})
-        instance = super().update(instance, validated_data)
-        return instance
 
 
 class UploadCSVSerializer(serializers.Serializer):
