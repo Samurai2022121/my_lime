@@ -6,7 +6,10 @@ import requests
 from django.conf import settings
 from django.utils import timezone
 from rest_framework import status, views, viewsets
+from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
@@ -29,6 +32,24 @@ from utils.views_utils import (
 )
 
 from .filters import UserFilter
+from .serializers import AuthTokenSerializer
+
+
+class ObtainAuthTokenIfPermitted(ObtainAuthToken):
+
+    serializer_class = AuthTokenSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data["user"]
+        if user.has_perm(
+            f"{Token._meta.app_label}.add_{Token._meta.model_name}",
+        ):
+            token, _ = Token.objects.get_or_create(user=user)
+            return Response({"token": token.key})
+
+        raise PermissionDenied("Plain token authentication is not allowed.")
 
 
 class RegistrationAPIView(views.APIView):

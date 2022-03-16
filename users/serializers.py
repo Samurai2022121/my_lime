@@ -1,10 +1,42 @@
 from django.conf import settings
-from django.contrib.auth import get_user_model
+from django.contrib.auth import authenticate, get_user_model
 from django.utils import timezone
 from rest_framework import serializers
 
 from orders.serializers import OrdersSerializer
 from users.models import CustomerDeliveryAddress, RefreshToken
+
+
+class AuthTokenSerializer(serializers.Serializer):
+    phone_number = serializers.CharField(label="телефон", write_only=True)
+    password = serializers.CharField(
+        label="пароль",
+        write_only=True,
+        trim_whitespace=False,
+        style={"input_type": "password"},
+    )
+    token = serializers.CharField(label="токен", read_only=True)
+
+    def validate(self, attrs):
+        phone_number = attrs.get("phone_number")
+        password = attrs.get("password")
+
+        if phone_number and password:
+            user = authenticate(
+                request=self.context.get("request"),
+                phone_number=phone_number,
+                password=password,
+            )
+
+            if not user:
+                msg = "Недопустимые телефон или пароль."
+                raise serializers.ValidationError(msg, code="authorization")
+        else:
+            msg = 'Должны быть указаны поля "phone_number" и "password".'
+            raise serializers.ValidationError(msg, code="authorization")
+
+        attrs["user"] = user
+        return attrs
 
 
 class RegistrationSerializer(serializers.ModelSerializer):

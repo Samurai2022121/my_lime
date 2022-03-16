@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "corsheaders",
     "rest_framework",
+    "rest_framework.authtoken",
     "mptt",
     "drf_yasg",
     "django_filters",
@@ -92,6 +93,13 @@ DB_PASSWORD = env("DB_PASSWORD")
 DB_HOST = env("DB_HOST")
 DB_PORT = env.int("DB_PORT", default=5432)
 
+RF_AUTH_CLASSES = env.list(
+    "RF_AUTH_CLASSES",
+    default=[
+        "users.backends.JWTAuthentication",
+    ],
+)
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -108,7 +116,7 @@ AUTH_USER_MODEL = "users.User"
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
-    "DEFAULT_AUTHENTICATION_CLASSES": ("users.backends.JWTAuthentication",),
+    "DEFAULT_AUTHENTICATION_CLASSES": RF_AUTH_CLASSES,
     "DEFAULT_PAGINATION_CLASS": "utils.views_utils.DefaultPagination",
     "DATETIME_FORMAT": "%H:%M %d/%m/%Y",
     "DATE_FORMAT": "%d/%m/%Y",

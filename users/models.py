@@ -4,6 +4,7 @@ from datetime import datetime
 import jwt
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import Group as BaseGroup
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -11,6 +12,13 @@ from django.utils.translation import gettext_lazy as _
 from utils.models_utils import compress_image, generate_new_password, phone_regex
 
 from .managers import CustomUserManager
+
+
+class Group(BaseGroup):
+    class Meta:
+        proxy = True
+        verbose_name = "Группа"
+        verbose_name_plural = "Группы"
 
 
 class User(AbstractUser):
