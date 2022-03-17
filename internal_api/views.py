@@ -57,26 +57,6 @@ class ShopViewSet(
         return qs.order_by("name")
 
 
-class PersonnelViewSet(
-    ChangeDestroyToArchiveMixin,
-    BulkChangeArchiveStatusViewSetMixin,
-    ModelViewSet,
-    OrderingModelViewsetMixin,
-):
-    filter_backends = (df_filters.DjangoFilterBackend,)
-    filterset_class = filters.PersonnelFilter
-    permission_classes = (AllowAny,)
-    serializer_class = serializers.PersonnelSerializer
-    lookup_field = "id"
-    queryset = models.Personnel.objects.all()
-
-    def get_queryset(self):
-        qs = self.queryset
-        if "is_archive" not in self.request.query_params:
-            qs = qs.filter(is_archive=False)
-        return qs
-
-
 class WarehouseViewSet(NestedViewSetMixin, ModelViewSet):
     permission_classes = (AllowAny,)
     serializer_class = serializers.WarehouseSerializer
@@ -260,13 +240,6 @@ class SupplyContractViewSet(BulkChangeArchiveStatusViewSetMixin, ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=HTTP_201_CREATED)
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
-
-
-class PersonnelDocumentViewSet(BulkChangeArchiveStatusViewSetMixin, ModelViewSet):
-    permission_classes = (AllowAny,)
-    serializer_class = serializers.PersonnelDocumentSerializer
-    lookup_field = "id"
-    queryset = models.PersonnelDocument.objects.all()
 
 
 class LegalEntityViewSet(ReadOnlyModelViewSet):

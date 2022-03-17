@@ -10,8 +10,6 @@ from . import views
 
 router = routers.SimpleRouter()
 router.register("outlets", views.ShopViewSet)
-router.register("personnel", views.PersonnelViewSet)
-router.register("personnel-document", views.PersonnelDocumentViewSet)
 router.register("product-orders", views.WarehouseOrderViewSet)
 router.register("supplier", views.SupplierViewSet)
 router.register("supply-contracts", views.SupplyContractViewSet)

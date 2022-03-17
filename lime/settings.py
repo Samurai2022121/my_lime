@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django_extensions",
     "news",
     "orders",
+    "personnel",
     "products",
     "recipes",
     "reviews",

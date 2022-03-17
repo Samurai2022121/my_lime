@@ -1,11 +1,12 @@
 from decimal import Decimal
 
+from django.conf import settings
 from django.db import models
 from django.db.models import Case, F, OuterRef, Subquery, Sum, When
 from django.db.models.functions import Coalesce
 from sql_util.aggregates import SubquerySum
 
-from internal_api.models import Personnel, Shop
+from internal_api.models import Shop
 from products.models import ProductUnit
 from utils.models_utils import Timestampable
 
@@ -13,7 +14,7 @@ from utils.models_utils import Timestampable
 class TechCard(Timestampable, models.Model):
     name = models.CharField("наименование", max_length=255)
     author = models.ForeignKey(
-        Personnel,
+        settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name="tech_card",
         verbose_name="автор",
@@ -165,7 +166,10 @@ class DailyMenuPlan(Timestampable, models.Model):
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE)
     name = models.CharField("название", max_length=255)
     dishes = models.ManyToManyField(TechCard, through="MenuDish")
-    author = models.ForeignKey(Personnel, on_delete=models.PROTECT)
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+    )
 
     objects = models.Manager()
     layout = DailyMenuPlanLayoutManager()

@@ -22,62 +22,6 @@ class Shop(models.Model):
         return self.name
 
 
-class Personnel(models.Model):
-    WORK_STATUSES = (
-        ("working", "Работает"),
-        ("fired", "Уволен"),
-        ("vacation", "Отпуск"),
-        ("maternity_leave", "Декрет"),
-        ("probation", "Исп. срок"),
-    )
-
-    is_archived = models.BooleanField(default=False)
-    position = models.CharField(max_length=255)
-    working_place = models.ForeignKey(Shop, on_delete=models.PROTECT)
-    phone_number = models.CharField(validators=[phone_regex], max_length=17)
-    date_hired = models.DateTimeField(auto_now=True)
-    status = models.CharField(max_length=255, choices=WORK_STATUSES)
-    photo = models.ImageField(upload_to="internal-api/staff/", null=True, blank=True)
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
-    fathers_name = models.CharField(max_length=255)
-    date_of_birth = models.DateField()
-    passport = models.CharField(max_length=100)
-    place_of_birth = models.CharField(max_length=255)
-    department_issued_passport = models.CharField(max_length=255)
-    identification_number = models.CharField(max_length=255)
-    date_passport_issued = models.DateField()
-    date_passport_valid = models.DateField()
-    contract_period = models.IntegerField()
-    contract_type = models.CharField(max_length=255)
-    is_archive = models.BooleanField(default=False)
-
-    class Meta:
-        verbose_name = "Персонал"
-        verbose_name_plural = "Персонал"
-
-    def __str__(self):
-        return self.first_name
-
-
-def create_personnel_document_download_path(instance, filename):
-    directory = "internal-api/personal-documents/"
-    upload_date = date.today().strftime("%d%M%Y")
-    salt = token_hex(5)
-    return f"{directory}_{upload_date}_{salt}_{filename}"
-
-
-class PersonnelDocument(Timestampable, models.Model):
-    personnel = models.ForeignKey(
-        Personnel, on_delete=models.PROTECT, related_name="personnel_document"
-    )
-    personnel_document = models.FileField(
-        upload_to=create_personnel_document_download_path, null=True
-    )
-    document_number = models.CharField(max_length=255)
-    document_date = models.DateField()
-
-
 class Supplier(models.Model):
     name = models.CharField(max_length=255)
     address = models.CharField(max_length=255, null=True, blank=True)

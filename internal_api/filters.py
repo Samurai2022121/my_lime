@@ -22,24 +22,6 @@ class SupplierFilter(django_filters.FilterSet):
         )
 
 
-class PersonnelFilter(django_filters.FilterSet):
-    s = django_filters.CharFilter(
-        method="search",
-        label="поиск по телефону, имени, фамилии",
-    )
-
-    class Meta:
-        model = models.Personnel
-        fields = {"is_archive": ["exact"]}
-
-    def search(self, qs, name, value):
-        return qs.filter(
-            Q(phone_number__icontains=value)
-            | Q(first_name__icontains=value)
-            | Q(last_name__icontains=value)
-        )
-
-
 class WarehouseOrderFilter(django_filters.FilterSet):
     s = django_filters.CharFilter(
         method="search",

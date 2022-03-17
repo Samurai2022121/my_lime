@@ -5,7 +5,8 @@ import django.db.models.deletion
 from django.conf import settings
 from django.db import migrations, models
 
-import internal_api.models
+from internal_api.models import create_contract_download_path
+from personnel.models import create_personnel_document_download_path
 
 
 class Migration(migrations.Migration):
@@ -680,9 +681,7 @@ class Migration(migrations.Migration):
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 (
                     "contract",
-                    models.FileField(
-                        upload_to=internal_api.models.create_contract_download_path
-                    ),
+                    models.FileField(upload_to=create_contract_download_path),
                 ),
                 ("contract_number", models.CharField(max_length=255)),
                 ("contract_date", models.DateField()),
@@ -718,7 +717,7 @@ class Migration(migrations.Migration):
                     "personnel_document",
                     models.FileField(
                         null=True,
-                        upload_to=internal_api.models.create_personnel_document_download_path,
+                        upload_to=create_personnel_document_download_path,
                     ),
                 ),
                 ("document_number", models.CharField(max_length=255)),

@@ -16,11 +16,6 @@ class ShopAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
     pass
 
 
-@admin.register(models.Personnel)
-class PersonnelAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
-    pass
-
-
 class WarehouseRecordInline(admin.TabularInline):
     model = models.WarehouseRecord
     extra = 1

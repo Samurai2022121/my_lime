@@ -373,32 +373,6 @@
         }
     },
     {
-        "model": "internal_api.personnel",
-        "pk": 1,
-        "fields": {
-            "is_archived": false,
-            "position": "Шеф-повар",
-            "working_place": 1,
-            "phone_number": "79990009090",
-            "date_hired": "2022-02-17T07:58:20.215Z",
-            "status": "working",
-            "photo": "",
-            "first_name": "Боря",
-            "last_name": "Сичкин",
-            "fathers_name": "Михалыч",
-            "date_of_birth": "2022-02-10",
-            "passport": "6666666666",
-            "place_of_birth": "с. Кудыкино",
-            "department_issued_passport": "ываав",
-            "identification_number": "6345645",
-            "date_passport_issued": "2022-02-10",
-            "date_passport_valid": "2022-02-10",
-            "contract_period": 1,
-            "contract_type": "постоянный",
-            "is_archive": false
-        }
-    },
-    {
         "model": "products.category",
         "pk": 2,
         "fields": {

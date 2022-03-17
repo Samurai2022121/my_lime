@@ -34,6 +34,10 @@ urlpatterns = [
         include(("internal_api.urls", "internal_api"), namespace="internal_api"),
     ),
     path(
+        "personnel/",
+        include(("personnel.urls", "personnel"), namespace="personnel"),
+    ),
+    path(
         "production/",
         include(("production.urls", "production"), namespace="production"),
     ),

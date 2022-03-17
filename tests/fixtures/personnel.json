@@ -1,0 +1,57 @@
+[
+    {
+        "model": "personnel.position",
+        "pk": 1,
+        "fields": {
+            "name": "Пекарь"
+        }
+    },
+    {
+        "model": "personnel.position",
+        "pk": 2,
+        "fields": {
+            "name": "Повар"
+        }
+    },
+    {
+        "model": "personnel.position",
+        "pk": 3,
+        "fields": {
+            "name": "Кассир"
+        }
+    },
+    {
+        "model": "personnel.personnel",
+        "pk": 1,
+        "fields": {
+            "user": 1,
+            "position": 2,
+            "phone_number": "79990009090",
+            "hired_at": "2022-03-17T03:23:50.824Z",
+            "status": "probation",
+            "photo": "",
+            "contract_period": 5,
+            "contract_type": "постоянный",
+            "workplaces": [
+                1
+            ]
+        }
+    },
+    {
+        "model": "personnel.localpassport",
+        "pk": 1,
+        "fields": {
+            "employee": 1,
+            "active": true,
+            "first_name": "Иван",
+            "last_name": "Иванов-Вано",
+            "patronymic": "Иванович",
+            "date_of_birth": "2022-03-17",
+            "place_of_birth": null,
+            "identification_number": "12455765786389",
+            "issued_by": "Дзержинский райисполком",
+            "issued_at": "2022-03-17",
+            "valid_until": "2024-03-17"
+        }
+    }
+]

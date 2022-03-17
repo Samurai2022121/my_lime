@@ -23,20 +23,6 @@ class ShopSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class PersonnelDocumentSerializer(WritableNestedModelSerializer):
-    class Meta:
-        model = models.PersonnelDocument
-        fields = "__all__"
-
-
-class PersonnelSerializer(WritableNestedModelSerializer):
-    personnel_document = PersonnelDocumentSerializer(many=True)
-
-    class Meta:
-        model = models.Personnel
-        fields = "__all__"
-
-
 class SupplyContractSerializer(WritableNestedModelSerializer):
     supplier = serializers.PrimaryKeyRelatedField(
         queryset=models.Supplier.objects.all()
