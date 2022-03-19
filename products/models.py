@@ -82,7 +82,7 @@ class Product(Timestampable, models.Model):
         max_length=50, blank=True, null=True, verbose_name="Страна происхождения"
     )
 
-    # TODO: these two belongs to proposed `Batch` model (for batch accounting)
+    # TODO: these two belong to proposed `Batch` model (for batch accounting)
     expiration_date = models.DateField(
         blank=True, null=True, verbose_name="Срок годности"
     )
@@ -163,8 +163,6 @@ class ProductUnit(models.Model):
         return f"{self.unit} of {self.product}"
 
     def save(self, *args, **kwargs):
-        # TODO: `ValidationError` is for serializers/views,
-        #   placing it in model feels uneasy
         if self.for_scales:
             if not self.product.short_name:
                 raise ValidationError(

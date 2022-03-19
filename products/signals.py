@@ -2,6 +2,7 @@ from copy import deepcopy
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+import pngquant
 
 from utils.models_utils import compress_image
 
@@ -22,3 +23,10 @@ def save_product_images(sender, instance=None, created=False, **kwargs):
                 temp, (1000, 1000), "image_1000", ("png", "png")
             )
             instance.save()
+            # TODO: Add Debug check.
+            try:
+                pngquant.quant_image(instance.image_1000.path)
+                pngquant.quant_image(instance.image_500.path)
+                pngquant.quant_image(instance.image_150.path)
+            except ValueError as e:
+                print(e)

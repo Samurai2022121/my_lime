@@ -191,7 +191,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        exclude = ["is_archive", "is_sorted", "own_production"]
+        exclude = ["is_archive", "is_sorted"]
 
     def get_stars_count(self, obj):
         return Star.objects.filter(
@@ -253,7 +253,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        exclude = ["is_archive", "is_sorted", "own_production"]
+        exclude = ["is_archive", "is_sorted"]
 
     def get_average_star(self, obj):
         return Star.objects.filter(

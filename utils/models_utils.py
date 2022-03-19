@@ -37,32 +37,28 @@ class Round(models.Func):
 
 def compress_image(image, sizes, field, image_format):
     im = Image.open(image)
+    base_width = sizes[0]
+    w_percent = base_width / float(im.size[0])
+    h_size = int((float(im.size[1]) * float(w_percent)))
+    image_name = f"{image.name.split('.')[0]}_{sizes[0]}.{image_format[0]}"
+
     output = BytesIO()
-    im = im.resize(sizes)
+    im = im.resize((base_width, h_size))
     try:
-        im.save(output, format=image_format[0], quality=70)
+        im.save(output, format=image_format[0])
         output.seek(0)
-        compressed_image = InMemoryUploadedFile(
+        image = InMemoryUploadedFile(
             output,
             field,
-            f"{image.name.split('.')[0]}_{sizes[0]}.{image_format[0]}",
+            image_name,
             f"image/{image_format[1]}",
             sys.getsizeof(output),
             None,
         )
     except Exception as e:
         print(e)
-        im.save(output, format="PNG", quality=70)
-        output.seek(0)
-        compressed_image = InMemoryUploadedFile(
-            output,
-            field,
-            f"{image.name.split('.')[0]}_{sizes[0]}.png",
-            "image/png",
-            sys.getsizeof(output),
-            None,
-        )
-    return compressed_image
+
+    return image
 
 
 def generate_new_password():
