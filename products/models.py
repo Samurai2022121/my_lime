@@ -43,7 +43,7 @@ class Product(Timestampable, models.Model):
     short_name = models.CharField(
         max_length=20, verbose_name="Краткое наименование", null=True, blank=True
     )
-    category = models.ForeignKey(
+    category = TreeForeignKey(
         Category,
         related_name="products",
         on_delete=models.SET_NULL,
@@ -96,13 +96,23 @@ class Product(Timestampable, models.Model):
     discount = models.DecimalField(
         blank=True, null=True, verbose_name="Скидка, %", max_digits=5, decimal_places=2
     )
-    extra_info = models.JSONField(null=True, blank=True)
-    is_archive = models.BooleanField(default=False)
-    is_sorted = models.BooleanField(default=False)
-    vat_value = models.DecimalField(
-        null=True, blank=True, max_digits=7, decimal_places=2
+    extra_info = models.JSONField(
+        "дополнительная информация",
+        null=True,
+        blank=True,
     )
-    for_own_production = models.BooleanField(default=False)
+    is_archive = models.BooleanField("в архиве", default=False)
+    is_sorted = models.BooleanField(
+        "завизировано после автоматического добавления",
+        default=False,
+    )
+    vat_value = models.DecimalField(
+        "НДС, %",
+        null=True,
+        blank=True,
+        max_digits=7,
+        decimal_places=2,
+    )
 
     class Meta:
         verbose_name = "товар"

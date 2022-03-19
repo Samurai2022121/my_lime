@@ -1,0 +1,353 @@
+[
+    {
+        "model": "products.category",
+        "pk": 1,
+        "fields": {
+            "name": "Розничный товар и сырьё",
+            "parent": null,
+            "description": "",
+            "image": "",
+            "is_archive": false,
+            "lft": 1,
+            "rght": 10,
+            "tree_id": 2,
+            "level": 0
+        }
+    },
+    {
+        "model": "products.category",
+        "pk": 2,
+        "fields": {
+            "name": "Продукция собственного производства",
+            "parent": null,
+            "description": "",
+            "image": "",
+            "is_archive": false,
+            "lft": 1,
+            "rght": 8,
+            "tree_id": 1,
+            "level": 0
+        }
+    },
+    {
+        "model": "products.category",
+        "pk": 3,
+        "fields": {
+            "name": "Розничный товар",
+            "parent": 1,
+            "description": "",
+            "image": "",
+            "is_archive": false,
+            "lft": 4,
+            "rght": 7,
+            "tree_id": 2,
+            "level": 1
+        }
+    },
+    {
+        "model": "products.category",
+        "pk": 4,
+        "fields": {
+            "name": "Сырьё",
+            "parent": 1,
+            "description": "",
+            "image": "",
+            "is_archive": false,
+            "lft": 8,
+            "rght": 9,
+            "tree_id": 2,
+            "level": 1
+        }
+    },
+    {
+        "model": "products.category",
+        "pk": 5,
+        "fields": {
+            "name": "Хлебобулочные изделия",
+            "parent": 2,
+            "description": "",
+            "image": "",
+            "is_archive": false,
+            "lft": 4,
+            "rght": 7,
+            "tree_id": 1,
+            "level": 1
+        }
+    },
+    {
+        "model": "products.category",
+        "pk": 6,
+        "fields": {
+            "name": "Кулинария",
+            "parent": 2,
+            "description": "",
+            "image": "",
+            "is_archive": false,
+            "lft": 2,
+            "rght": 3,
+            "tree_id": 1,
+            "level": 1
+        }
+    },
+    {
+        "model": "products.category",
+        "pk": 7,
+        "fields": {
+            "name": "Хлеб",
+            "parent": 5,
+            "description": "",
+            "image": "",
+            "is_archive": false,
+            "lft": 5,
+            "rght": 6,
+            "tree_id": 1,
+            "level": 2
+        }
+    },
+    {
+        "model": "products.category",
+        "pk": 8,
+        "fields": {
+            "name": "Напитки",
+            "parent": 3,
+            "description": "",
+            "image": "",
+            "is_archive": false,
+            "lft": 5,
+            "rght": 6,
+            "tree_id": 2,
+            "level": 2
+        }
+    },
+    {
+        "model": "products.category",
+        "pk": 9,
+        "fields": {
+            "name": "Бакалея",
+            "parent": 1,
+            "description": "",
+            "image": "",
+            "is_archive": false,
+            "lft": 2,
+            "rght": 3,
+            "tree_id": 2,
+            "level": 1
+        }
+    },
+    {
+        "model": "products.product",
+        "pk": 1,
+        "fields": {
+            "created_at": "2022-03-19T04:16:54.098Z",
+            "updated_at": "2022-03-19T04:24:42.209Z",
+            "name": "Хлеб белый",
+            "short_name": null,
+            "category": 7,
+            "description": "",
+            "protein": null,
+            "carbohydrates": null,
+            "fats": null,
+            "calories": null,
+            "energy": null,
+            "manufacturer": null,
+            "origin": null,
+            "expiration_date": null,
+            "production_date": null,
+            "own_production": true,
+            "discount": null,
+            "extra_info": null,
+            "is_archive": false,
+            "is_sorted": true,
+            "vat_value": null
+        }
+    },
+    {
+        "model": "products.product",
+        "pk": 2,
+        "fields": {
+            "created_at": "2022-03-19T04:23:23.911Z",
+            "updated_at": "2022-03-19T04:24:51.741Z",
+            "name": "Салат овощной",
+            "short_name": null,
+            "category": 6,
+            "description": "",
+            "protein": null,
+            "carbohydrates": null,
+            "fats": null,
+            "calories": null,
+            "energy": null,
+            "manufacturer": null,
+            "origin": null,
+            "expiration_date": null,
+            "production_date": null,
+            "own_production": true,
+            "discount": null,
+            "extra_info": null,
+            "is_archive": false,
+            "is_sorted": true,
+            "vat_value": null
+        }
+    },
+    {
+        "model": "products.product",
+        "pk": 3,
+        "fields": {
+            "created_at": "2022-03-19T04:24:05.578Z",
+            "updated_at": "2022-03-19T04:24:05.578Z",
+            "name": "Меланж",
+            "short_name": null,
+            "category": 4,
+            "description": "",
+            "protein": null,
+            "carbohydrates": null,
+            "fats": null,
+            "calories": null,
+            "energy": null,
+            "manufacturer": null,
+            "origin": null,
+            "expiration_date": null,
+            "production_date": null,
+            "own_production": false,
+            "discount": null,
+            "extra_info": null,
+            "is_archive": false,
+            "is_sorted": true,
+            "vat_value": null
+        }
+    },
+    {
+        "model": "products.product",
+        "pk": 4,
+        "fields": {
+            "created_at": "2022-03-19T04:27:53.261Z",
+            "updated_at": "2022-03-19T04:27:53.261Z",
+            "name": "Кока-кола",
+            "short_name": null,
+            "category": 8,
+            "description": "",
+            "protein": null,
+            "carbohydrates": null,
+            "fats": null,
+            "calories": null,
+            "energy": null,
+            "manufacturer": null,
+            "origin": null,
+            "expiration_date": null,
+            "production_date": null,
+            "own_production": false,
+            "discount": null,
+            "extra_info": null,
+            "is_archive": false,
+            "is_sorted": true,
+            "vat_value": null
+        }
+    },
+    {
+        "model": "products.product",
+        "pk": 5,
+        "fields": {
+            "created_at": "2022-03-19T04:28:23.983Z",
+            "updated_at": "2022-03-19T04:28:23.983Z",
+            "name": "Мука",
+            "short_name": null,
+            "category": 9,
+            "description": "",
+            "protein": null,
+            "carbohydrates": null,
+            "fats": null,
+            "calories": null,
+            "energy": null,
+            "manufacturer": null,
+            "origin": null,
+            "expiration_date": null,
+            "production_date": null,
+            "own_production": false,
+            "discount": null,
+            "extra_info": null,
+            "is_archive": false,
+            "is_sorted": true,
+            "vat_value": null
+        }
+    },
+    {
+        "model": "products.product",
+        "pk": 6,
+        "fields": {
+            "created_at": "2022-03-19T04:28:57.026Z",
+            "updated_at": "2022-03-19T04:28:57.026Z",
+            "name": "Дрожжи",
+            "short_name": null,
+            "category": 9,
+            "description": "",
+            "protein": null,
+            "carbohydrates": null,
+            "fats": null,
+            "calories": null,
+            "energy": null,
+            "manufacturer": null,
+            "origin": null,
+            "expiration_date": null,
+            "production_date": null,
+            "own_production": false,
+            "discount": null,
+            "extra_info": null,
+            "is_archive": false,
+            "is_sorted": true,
+            "vat_value": null
+        }
+    },
+    {
+        "model": "products.product",
+        "pk": 7,
+        "fields": {
+            "created_at": "2022-03-19T04:29:22.120Z",
+            "updated_at": "2022-03-19T04:29:22.120Z",
+            "name": "Неактуальный товар",
+            "short_name": null,
+            "category": null,
+            "description": "",
+            "protein": null,
+            "carbohydrates": null,
+            "fats": null,
+            "calories": null,
+            "energy": null,
+            "manufacturer": null,
+            "origin": null,
+            "expiration_date": null,
+            "production_date": null,
+            "own_production": false,
+            "discount": null,
+            "extra_info": null,
+            "is_archive": true,
+            "is_sorted": true,
+            "vat_value": null
+        }
+    },
+    {
+        "model": "products.product",
+        "pk": 8,
+        "fields": {
+            "created_at": "2022-03-19T04:29:55.186Z",
+            "updated_at": "2022-03-19T04:29:55.186Z",
+            "name": "Непроверенный товар",
+            "short_name": null,
+            "category": null,
+            "description": "",
+            "protein": null,
+            "carbohydrates": null,
+            "fats": null,
+            "calories": null,
+            "energy": null,
+            "manufacturer": null,
+            "origin": null,
+            "expiration_date": null,
+            "production_date": null,
+            "own_production": false,
+            "discount": null,
+            "extra_info": null,
+            "is_archive": false,
+            "is_sorted": false,
+            "vat_value": null
+        }
+    }
+]

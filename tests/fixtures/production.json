@@ -427,7 +427,7 @@
             "is_archive": false,
             "is_sorted": true,
             "vat_value": null,
-            "for_own_production": false
+            "own_production": false
         }
     },
     {
@@ -455,7 +455,7 @@
             "is_archive": false,
             "is_sorted": true,
             "vat_value": null,
-            "for_own_production": false
+            "own_production": false
         }
     },
     {
@@ -483,7 +483,7 @@
             "is_archive": false,
             "is_sorted": false,
             "vat_value": null,
-            "for_own_production": false
+            "own_production": false
         }
     },
     {
@@ -511,7 +511,7 @@
             "is_archive": false,
             "is_sorted": true,
             "vat_value": null,
-            "for_own_production": false
+            "own_production": false
         }
     },
     {
@@ -539,7 +539,7 @@
             "is_archive": false,
             "is_sorted": true,
             "vat_value": null,
-            "for_own_production": false
+            "own_production": false
         }
     },
     {
@@ -567,7 +567,7 @@
             "is_archive": false,
             "is_sorted": false,
             "vat_value": null,
-            "for_own_production": false
+            "own_production": false
         }
     },
     {
@@ -595,7 +595,7 @@
             "is_archive": false,
             "is_sorted": true,
             "vat_value": null,
-            "for_own_production": false
+            "own_production": false
         }
     },
     {
@@ -623,7 +623,7 @@
             "is_archive": false,
             "is_sorted": true,
             "vat_value": null,
-            "for_own_production": false
+            "own_production": false
         }
     },
     {
@@ -651,7 +651,7 @@
             "is_archive": false,
             "is_sorted": false,
             "vat_value": null,
-            "for_own_production": false
+            "own_production": false
         }
     },
     {

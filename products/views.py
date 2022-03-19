@@ -14,7 +14,7 @@ from utils.views_utils import (
 )
 
 from . import serializers
-from .filters import ProductFilter
+from .filters import ProductFilter, ProductUnitFilter
 from .models import (
     Category,
     MeasurementUnit,
@@ -85,6 +85,8 @@ class ProductUnitViewset(NestedViewSetMixin, viewsets.ModelViewSet):
     permission_classes = (AllowAny,)
     serializer_class = serializers.ProductUnitSerializer
     queryset = ProductUnit.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = ProductUnitFilter
     lookup_field = "id"
     parent_lookup_kwargs = {"product_id": "product__id"}
 
@@ -144,7 +146,7 @@ class ProductViewset(
 
     def get_queryset(self):
         qs = self.queryset.filter(
-            is_archive=False, is_sorted=True, for_own_production=False
+            is_archive=False, is_sorted=True, own_production=False
         )
         ordering_fields = self.get_ordering_fields()
         if ordering_fields:
