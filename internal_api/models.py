@@ -13,29 +13,47 @@ from utils.models_utils import Timestampable, classproperty, phone_regex
 
 
 class Shop(models.Model):
-    address = models.TextField()
-    name = models.CharField(max_length=255)
-    date_added = models.DateTimeField(auto_now=True)
-    is_archive = models.BooleanField(default=False)
+    address = models.TextField(verbose_name="адрес")
+    name = models.CharField(max_length=255, verbose_name="название")
+    date_added = models.DateTimeField(auto_now=True, verbose_name="дата добавления")
+    is_archive = models.BooleanField(default=False, verbose_name="архивный")
+
+    class Meta:
+        verbose_name = "Филиал"
+        verbose_name_plural = "Филиалы"
 
     def __str__(self):
         return self.name
 
 
 class Supplier(models.Model):
-    name = models.CharField(max_length=255)
-    address = models.CharField(max_length=255, null=True, blank=True)
-    email = models.EmailField(blank=True, null=True)
-    phone = models.CharField(
-        validators=[phone_regex], max_length=17, blank=True, null=True
+    name = models.CharField(max_length=255, verbose_name="название")
+    address = models.CharField(
+        max_length=255, null=True, blank=True, verbose_name="адрес"
     )
-    extra_info = models.JSONField(null=True, blank=True)
-    is_archive = models.BooleanField(default=False)
-    bank_identifier_code = models.CharField(max_length=255, null=True, blank=True)
-    bank_account = models.CharField(max_length=255, null=True, blank=True)
-    inner_id = models.CharField(max_length=255, null=True, blank=True)
-    payer_identification_number = models.CharField(
-        max_length=255, null=True, blank=True
+    email = models.EmailField(blank=True, null=True, verbose_name="email")
+    phone = models.CharField(
+        validators=[phone_regex],
+        max_length=17,
+        blank=True,
+        null=True,
+        verbose_name="номер телефона",
+    )
+    extra_info = models.JSONField(
+        null=True, blank=True, verbose_name="дополнительная информация"
+    )
+    is_archive = models.BooleanField(default=False, verbose_name="архивный")
+    bank_identifier_code = models.CharField(
+        max_length=255, null=True, blank=True, verbose_name="БИК"
+    )
+    bank_account = models.CharField(
+        max_length=255, null=True, blank=True, verbose_name="номер банковского счета"
+    )
+    inner_id = models.CharField(
+        max_length=255, null=True, blank=True, verbose_name="внутренний ID"
+    )
+    taxpayer_identification_number = models.CharField(
+        max_length=255, null=True, blank=True, verbose_name="ИНН"
     )
 
     class Meta:
@@ -57,9 +75,11 @@ class SupplyContract(Timestampable, models.Model):
     supplier = models.ForeignKey(
         Supplier, on_delete=models.PROTECT, related_name="supply_contract"
     )
-    contract = models.FileField(upload_to=create_contract_download_path)
-    contract_number = models.CharField(max_length=255)
-    contract_date = models.DateField()
+    contract = models.FileField(
+        upload_to=create_contract_download_path, verbose_name="контракт"
+    )
+    contract_number = models.CharField(max_length=255, verbose_name="номер контракта")
+    contract_date = models.DateField(verbose_name="дата контракта")
 
     class Meta:
         verbose_name = "Контракт поставщика"
@@ -94,8 +114,12 @@ class WarehouseManager(models.Manager):
 class Warehouse(models.Model):
     product_unit = models.ForeignKey(ProductUnit, on_delete=models.PROTECT)
     shop = models.ForeignKey(Shop, on_delete=models.PROTECT)
-    min_remaining = models.DecimalField(default=0, max_digits=7, decimal_places=2)
-    max_remaining = models.DecimalField(default=0, max_digits=7, decimal_places=2)
+    min_remaining = models.DecimalField(
+        default=0, max_digits=7, decimal_places=2, verbose_name="минимальный остаток"
+    )
+    max_remaining = models.DecimalField(
+        default=0, max_digits=7, decimal_places=2, verbose_name="максимальный остаток"
+    )
     supplier = models.ForeignKey(
         Supplier,
         on_delete=models.PROTECT,
@@ -110,7 +134,7 @@ class Warehouse(models.Model):
         max_digits=4,
         decimal_places=2,
     )
-    auto_order = models.BooleanField(default=False)
+    auto_order = models.BooleanField(default=False, verbose_name="автоматический заказ")
     price = models.DecimalField(
         decimal_places=2,
         max_digits=6,
