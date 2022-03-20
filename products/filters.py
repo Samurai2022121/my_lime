@@ -45,8 +45,8 @@ class ProductFilter(filters.FilterSet):
         return qs.filter(
             Q(name__icontains=value)
             | Q(short_name__icontains=value)
-            | Q(unit__name__icontains=value)
-            | Q(unit__barcode__icontains=value)
+            | Q(units__unit__name__icontains=value)
+            | Q(units__barcode__icontains=value)
             | Q(id__icontains=value)
         )
 

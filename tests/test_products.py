@@ -76,6 +76,12 @@ class TestProductViewset(ViewSetTest):
             # all products in "cat_id" category and subcategories
             assert len(json["results"]) == number
 
+    class TestSearchList(UsesGetMethod, UsesListEndpoint, Returns200):
+        # the search should return something
+        list_url = lambda_fixture(
+            lambda: url_for("internal_api:product-list") + "?s=товар"
+        )
+
     class TestCreate(
         UsesPostMethod,
         UsesListEndpoint,
