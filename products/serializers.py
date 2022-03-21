@@ -31,7 +31,7 @@ class CategoryListSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    parents = serializers.SerializerMethodField()
+    parent = serializers.SerializerMethodField()
     parent_id = serializers.CharField(write_only=True, required=False)
     image = serializers.FileField(
         write_only=True, validators=[FileExtensionValidator(["svg", "png", "jpg"])]
@@ -39,11 +39,13 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ["id", "name", "parents", "parent_id", "image"]
+        fields = ["id", "name", "parent", "parent_id", "image"]
 
-    def get_parents(self, obj):
-        serializer = CategorySerializer(instance=obj.parent)
-        return serializer.data
+    def get_parent(self, obj):
+        # do not show empty root parent
+        if obj.parent:
+            serializer = CategorySerializer(instance=obj.parent)
+            return serializer.data
 
     def create(self, validated_data):
         parent_category_id = validated_data.pop("parent_id", None)
@@ -349,6 +351,20 @@ class ProductAdminSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Введите category.")
 
         return data
+
+
+class SimpleProductUnitSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(read_only=True, source="product.name")
+    short_name = serializers.CharField(
+        read_only=True,
+        source="product.short_name",
+    )
+    category = CategorySerializer(read_only=True, source="product.category")
+    unit = serializers.CharField(read_only=True, source="unit.name")
+
+    class Meta:
+        model = ProductUnit
+        fields = "__all__"
 
 
 class BulkActionProductSerializer(serializers.Serializer):

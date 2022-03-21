@@ -1,13 +1,30 @@
 from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework import serializers
 
+from products.models import ProductUnit
+from products.serializers import SimpleProductUnitSerializer
+
 from .models import DailyMenuPlan, MenuDish, TechCard, TechCardProduct
 
 
 class TechProductSerializer(serializers.ModelSerializer):
+    product_unit_on_read = SimpleProductUnitSerializer(
+        read_only=True,
+        source="product_unit",
+    )
+    product_unit = serializers.PrimaryKeyRelatedField(
+        write_only=True,
+        queryset=ProductUnit.objects,
+    )
+
     class Meta:
         model = TechCardProduct
         exclude = ("tech_card",)
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["product_unit"] = data.pop("product_unit_on_read")
+        return data
 
 
 class TechCardSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):

@@ -6,7 +6,8 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_nested.serializers import NestedHyperlinkedIdentityField
 
-from products.serializers import ProductUnitSerializer
+from products.models import ProductUnit
+from products.serializers import SimpleProductUnitSerializer
 
 from . import models
 
@@ -59,17 +60,13 @@ class WarehouseRecordSerializer(serializers.ModelSerializer):
 
 
 class WarehouseSerializer(serializers.ModelSerializer):
-    product_name = serializers.CharField(
-        source="product_unit.product.name",
+    product_unit_on_read = SimpleProductUnitSerializer(
         read_only=True,
+        source="product_unit",
     )
-    unit_name = serializers.CharField(
-        source="product_unit.unit.name",
-        read_only=True,
-    )
-    barcode = serializers.IntegerField(
-        source="product_unit.product.barcode",
-        read_only=True,
+    product_unit = serializers.PrimaryKeyRelatedField(
+        write_only=True,
+        queryset=ProductUnit.objects,
     )
     remaining = serializers.DecimalField(
         read_only=True,
@@ -94,6 +91,11 @@ class WarehouseSerializer(serializers.ModelSerializer):
         model = models.Warehouse
         fields = "__all__"
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["product_unit"] = data.pop("product_unit_on_read")
+        return data
+
 
 class UploadCSVSerializer(serializers.Serializer):
     csv_file = serializers.FileField()
@@ -112,7 +114,7 @@ class WarehouseOrderPositionsSerializer(serializers.ModelSerializer):
         queryset=models.ProductUnit.objects,
         write_only=True,
     )
-    product_unit_on_read = ProductUnitSerializer(
+    product_unit_on_read = SimpleProductUnitSerializer(
         source="product_unit",
         read_only=True,
     )
