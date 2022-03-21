@@ -11,10 +11,11 @@ from pytest_drf import (
     UsesGetMethod,
     UsesListEndpoint,
     UsesPostMethod,
-    ViewSetTest,
 )
 from pytest_drf.util import url_for
 from pytest_lambda import lambda_fixture, static_fixture
+
+from utils.views_utils import ViewSetTest
 
 
 @pytest.fixture(scope="module")

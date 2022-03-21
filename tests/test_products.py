@@ -5,6 +5,7 @@ from django.core.management import call_command
 from pytest_drf import (
     Returns200,
     Returns201,
+    UsesDetailEndpoint,
     UsesGetMethod,
     UsesListEndpoint,
     UsesPostMethod,
@@ -96,3 +97,35 @@ class TestProductViewset(ViewSetTest):
                 "for_scales": False,
             }
         )
+
+
+class TestProductCategoryViewSet(ViewSetTest):
+    @pytest.fixture
+    def common_subject(self, request, db, django_db_blocker, get_response):
+        with django_db_blocker.unblock():
+            call_command(
+                "loaddata",
+                Path(request.fspath).parent / "fixtures" / "products.json",
+            )
+        return get_response
+
+    list_url = lambda_fixture(lambda: url_for("products:category-list"))
+
+    detail_url = lambda_fixture(lambda id: url_for("products:category-detail", id=id))
+
+    class TestView(UsesGetMethod, UsesListEndpoint, Returns200):
+        pass
+
+    class TestCreate(UsesPostMethod, UsesListEndpoint, Returns201):
+        format = static_fixture(None)
+
+        @pytest.fixture
+        def data(self, wojak):
+            return {
+                "name": "Test Category 33",
+                "parent_id": 4,
+                "image": wojak,
+            }
+
+    class TestDetail(UsesGetMethod, UsesDetailEndpoint, Returns200):
+        id = static_fixture(4)
