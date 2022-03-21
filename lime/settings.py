@@ -1,4 +1,3 @@
-import os
 from datetime import timedelta
 from pathlib import Path
 
@@ -162,9 +161,9 @@ USE_TZ = True
 
 
 STATIC_URL = "/staticfiles/"
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATIC_ROOT = BASE_DIR.parent / "staticfiles"
 MEDIA_URL = "/mediafiles/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "mediafiles")
+MEDIA_ROOT = BASE_DIR.parent / "mediafiles"
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
