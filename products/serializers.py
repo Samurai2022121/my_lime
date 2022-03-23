@@ -34,7 +34,9 @@ class CategorySerializer(serializers.ModelSerializer):
     parent = serializers.SerializerMethodField()
     parent_id = serializers.CharField(write_only=True, required=False)
     image = serializers.FileField(
-        write_only=True, validators=[FileExtensionValidator(["svg", "png", "jpg"])]
+        write_only=True,
+        validators=[FileExtensionValidator(["svg", "png", "jpg"])],
+        required=False,
     )
 
     class Meta:
