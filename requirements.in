@@ -31,3 +31,4 @@ python-environ==0.4.54
 redis==4.1.2
 requests==2.27.1
 sentry-sdk==1.5.4
+openpyxl==3.0.9

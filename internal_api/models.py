@@ -142,7 +142,7 @@ class Warehouse(models.Model):
         "наценка, %",
         blank=True,
         null=True,
-        max_digits=4,
+        max_digits=6,
         decimal_places=2,
     )
     auto_order = models.BooleanField(default=False, verbose_name="автоматический заказ")
@@ -471,7 +471,7 @@ class WarehouseOrderPositions(models.Model):
     value_added_tax_value = models.DecimalField(
         default=0, max_digits=7, decimal_places=2
     )
-    margin = models.DecimalField(default=0, max_digits=4, decimal_places=2)
+    margin = models.DecimalField(default=0, max_digits=6, decimal_places=2)
 
     class Meta:
         verbose_name = "Строка заказа"
