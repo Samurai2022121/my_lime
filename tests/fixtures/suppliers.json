@@ -1,0 +1,36 @@
+[
+    {
+        "model": "internal_api.supplier",
+        "pk": 1,
+        "fields": {
+            "name": "Тестовый поставщик",
+            "address": null,
+            "email": null,
+            "phone_numbers": "[\"+79141094000\"]",
+            "payment_deferral": 0,
+            "extra_info": null,
+            "is_archive": false,
+            "bank_identifier_code": null,
+            "bank_account": null,
+            "inner_id": null,
+            "taxpayer_identification_number": null
+        }
+    },
+    {
+        "model": "internal_api.supplier",
+        "pk": 2,
+        "fields": {
+            "name": "Неактуальный поставщик",
+            "address": null,
+            "email": null,
+            "phone_numbers": "[\"+79090060909\", \"+79090060919\"]",
+            "payment_deferral": 0,
+            "extra_info": null,
+            "is_archive": true,
+            "bank_identifier_code": null,
+            "bank_account": null,
+            "inner_id": null,
+            "taxpayer_identification_number": null
+        }
+    }
+]

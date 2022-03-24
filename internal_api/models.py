@@ -3,6 +3,7 @@ from decimal import Decimal
 from secrets import token_hex
 
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models.functions import Coalesce
@@ -32,12 +33,19 @@ class Supplier(models.Model):
         max_length=255, null=True, blank=True, verbose_name="адрес"
     )
     email = models.EmailField(blank=True, null=True, verbose_name="email")
-    phone = models.CharField(
-        validators=[phone_regex],
-        max_length=17,
+    phone_numbers = ArrayField(
+        models.CharField(
+            "номер телефона",
+            validators=[phone_regex],
+            max_length=17,
+        ),
+        verbose_name="номера телефонов",
         blank=True,
-        null=True,
-        verbose_name="номер телефона",
+        default=list,
+    )
+    payment_deferral = models.PositiveIntegerField(
+        "отсрочка оплаты, дней",
+        default=0,
     )
     extra_info = models.JSONField(
         null=True, blank=True, verbose_name="дополнительная информация"
@@ -47,7 +55,10 @@ class Supplier(models.Model):
         max_length=255, null=True, blank=True, verbose_name="БИК"
     )
     bank_account = models.CharField(
-        max_length=255, null=True, blank=True, verbose_name="номер банковского счета"
+        "номер банковского счета",
+        max_length=255,
+        null=True,
+        blank=True,
     )
     inner_id = models.CharField(
         max_length=255, null=True, blank=True, verbose_name="внутренний ID"
