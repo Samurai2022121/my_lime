@@ -7,7 +7,7 @@ from utils.models_utils import Timestampable
 
 
 class Category(MPTTModel):
-    name = models.CharField(max_length=50, unique=True, verbose_name="Название")
+    name = models.CharField(max_length=50, verbose_name="Название")
     parent = TreeForeignKey(
         "self",
         on_delete=models.CASCADE,
@@ -33,6 +33,7 @@ class Category(MPTTModel):
         ordering = ["name"]
         verbose_name = "категория"
         verbose_name_plural = "категории"
+        unique_together = (("name", "lft", "rght"), ("name", "parent"))
 
     def __str__(self):
         return self.name
