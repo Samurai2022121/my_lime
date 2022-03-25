@@ -6,6 +6,7 @@ from django.db.models import DecimalField, Sum
 from django.db.models.functions import Coalesce
 from django.urls import path
 
+from products.models import ProductUnit
 from utils.models_utils import ListDisplayAllModelFieldsAdminMixin
 
 from . import models
@@ -17,6 +18,7 @@ class ShopAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
 
 
 class WarehouseRecordInline(admin.TabularInline):
+    autocomplete_fields = ("warehouse",)
     model = models.WarehouseRecord
     extra = 1
 
@@ -117,6 +119,12 @@ class PrimaryDocumentAdmin(admin.ModelAdmin):
         return urls + subclass_urls
 
 
+@admin.register(ProductUnit)
+class ProductUnitAdmin(admin.ModelAdmin):
+    search_fields = ("product__name", "product__short_name")
+    ordering = ("product__name", "unit__name")
+
+
 @admin.register(models.Warehouse)
 class WarehouseAdmin(admin.ModelAdmin):
     list_display = [
@@ -131,6 +139,14 @@ class WarehouseAdmin(admin.ModelAdmin):
     ]
     inlines = [WarehouseRecordInline]
     list_filter = ("shop__name", "product_unit__unit__name")
+    autocomplete_fields = ("product_unit",)
+    search_fields = (
+        "shop__name",
+        "product_unit__product__name",
+        "product_unit__product__short_name",
+        "product_unit__unit__name",
+    )
+    ordering = ("product_unit__product__name", "product_unit__unit__name")
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -153,6 +169,7 @@ class WarehouseAdmin(admin.ModelAdmin):
 
 
 class WarehouseOrderPositionsInline(admin.TabularInline):
+    autocomplete_fields = ("product_unit",)
     model = models.WarehouseOrderPositions
     extra = 1
 

@@ -6,8 +6,6 @@
             "status": "delivered",
             "supplier": null,
             "shop": 1,
-            "waybill": null,
-            "waybill_date": "2022-02-01",
             "order_number": null,
             "is_archive": false,
             "created_at": "2022-02-26T02:53:28.947Z",

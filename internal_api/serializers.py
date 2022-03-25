@@ -97,6 +97,38 @@ class WarehouseSerializer(serializers.ModelSerializer):
         return data
 
 
+class SimpleWarehouseSerializer(serializers.ModelSerializer):
+    product_unit_on_read = SimpleProductUnitSerializer(
+        read_only=True,
+        source="product_unit",
+    )
+    product_unit = serializers.PrimaryKeyRelatedField(
+        write_only=True,
+        queryset=ProductUnit.objects,
+    )
+    remaining = serializers.DecimalField(
+        read_only=True,
+        max_digits=7,
+        decimal_places=2,
+    )
+    recommended_price = serializers.DecimalField(
+        read_only=True,
+        allow_null=True,
+        max_digits=7,
+        decimal_places=2,
+    )
+    supplier = SupplierSerializer(allow_null=True, required=False)
+
+    class Meta:
+        model = models.Warehouse
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["product_unit"] = data.pop("product_unit_on_read")
+        return data
+
+
 class UploadCSVSerializer(serializers.Serializer):
     csv_file = serializers.FileField()
     price_col = serializers.IntegerField()
@@ -132,6 +164,7 @@ class WarehouseOrderPositionsSerializer(serializers.ModelSerializer):
 class WarehouseOrderSerializer(WritableNestedModelSerializer):
     order_positions = WarehouseOrderPositionsSerializer(
         many=True,
+        required=False,
         source="warehouse_order_positions",
     )
     supplier_on_read = SupplierSerializer(source="supplier", read_only=True)
@@ -457,7 +490,7 @@ class ReceiptRecordSerializer(serializers.ModelSerializer):
         queryset=models.ProductUnit.objects,
         write_only=True,
     )
-    warehouse = serializers.PrimaryKeyRelatedField(read_only=True)
+    warehouse = SimpleWarehouseSerializer(read_only=True)
     price = serializers.DecimalField(
         write_only=True,
         required=False,

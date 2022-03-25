@@ -343,6 +343,13 @@ class ReceiptDocument(PrimaryDocument):
         related_name="receipts",
         verbose_name="заказ",
     )
+    waybill = models.CharField(
+        "номер накладной",
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+    waybill_date = models.DateField("дата накладной", null=True, blank=True)
 
     class Meta:
         verbose_name = "Документ поступления товара"
@@ -441,8 +448,6 @@ class WarehouseOrder(models.Model):
         ProductUnit, through="WarehouseOrderPositions", blank=True
     )
     shop = models.ForeignKey(Shop, on_delete=models.PROTECT)
-    waybill = models.CharField(max_length=255, null=True, blank=True)
-    waybill_date = models.DateField(null=True, blank=True)
     order_number = models.CharField(max_length=255, null=True, blank=True)
     is_archive = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=True)
