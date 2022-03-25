@@ -8,16 +8,43 @@ from sql_util.aggregates import SubquerySum
 
 from internal_api.models import Shop
 from products.models import ProductUnit
-from utils.models_utils import Timestampable
+from utils.models_utils import Enumerable, Timestampable
 
 
-class TechCard(Timestampable, models.Model):
+class TechCard(Enumerable, Timestampable, models.Model):
+    NUMBER_PREFIX = ""
+    NUMBER_DIGITS = 6
+
     name = models.CharField("наименование", max_length=255)
+    short_name = models.CharField(
+        "короткое наименование",
+        max_length=50,
+        null=True,
+        blank=True,
+    )
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name="tech_card",
         verbose_name="автор",
+    )
+    regulatory_law = models.CharField(
+        "ТНПА",
+        max_length=255,
+        default="СТБ 1210-2010",
+    )
+    cooking_method = models.TextField(
+        "технология приготовления",
+        null=True,
+        blank=True,
+    )
+    appearance = models.TextField("внешний вид", null=True, blank=True)
+    consistence = models.TextField("консистенция", null=True, blank=True)
+    taste_and_smell = models.TextField("вкус и запах", null=True, blank=True)
+    storage_conditions = models.TextField(
+        "условия хранения",
+        null=True,
+        blank=True,
     )
     is_archive = models.BooleanField(default=False)
     ingredients = models.ManyToManyField(
@@ -33,10 +60,10 @@ class TechCard(Timestampable, models.Model):
         verbose_name="готовый продукт",
     )
     amount = models.DecimalField(
-        "выход",
+        "выход в складских единицах",
         default=1,
-        max_digits=7,
-        decimal_places=2,
+        max_digits=8,
+        decimal_places=3,
     )
 
     class Meta:
@@ -58,9 +85,23 @@ class TechCardProduct(models.Model):
         verbose_name="сырьё",
     )
     quantity = models.DecimalField(
-        "количество",
-        max_digits=7,
-        decimal_places=2,
+        "количество в складских единицах",
+        max_digits=8,
+        decimal_places=3,
+    )
+    gross_weight = models.DecimalField(
+        "вес брутто, кг",
+        max_digits=8,
+        decimal_places=3,
+        null=True,
+        blank=True,
+    )
+    net_weight = models.DecimalField(
+        "вес нетто, кг",
+        max_digits=8,
+        decimal_places=3,
+        null=True,
+        blank=True,
     )
 
     class Meta:

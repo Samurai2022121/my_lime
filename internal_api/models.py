@@ -10,7 +10,7 @@ from django.db.models.functions import Coalesce
 from model_utils.managers import InheritanceManager
 
 from products.models import ProductUnit
-from utils.models_utils import Timestampable, classproperty, phone_regex
+from utils.models_utils import Enumerable, Timestampable, classproperty, phone_regex
 
 
 class Shop(models.Model):
@@ -170,10 +170,7 @@ class Warehouse(models.Model):
         return f"{self.product_unit} in {self.shop}"
 
 
-class PrimaryDocument(models.Model):
-    NUMBER_DIGITS = 8
-    NUMBER_PREFIX = ""
-
+class PrimaryDocument(Enumerable):
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -182,7 +179,6 @@ class PrimaryDocument(models.Model):
         verbose_name="автор",
     )
     created_at = models.DateField("создан", auto_now_add=True, editable=True)
-    number = models.CharField("номер", max_length=255, unique=True, blank=True)
 
     objects = InheritanceManager()
 
@@ -217,27 +213,6 @@ class PrimaryDocument(models.Model):
     def SUBCLASS(cls, name):
         """Given a subclass name, return the subclass."""
         return cls.SUBCLASS_OBJECT_CHOICES.get(name, cls)
-
-    def save(self, *args, **kwargs):
-        # if a number is not provided, generate one
-        if self.pk is None and not self.number:
-            new_number = 1
-            for latest_number in (
-                self._meta.model.objects.filter(
-                    number__startswith=self.NUMBER_PREFIX,
-                )
-                .order_by("-number")
-                .values_list("number", flat=True)
-                .iterator(chunk_size=1)
-            ):
-                try:
-                    new_number = int(latest_number.lstrip(self.NUMBER_PREFIX)) + 1
-                    break
-                except ValueError:
-                    pass
-
-            self.number = self.NUMBER_PREFIX + str(new_number).zfill(self.NUMBER_DIGITS)
-        super().save(*args, **kwargs)
 
 
 class ProductionDocument(PrimaryDocument):

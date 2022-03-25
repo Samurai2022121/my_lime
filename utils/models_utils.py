@@ -22,6 +22,40 @@ class Timestampable(models.Model):
         abstract = True
 
 
+class Enumerable(models.Model):
+    """
+    If a document number is not provided, generate one.
+    """
+
+    NUMBER_PREFIX = ""
+    NUMBER_DIGITS = 8
+
+    number = models.CharField("номер", max_length=255, unique=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if self.pk is None and not self.number:
+            new_number = 1
+            for latest_number in (
+                self._meta.model.objects.filter(
+                    number__startswith=self.NUMBER_PREFIX,
+                )
+                .order_by("-number")
+                .values_list("number", flat=True)
+                .iterator(chunk_size=1)
+            ):
+                try:
+                    new_number = int(latest_number.lstrip(self.NUMBER_PREFIX)) + 1
+                    break
+                except ValueError:
+                    pass
+
+            self.number = self.NUMBER_PREFIX + str(new_number).zfill(self.NUMBER_DIGITS)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        abstract = True
+
+
 class ListDisplayAllModelFieldsAdminMixin(object):
     def __init__(self, model, admin_site):
         self.list_display = [

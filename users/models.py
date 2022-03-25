@@ -59,10 +59,10 @@ class User(AbstractUser):
         super(User, self).save()
 
     def get_full_name(self):
-        if self.name:
-            return f"{self.name} {self.surname}" if self.surname else self.name
-        else:
-            return self.phone_number
+        return (
+            " ".join([x for x in (self.name, self.fathers_name, self.surname) if x])
+            or self.phone_number
+        )
 
     def get_short_name(self):
         return self.name if self.name else "Anonymous user"

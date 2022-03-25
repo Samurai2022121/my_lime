@@ -119,3 +119,9 @@ class TestTechCardViewset(ViewSetTest):
                 "end_product": 9,
             }
         )
+
+    class TestRenderDOCX(UsesGetMethod, UsesDetailEndpoint, Returns200):
+        detail_url = lambda_fixture(
+            lambda id: url_for("production:techcard-render-docx", id=id)
+        )
+        id = static_fixture(2)

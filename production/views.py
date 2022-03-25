@@ -1,4 +1,8 @@
+from pathlib import Path
+
+from django.http import HttpResponse
 from django_filters import rest_framework as filters
+from docxtpl import DocxTemplate
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets
@@ -30,6 +34,22 @@ class TechCardViewSet(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet
         if "is_archive" not in self.request.query_params:
             qs = qs.filter(is_archive=False)
         return qs.order_by("name")
+
+    @action(methods=["get"], detail=True, url_path="render-docx")
+    def render_docx(self, request, **kwargs):
+        tech_card = self.get_object()
+        docx = DocxTemplate(
+            Path(__file__).parent / "templates" / "production" / "techcard.docx"
+        )
+        docx.render(context={"obj": tech_card})
+        response = HttpResponse(
+            content_type=(
+                "application/vnd.openxmlformats-officedocument"
+                ".wordprocessingml.document"
+            )
+        )
+        docx.save(response)
+        return response
 
 
 class DailyMenuViewSet(viewsets.ModelViewSet):
