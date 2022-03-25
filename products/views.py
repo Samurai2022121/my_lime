@@ -178,7 +178,7 @@ class CategoryViewset(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet
 
         if "s" in self.request.query_params:
             search_value = self.request.query_params["s"]
-            qs = qs.filter(Q(name__icontains=search_value))
+            qs = self.queryset.filter(Q(name__icontains=search_value))
 
         return qs
 
