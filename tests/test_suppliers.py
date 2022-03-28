@@ -45,6 +45,11 @@ class TestSupplierViewSet(ViewSetTest):
             # archived suppliers must be filtered out
             assert len(json["results"]) == 1
 
+    class TestSearchList(UsesGetMethod, UsesListEndpoint, Returns200):
+        list_url = lambda_fixture(
+            lambda: url_for("internal_api:supplier-list") + "?s=555"
+        )
+
     class TestCreate(UsesPostMethod, UsesListEndpoint, Returns201):
         data = static_fixture(
             {

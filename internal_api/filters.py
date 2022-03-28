@@ -18,7 +18,7 @@ class SupplierFilter(django_filters.FilterSet):
         return qs.filter(
             Q(name__icontains=value)
             | Q(email__icontains=value)
-            | Q(phone__icontains=value)
+            | Q(phone_numbers__icontains=value)
         )
 
 
