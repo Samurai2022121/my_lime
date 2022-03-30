@@ -428,7 +428,7 @@
             "extra_info": null,
             "is_archive": false,
             "is_sorted": true,
-            "vat_value": null,
+            "vat_rate": "20.00",
             "own_production": false
         }
     },
@@ -456,7 +456,7 @@
             "extra_info": null,
             "is_archive": false,
             "is_sorted": true,
-            "vat_value": null,
+            "vat_rate": "20.00",
             "own_production": false
         }
     },
@@ -484,7 +484,7 @@
             "extra_info": null,
             "is_archive": false,
             "is_sorted": false,
-            "vat_value": null,
+            "vat_rate": "20.00",
             "own_production": false
         }
     },
@@ -512,7 +512,7 @@
             "extra_info": null,
             "is_archive": false,
             "is_sorted": true,
-            "vat_value": null,
+            "vat_rate": "20.00",
             "own_production": false
         }
     },
@@ -540,7 +540,7 @@
             "extra_info": null,
             "is_archive": false,
             "is_sorted": true,
-            "vat_value": null,
+            "vat_rate": "20.00",
             "own_production": false
         }
     },
@@ -568,7 +568,7 @@
             "extra_info": null,
             "is_archive": false,
             "is_sorted": false,
-            "vat_value": null,
+            "vat_rate": "20.00",
             "own_production": false
         }
     },
@@ -596,7 +596,7 @@
             "extra_info": null,
             "is_archive": false,
             "is_sorted": true,
-            "vat_value": null,
+            "vat_rate": "20.00",
             "own_production": false
         }
     },
@@ -624,7 +624,7 @@
             "extra_info": null,
             "is_archive": false,
             "is_sorted": true,
-            "vat_value": null,
+            "vat_rate": "20.00",
             "own_production": false
         }
     },
@@ -652,7 +652,7 @@
             "extra_info": null,
             "is_archive": false,
             "is_sorted": false,
-            "vat_value": null,
+            "vat_rate": "20.00",
             "own_production": false
         }
     },

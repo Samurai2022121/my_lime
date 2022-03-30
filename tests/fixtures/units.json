@@ -53,7 +53,7 @@
             "extra_info": null,
             "is_archive": false,
             "is_sorted": true,
-            "vat_value": null
+            "vat_rate": "20.00"
         }
     },
     {
@@ -80,7 +80,7 @@
             "extra_info": null,
             "is_archive": false,
             "is_sorted": true,
-            "vat_value": null
+            "vat_rate": "20.00"
         }
     },
     {
@@ -107,7 +107,7 @@
             "extra_info": null,
             "is_archive": false,
             "is_sorted": true,
-            "vat_value": null
+            "vat_rate": "20.00"
         }
     },
     {

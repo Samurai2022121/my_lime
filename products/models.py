@@ -107,8 +107,8 @@ class Product(Timestampable, models.Model):
         "завизировано после автоматического добавления",
         default=False,
     )
-    vat_value = models.DecimalField(
-        "НДС, %",
+    vat_rate = models.DecimalField(
+        "Ставка НДС, %",
         null=True,
         blank=True,
         max_digits=7,

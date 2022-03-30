@@ -500,10 +500,20 @@ class ReceiptRecordSerializer(serializers.ModelSerializer):
         max_value=Decimal("9999.99"),
         min_value=Decimal("0.01"),
     )
+    vat_rate = serializers.DecimalField(read_only=True, max_digits=7, decimal_places=2)
+    vat_value = serializers.DecimalField(read_only=True, max_digits=7, decimal_places=2)
 
     class Meta:
         model = models.WarehouseRecord
-        fields = ("product_unit", "warehouse", "quantity", "price")
+        fields = (
+            "product_unit",
+            "warehouse",
+            "quantity",
+            "cost",
+            "price",
+            "vat_rate",
+            "vat_value",
+        )
 
 
 class ReceiptDocumentSerializer(serializers.ModelSerializer):

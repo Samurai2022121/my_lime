@@ -370,6 +370,29 @@ class CancelDocument(PrimaryDocument):
         verbose_name_plural = "Документы отмены"
 
 
+class WarehouseRecordManager(models.Manager):
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return qs.annotate(
+            vat_rate=models.ExpressionWrapper(
+                models.F("warehouse__product_unit__product__vat_rate"),
+                output_field=models.DecimalField(
+                    "ставка НДС, %",
+                    max_digits=7,
+                    decimal_places=2,
+                ),
+            ),
+            vat_value=models.ExpressionWrapper(
+                models.F("quantity") * models.F("cost") * models.F("vat_rate") / 100,
+                output_field=models.DecimalField(
+                    "сумма НДС",
+                    max_digits=7,
+                    decimal_places=2,
+                ),
+            ),
+        )
+
+
 class WarehouseRecord(Timestampable, models.Model):
     warehouse = models.ForeignKey(
         Warehouse,
@@ -393,6 +416,8 @@ class WarehouseRecord(Timestampable, models.Model):
         on_delete=models.CASCADE,
         verbose_name="первичный документ",
     )
+
+    objects = WarehouseRecordManager()
 
     class Meta:
         verbose_name = "Изменение запаса"
