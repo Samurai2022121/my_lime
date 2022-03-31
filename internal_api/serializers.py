@@ -338,6 +338,30 @@ class WriteOffDocumentSerializer(NestedCreateMixin, serializers.ModelSerializer)
         return super().create(validated_data)
 
 
+class ReturnRecordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.WarehouseRecord
+        exclude = ("document",)
+
+
+class ReturnDocumentSerializer(NestedCreateMixin, serializers.ModelSerializer):
+    """
+    This serializer is basically a copy of `WriteOffDocumentSerializer`.
+    """
+
+    warehouse_records = ReturnRecordSerializer(many=True)
+
+    class Meta:
+        model = models.ReturnDocument
+        fields = "__all__"
+
+    def create(self, validated_data):
+        # negate quantity
+        for each in validated_data.get("warehouse_records", []):
+            each["quantity"] = -each["quantity"]
+        return super().create(validated_data)
+
+
 class ConversionRecordSerializer(serializers.ModelSerializer):
     """
     Gathers data to convert `Warehouse` to target warehouse, which in turn

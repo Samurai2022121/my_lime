@@ -370,6 +370,23 @@ class CancelDocument(PrimaryDocument):
         verbose_name_plural = "Документы отмены"
 
 
+class ReturnDocument(PrimaryDocument):
+    NUMBER_PREFIX = "RT"
+
+    primary_document = models.OneToOneField(
+        PrimaryDocument,
+        on_delete=models.CASCADE,
+        parent_link=True,
+        primary_key=True,
+        related_name="return_document",
+    )
+    reason = models.TextField("причина", null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Документ возврата"
+        verbose_name_plural = "Документы возврата"
+
+
 class WarehouseRecordManager(models.Manager):
     def get_queryset(self):
         qs = super().get_queryset()

@@ -39,6 +39,7 @@ docs_router.register("move", views.MoveDocumentViewSet)
 docs_router.register("receipts", views.ReceiptDocumentViewSet)
 docs_router.register("sales", views.SaleDocumentViewSet)
 docs_router.register("cancel", views.CancelDocumentViewSet)
+docs_router.register("return", views.ReturnDocumentViewSet)
 
 urlpatterns = [
     path("primary-documents/", include(docs_router.urls)),

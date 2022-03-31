@@ -347,6 +347,17 @@ class WriteOffDocumentViewSet(
 
 
 @method_decorator(transaction.atomic, "perform_create")
+class ReturnDocumentViewSet(
+    CreateModelMixin,
+    DestroyModelMixin,
+    ReadOnlyModelViewSet,
+):
+    permission_classes = (AllowAny,)
+    queryset = models.ReturnDocument.objects.order_by("created_at", "number")
+    serializer_class = serializers.ReturnDocumentSerializer
+
+
+@method_decorator(transaction.atomic, "perform_create")
 class ConversionDocumentViewSet(
     CreateModelMixin,
     DestroyModelMixin,

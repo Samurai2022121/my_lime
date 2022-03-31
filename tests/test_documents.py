@@ -156,6 +156,41 @@ class TestWriteOffDocumentViewset(ViewSetTest):
         )
 
 
+class TestReturnDocumentViewset(ViewSetTest):
+    @pytest.fixture
+    def common_subject(self, db, load_inventory, get_response):
+        return get_response
+
+    @pytest.fixture
+    def load_inventory(self, request, django_db_blocker):
+        with django_db_blocker.unblock():
+            call_command(
+                "loaddata",
+                Path(request.fspath).parent / "fixtures" / "warehouses.json",
+            )
+
+    list_url = lambda_fixture(lambda: url_for("internal_api:returndocument-list"))
+
+    detail_url = lambda_fixture(
+        lambda pk: url_for("internal_api:returndocument-detail", pk)
+    )
+
+    class TestList(UsesGetMethod, UsesListEndpoint, Returns200):
+        pass
+
+    class TestCreate(UsesPostMethod, UsesListEndpoint, Returns201):
+        data = static_fixture(
+            {
+                "warehouse_records": [
+                    {
+                        "warehouse": 1,
+                        "quantity": 13,
+                    },
+                ],
+            }
+        )
+
+
 class TestConversionDocumentViewset(ViewSetTest):
     @pytest.fixture
     def common_subject(self, db, load_inventory, create_conversion, get_response):
