@@ -77,7 +77,7 @@ class WarehouseFilter(django_filters.FilterSet):
         label="поиск по наименованию продукта, штрихкоду продукта, id продукта",
     )
     is_archive = django_filters.BooleanFilter(
-        field_name="product__is_archive",
+        field_name="product_unit__product__is_archive",
         label="показывать архивные запасы",
     )
     remaining = django_filters.RangeFilter(
