@@ -91,6 +91,6 @@ class WarehouseFilter(django_filters.FilterSet):
     def search(self, qs, name, value):
         return qs.filter(
             Q(product_unit__product__name__icontains=value)
-            | Q(product_unit__product__barcode__icontains=value)
+            | Q(product_unit__barcode__icontains=value)
             | Q(product_unit__product__id__icontains=value)
         )
