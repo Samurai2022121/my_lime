@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from django.db import models
+from django.db.models.constraints import UniqueConstraint
 from mptt.models import MPTTModel, TreeForeignKey
 
 from utils.models_utils import Timestampable
@@ -33,7 +34,17 @@ class Category(MPTTModel):
         ordering = ["name"]
         verbose_name = "категория"
         verbose_name_plural = "категории"
-        unique_together = (("name", "lft", "rght"), ("name", "parent"))
+        constraints = (
+            UniqueConstraint(
+                fields=("name", "parent"),
+                name="unique_name",
+            ),
+            UniqueConstraint(
+                fields=("name",),
+                condition=models.Q(parent=None),
+                name="unique_root_name",
+            ),
+        )
 
     def __str__(self):
         return self.name
