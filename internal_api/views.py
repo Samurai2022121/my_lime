@@ -267,6 +267,8 @@ class ProductionDocumentViewSet(
     permission_classes = (AllowAny,)
     queryset = models.ProductionDocument.objects.order_by("created_at", "number")
     serializer_class = serializers.ProductionDocumentSerializer
+    filter_backends = (df_filters.DjangoFilterBackend,)
+    filterset_class = filters.PrimaryDocumentFilter
 
     @staticmethod
     def get_or_create_warehouse(shop, product_unit, **kwargs):
@@ -333,6 +335,8 @@ class InventoryDocumentViewSet(
     permission_classes = (AllowAny,)
     queryset = models.InventoryDocument.objects.order_by("created_at", "number")
     serializer_class = serializers.InventoryDocumentSerializer
+    filter_backends = (df_filters.DjangoFilterBackend,)
+    filterset_class = filters.PrimaryDocumentFilter
 
 
 @method_decorator(transaction.atomic, "perform_create")
@@ -344,6 +348,8 @@ class WriteOffDocumentViewSet(
     permission_classes = (AllowAny,)
     queryset = models.WriteOffDocument.objects.order_by("created_at", "number")
     serializer_class = serializers.WriteOffDocumentSerializer
+    filter_backends = (df_filters.DjangoFilterBackend,)
+    filterset_class = filters.PrimaryDocumentFilter
 
 
 @method_decorator(transaction.atomic, "perform_create")
@@ -355,6 +361,8 @@ class ReturnDocumentViewSet(
     permission_classes = (AllowAny,)
     queryset = models.ReturnDocument.objects.order_by("created_at", "number")
     serializer_class = serializers.ReturnDocumentSerializer
+    filter_backends = (df_filters.DjangoFilterBackend,)
+    filterset_class = filters.PrimaryDocumentFilter
 
 
 @method_decorator(transaction.atomic, "perform_create")
@@ -366,6 +374,8 @@ class ConversionDocumentViewSet(
     permission_classes = (AllowAny,)
     queryset = models.ConversionDocument.objects.order_by("created_at", "number")
     serializer_class = serializers.ConversionDocumentSerializer
+    filter_backends = (df_filters.DjangoFilterBackend,)
+    filterset_class = filters.PrimaryDocumentFilter
 
 
 @method_decorator(transaction.atomic, "perform_create")
@@ -377,6 +387,8 @@ class MoveDocumentViewSet(
     permission_classes = (AllowAny,)
     queryset = models.MoveDocument.objects.order_by("created_at", "number")
     serializer_class = serializers.MoveDocumentSerializer
+    filter_backends = (df_filters.DjangoFilterBackend,)
+    filterset_class = filters.PrimaryDocumentFilter
 
 
 @method_decorator(transaction.atomic, "perform_create")
@@ -388,6 +400,8 @@ class ReceiptDocumentViewSet(
     permission_classes = (AllowAny,)
     queryset = models.ReceiptDocument.objects.order_by("created_at", "number")
     serializer_class = serializers.ReceiptDocumentSerializer
+    filter_backends = (df_filters.DjangoFilterBackend,)
+    filterset_class = filters.PrimaryDocumentFilter
 
 
 @method_decorator(transaction.atomic, "perform_create")
@@ -399,6 +413,8 @@ class SaleDocumentViewSet(
     permission_classes = (AllowAny,)
     queryset = models.SaleDocument.objects.order_by("created_at", "number")
     serializer_class = serializers.SaleDocumentSerializer
+    filter_backends = (df_filters.DjangoFilterBackend,)
+    filterset_class = filters.PrimaryDocumentFilter
 
 
 class CancelDocumentViewSet(
@@ -409,6 +425,8 @@ class CancelDocumentViewSet(
     permission_classes = (AllowAny,)
     queryset = models.CancelDocument.objects.order_by("created_at", "number")
     serializer_class = serializers.CancelDocumentSerializer
+    filter_backends = (df_filters.DjangoFilterBackend,)
+    filterset_class = filters.PrimaryDocumentFilter
 
     @transaction.atomic
     def perform_create(self, serializer):

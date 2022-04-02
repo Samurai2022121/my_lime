@@ -94,3 +94,15 @@ class WarehouseFilter(django_filters.FilterSet):
             | Q(product_unit__barcode__icontains=value)
             | Q(product_unit__product__id__icontains=value)
         )
+
+
+class PrimaryDocumentFilter(django_filters.FilterSet):
+    created = django_filters.DateFromToRangeFilter(
+        field_name="created_at",
+        label="период времени",
+    )
+    number = django_filters.CharFilter(lookup_expr="icontains", label="номер")
+
+    class Meta:
+        model = models.PrimaryDocument
+        fields = ("created", "number")
