@@ -445,7 +445,8 @@ class WarehouseRecord(Timestampable, models.Model):
         return f"Изменение {self.warehouse}"
 
 
-class WarehouseOrder(models.Model):
+class WarehouseOrder(Enumerable):
+    NUMBER_PREFIX = "AO"
     ORDER_STATUSES = (
         ("approving", "Подтверждается"),
         ("delivered", "Доставлен"),
@@ -465,7 +466,6 @@ class WarehouseOrder(models.Model):
         ProductUnit, through="WarehouseOrderPositions", blank=True
     )
     shop = models.ForeignKey(Shop, on_delete=models.PROTECT)
-    order_number = models.CharField(max_length=255, null=True, blank=True)
     is_archive = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -475,7 +475,7 @@ class WarehouseOrder(models.Model):
         verbose_name_plural = "Заказы"
 
     def __str__(self):
-        return self.order_number or "-"
+        return self.number
 
 
 class WarehouseOrderPositions(models.Model):

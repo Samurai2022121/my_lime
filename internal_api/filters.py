@@ -33,7 +33,7 @@ class WarehouseOrderFilter(django_filters.FilterSet):
         fields = {"is_archive": ["exact"]}
 
     def search(self, qs, name, value):
-        return qs.filter(Q(order_number__icontains=value))
+        return qs.filter(Q(number__icontains=value))
 
 
 class LegalEntityFilterSet(django_filters.FilterSet):

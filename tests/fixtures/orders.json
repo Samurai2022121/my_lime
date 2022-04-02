@@ -6,7 +6,7 @@
             "status": "delivered",
             "supplier": null,
             "shop": 1,
-            "order_number": null,
+            "number": "AO00000001",
             "is_archive": false,
             "created_at": "2022-02-26T02:53:28.947Z",
             "updated_at": "2022-02-26T02:53:28.947Z"
