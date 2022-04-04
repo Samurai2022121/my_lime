@@ -210,7 +210,9 @@ pytest-lambda==1.2.5
     #   pytest-common-subject
     #   pytest-drf
 python-dateutil==2.8.2
-    # via pandas
+    # via
+    #   -r requirements.in
+    #   pandas
 python-docx==0.8.11
     # via
     #   docxcompose

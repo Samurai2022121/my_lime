@@ -27,7 +27,7 @@ class Command(BaseCommand):
         wb = load_workbook(input_file, read_only=True)
         ws = wb["TDSheet"]
 
-        shop_id = options.get("shop", None)
+        shop_id = options.get("shop")
         shop = Shop.objects.get(id=shop_id) if shop_id else None
 
         for i, row in enumerate(ws.iter_rows(min_row=2), start=2):
@@ -43,24 +43,16 @@ class Command(BaseCommand):
                 price = Decimal(row[6].value or 0)
 
                 unit, _ = MeasurementUnit.objects.get_or_create(name=unit_name)
-                unit.save()
-
                 product, _ = Product.objects.get_or_create(name=product_name)
-                product.save()
-
                 product_unit, _ = ProductUnit.objects.get_or_create(
                     product=product,
                     unit=unit,
                     defaults={"barcode": barcode},
                 )
-                product_unit.save()
-
                 if shop and price and cost:
                     supplier, _ = Supplier.objects.get_or_create(
                         name=supplier_name,
                     )
-                    supplier.save()
-
                     warehouse, _ = Warehouse.objects.get_or_create(
                         shop=shop,
                         product_unit=product_unit,
@@ -70,7 +62,6 @@ class Command(BaseCommand):
                             "margin": round(price / cost * 100 - Decimal(100), 2),
                         },
                     )
-                    warehouse.save()
             except:  # noqa
                 print(f"При обработке строки {i} возникло исключение:")
                 traceback.print_exc()
