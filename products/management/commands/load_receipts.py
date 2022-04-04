@@ -5,6 +5,7 @@ from functools import cache
 
 from dateutil import parser
 from django.core.management.base import BaseCommand
+from django.db import transaction
 from django.utils.timezone import get_current_timezone
 from openpyxl import load_workbook
 
@@ -29,17 +30,34 @@ def _get_or_create_shop(address):
 
 
 @cache
-def _get_or_create_supplier(name):
-    return Supplier.objects.get_or_create(name=name)[0]
-
-
-@cache
 def _get_or_create_supply_contract(supplier_id, number, date):
     return SupplyContract.objects.get_or_create(
         supplier_id=supplier_id,
         contract_number=number,
         contract_date=date,
     )[0]
+
+
+@cache
+def _get_or_create_supplier(supplier_name, contract_number, contract_date):
+    # multiple suppliers may have the same names,
+    # but name+contract must be pretty unique
+    supplier = Supplier.objects.filter(
+        name=supplier_name,
+        supply_contract__contract_number=contract_number,
+        supply_contract__contract_date=contract_date,
+    ).last()
+    if supplier:
+        return supplier
+
+    with transaction.atomic():
+        supplier = Supplier.objects.create(name=supplier_name)
+        SupplyContract.objects.create(
+            supplier=supplier,
+            contract_number=contract_number,
+            contract_date=contract_date,
+        )
+    return supplier
 
 
 class Command(BaseCommand):
@@ -49,7 +67,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "input_file",
             type=str,
-            help="Input file (*.xslx)",
+            help="Input file (*.xlsx)",
         )
 
     def handle(self, input_file, *args, **options):
@@ -76,15 +94,13 @@ class Command(BaseCommand):
                 shop = _get_or_create_shop(shop_address)
 
                 supplier_name = first_row[4].value
-                supplier = _get_or_create_supplier(supplier_name)
-
                 contract = first_row[5].value
                 contract_number, contract_date = contract.removeprefix(
                     "Договор № "
                 ).split(" от ")
                 contract_date = parser.parse(contract_date.removesuffix("г.")).date()
-                _get_or_create_supply_contract(
-                    supplier.id,
+                supplier = _get_or_create_supplier(
+                    supplier_name,
                     contract_number,
                     contract_date,
                 )

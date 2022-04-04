@@ -15,7 +15,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "input_file",
             type=str,
-            help="Input file (*.xslx)",
+            help="Input file (*.xlsx)",
         )
         parser.add_argument(
             "--shop",
