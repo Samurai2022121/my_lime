@@ -1,6 +1,8 @@
 import django_filters
 from django.db.models import Q
 
+from products.models import Category
+
 from . import models
 
 
@@ -84,6 +86,11 @@ class WarehouseFilter(django_filters.FilterSet):
         label="отобрать по количеству на складе",
     )
 
+    category = django_filters.CharFilter(
+        method="in_category_filter",
+        label="входит в категорию или её подкатегории (Id категории)",
+    )
+
     class Meta:
         model = models.Warehouse
         fields = ("s",)
@@ -93,6 +100,19 @@ class WarehouseFilter(django_filters.FilterSet):
             Q(product_unit__product__name__icontains=value)
             | Q(product_unit__barcode__icontains=value)
             | Q(product_unit__product__id__icontains=value)
+        )
+
+    @staticmethod
+    def in_category_filter(qs, name, value):
+        try:
+            category = Category.objects.get(pk=value)
+        except Category.DoesNotExist:
+            return qs
+
+        return qs.filter(
+            product_unit__product__category__in=category.get_descendants(
+                include_self=True
+            ),
         )
 
 

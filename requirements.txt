@@ -12,7 +12,7 @@ attrs==21.4.0
     # via pytest
 billiard==3.6.4.0
     # via celery
-black==22.1.0
+black==22.3.0
     # via -r requirements.in
 celery==5.2.3
     # via -r requirements.in
