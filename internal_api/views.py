@@ -66,6 +66,10 @@ class WarehouseViewSet(NestedViewSetMixin, ModelViewSet):
     parent_lookup_kwargs = {"shop_id": "shop__id"}
     queryset = models.Warehouse.objects
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.paginator.page_size = None
+
     def get_queryset(self):
         qs = super().get_queryset().order_by("product_unit__product__name")
         return qs
