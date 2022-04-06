@@ -69,6 +69,17 @@ class TestInventoryDocumentViewset(ViewSetTest):
             }
         )
 
+        def test_record_list(self, json, client):
+            """Test inventory records created."""
+            document_id = json["id"]
+            record_list_url = url_for(
+                "internal_api:inventoryrecord-list",
+                document_id,
+            )
+            result = client.get(record_list_url)
+            assert result.status_code == status.HTTP_200_OK
+            assert len(result.json()["results"]) == 4
+
 
 class TestReceiptDocumentViewset(ViewSetTest):
     @pytest.fixture
@@ -119,6 +130,17 @@ class TestReceiptDocumentViewset(ViewSetTest):
             }
         )
 
+        def test_record_list(self, json, client):
+            """Test receipt records created."""
+            document_id = json["id"]
+            record_list_url = url_for(
+                "internal_api:receiptrecord-list",
+                document_id,
+            )
+            result = client.get(record_list_url)
+            assert result.status_code == status.HTTP_200_OK
+            assert len(result.json()["results"]) == 4
+
 
 class TestWriteOffDocumentViewset(ViewSetTest):
     @pytest.fixture
@@ -155,6 +177,17 @@ class TestWriteOffDocumentViewset(ViewSetTest):
             }
         )
 
+        def test_record_list(self, json, client):
+            """Test write off records created."""
+            document_id = json["id"]
+            record_list_url = url_for(
+                "internal_api:writeoffrecord-list",
+                document_id,
+            )
+            result = client.get(record_list_url)
+            assert result.status_code == status.HTTP_200_OK
+            assert len(result.json()["results"]) == 1
+
 
 class TestReturnDocumentViewset(ViewSetTest):
     @pytest.fixture
@@ -189,6 +222,17 @@ class TestReturnDocumentViewset(ViewSetTest):
                 ],
             }
         )
+
+        def test_record_list(self, json, client):
+            """Test return records created."""
+            document_id = json["id"]
+            record_list_url = url_for(
+                "internal_api:returnrecord-list",
+                document_id,
+            )
+            result = client.get(record_list_url)
+            assert result.status_code == status.HTTP_200_OK
+            assert len(result.json()["results"]) == 1
 
 
 class TestConversionDocumentViewset(ViewSetTest):
@@ -236,6 +280,17 @@ class TestConversionDocumentViewset(ViewSetTest):
             }
         )
 
+        def test_record_list(self, json, client):
+            """Test conversion records created (two for each input line)."""
+            document_id = json["id"]
+            record_list_url = url_for(
+                "internal_api:conversionrecord-list",
+                document_id,
+            )
+            result = client.get(record_list_url)
+            assert result.status_code == status.HTTP_200_OK
+            assert len(result.json()["results"]) == 2
+
 
 class TestMoveDocumentViewset(ViewSetTest):
     @pytest.fixture
@@ -273,6 +328,17 @@ class TestMoveDocumentViewset(ViewSetTest):
             }
         )
 
+        def test_record_list(self, json, client):
+            """Test move records created (two for each input line)."""
+            document_id = json["id"]
+            record_list_url = url_for(
+                "internal_api:moverecord-list",
+                document_id,
+            )
+            result = client.get(record_list_url)
+            assert result.status_code == status.HTTP_200_OK
+            assert len(result.json()["results"]) == 4
+
 
 class TestSaleDocumentViewset(ViewSetTest):
     @pytest.fixture
@@ -309,3 +375,14 @@ class TestSaleDocumentViewset(ViewSetTest):
                 ],
             }
         )
+
+        def test_record_list(self, json, client):
+            """Test sale records created."""
+            document_id = json["id"]
+            record_list_url = url_for(
+                "internal_api:conversionrecord-list",
+                document_id,
+            )
+            result = client.get(record_list_url)
+            assert result.status_code == status.HTTP_200_OK
+            assert len(result.json()["results"]) == 2

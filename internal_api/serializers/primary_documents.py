@@ -1,201 +1,13 @@
 from decimal import Decimal
 
-from drf_base64.fields import Base64FileField
-from drf_writable_nested import NestedCreateMixin, WritableNestedModelSerializer
+from drf_writable_nested import NestedCreateMixin
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from rest_framework_nested.serializers import NestedHyperlinkedIdentityField
 
 from products.models import ProductUnit
-from products.serializers import SimpleProductUnitSerializer
 
-from . import models
-
-
-class ShopSerializer(serializers.ModelSerializer):
-    warehouses = serializers.HyperlinkedIdentityField(
-        read_only=True,
-        view_name="internal_api:warehouse-list",
-        lookup_url_kwarg="shop_id",
-    )
-
-    class Meta:
-        model = models.Shop
-        fields = "__all__"
-
-
-class SupplyContractSerializer(WritableNestedModelSerializer):
-    supplier = serializers.PrimaryKeyRelatedField(
-        queryset=models.Supplier.objects.all()
-    )
-    contract = Base64FileField()
-
-    class Meta:
-        model = models.SupplyContract
-        fields = "__all__"
-
-
-class SupplyContractsSerializer(serializers.Serializer):
-    files_supply = SupplyContractSerializer(many=True, write_only=True)
-
-    def create(self, validated_data):
-        files = validated_data.pop("files_supply", [])
-        files = [models.SupplyContract(**f) for f in files]
-        supply_contracts = models.SupplyContract.objects.bulk_create(files)
-        return supply_contracts
-
-
-class SupplierSerializer(WritableNestedModelSerializer):
-    supply_contract = SupplyContractSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = models.Supplier
-        fields = "__all__"
-
-
-class WarehouseRecordSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.WarehouseRecord
-        fields = "__all__"
-
-
-class WarehouseSerializer(serializers.ModelSerializer):
-    product_unit_on_read = SimpleProductUnitSerializer(
-        read_only=True,
-        source="product_unit",
-    )
-    product_unit = serializers.PrimaryKeyRelatedField(
-        write_only=True,
-        queryset=ProductUnit.objects,
-    )
-    remaining = serializers.DecimalField(
-        read_only=True,
-        max_digits=7,
-        decimal_places=2,
-    )
-    recommended_price = serializers.DecimalField(
-        read_only=True,
-        allow_null=True,
-        max_digits=7,
-        decimal_places=2,
-    )
-    supplier = SupplierSerializer(allow_null=True, required=False)
-    warehouse_records = NestedHyperlinkedIdentityField(
-        read_only=True,
-        view_name="internal_api:warehouserecord-list",
-        lookup_url_kwarg="warehouse_id",
-        parent_lookup_kwargs={"shop_id": "shop__id"},
-    )
-
-    class Meta:
-        model = models.Warehouse
-        fields = "__all__"
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data["product_unit"] = data.pop("product_unit_on_read")
-        return data
-
-
-class SimpleWarehouseSerializer(serializers.ModelSerializer):
-    product_unit_on_read = SimpleProductUnitSerializer(
-        read_only=True,
-        source="product_unit",
-    )
-    product_unit = serializers.PrimaryKeyRelatedField(
-        write_only=True,
-        queryset=ProductUnit.objects,
-    )
-    remaining = serializers.DecimalField(
-        read_only=True,
-        max_digits=7,
-        decimal_places=2,
-    )
-    recommended_price = serializers.DecimalField(
-        read_only=True,
-        allow_null=True,
-        max_digits=7,
-        decimal_places=2,
-    )
-    supplier = SupplierSerializer(allow_null=True, required=False)
-
-    class Meta:
-        model = models.Warehouse
-        fields = "__all__"
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data["product_unit"] = data.pop("product_unit_on_read")
-        return data
-
-
-class UploadCSVSerializer(serializers.Serializer):
-    csv_file = serializers.FileField()
-    price_col = serializers.IntegerField()
-    name_col = serializers.IntegerField()
-    barcode_col = serializers.IntegerField(required=False)
-    vat_col = serializers.IntegerField(required=False)
-    supplier_col = serializers.IntegerField(required=False)
-    measure_unit_col = serializers.IntegerField(required=False)
-    origin_col = serializers.IntegerField(required=False)
-    first_row = serializers.IntegerField()
-
-
-class WarehouseOrderPositionsSerializer(serializers.ModelSerializer):
-    product_unit = serializers.PrimaryKeyRelatedField(
-        queryset=models.ProductUnit.objects,
-        write_only=True,
-    )
-    product_unit_on_read = SimpleProductUnitSerializer(
-        source="product_unit",
-        read_only=True,
-    )
-
-    def to_representation(self, instance):
-        result = super().to_representation(instance)
-        result["product_unit"] = result.pop("product_unit_on_read")
-        return result
-
-    class Meta:
-        model = models.WarehouseOrderPositions
-        exclude = ("warehouse_order",)
-
-
-class WarehouseOrderSerializer(WritableNestedModelSerializer):
-    order_positions = WarehouseOrderPositionsSerializer(
-        many=True,
-        required=False,
-        source="warehouse_order_positions",
-    )
-    supplier_on_read = SupplierSerializer(source="supplier", read_only=True)
-    supplier = serializers.PrimaryKeyRelatedField(
-        queryset=models.Supplier.objects,
-        allow_null=True,
-        required=False,
-    )
-    total = serializers.DecimalField(
-        read_only=True,
-        max_digits=10,
-        decimal_places=2,
-    )
-    shop_address = serializers.CharField(source="shop.address", read_only=True)
-    shop = serializers.PrimaryKeyRelatedField(queryset=models.Shop.objects)
-    created_at = serializers.DateTimeField(required=False)
-
-    class Meta:
-        model = models.WarehouseOrder
-        fields = "__all__"
-
-    def to_representation(self, instance):
-        result = super().to_representation(instance)
-        result["supplier"] = result.pop("supplier_on_read", None)
-        return result
-
-
-class LegalEntitySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.LegalEntities
-        fields = "__all__"
+from .. import models
+from .shops import WarehouseRecordSerializer
 
 
 class ProductionDocumentSerializer(serializers.ModelSerializer):
@@ -204,7 +16,11 @@ class ProductionDocumentSerializer(serializers.ModelSerializer):
     a proper `daily_menu_plan` into this serializer.
     """
 
-    warehouse_records = WarehouseRecordSerializer(many=True, read_only=True)
+    warehouse_records = serializers.HyperlinkedIdentityField(
+        read_only=True,
+        view_name="internal_api:productionrecord-list",
+        lookup_url_kwarg="document_id",
+    )
 
     class Meta:
         model = models.ProductionDocument
@@ -225,7 +41,7 @@ class InventoryRecordSerializer(serializers.ModelSerializer):
     """
 
     product_unit = serializers.PrimaryKeyRelatedField(
-        queryset=models.ProductUnit.objects,
+        queryset=ProductUnit.objects,
         write_only=True,
     )
     supplier = serializers.PrimaryKeyRelatedField(
@@ -302,11 +118,21 @@ class InventoryDocumentSerializer(NestedCreateMixin, serializers.ModelSerializer
         queryset=models.Shop.objects,
         write_only=True,
     )
-    warehouse_records = InventoryRecordSerializer(many=True)
+    warehouse_records = InventoryRecordSerializer(many=True, write_only=True)
+    warehouse_records_on_read = serializers.HyperlinkedIdentityField(
+        read_only=True,
+        view_name="internal_api:inventoryrecord-list",
+        lookup_url_kwarg="document_id",
+    )
 
     class Meta:
         model = models.InventoryDocument
         fields = "__all__"
+
+    def to_representation(self, instance):
+        result = super().to_representation(instance)
+        result["warehouse_records"] = result.pop("warehouse_records_on_read", None)
+        return result
 
     def create(self, validated_data):
         self.context["shop"] = validated_data.pop("shop")
@@ -325,11 +151,21 @@ class WriteOffDocumentSerializer(NestedCreateMixin, serializers.ModelSerializer)
     stating `warehouse` Id and `quantity`.
     """
 
-    warehouse_records = WriteOffRecordSerializer(many=True)
+    warehouse_records = WriteOffRecordSerializer(many=True, write_only=True)
+    warehouse_records_on_read = serializers.HyperlinkedIdentityField(
+        read_only=True,
+        view_name="internal_api:writeoffrecord-list",
+        lookup_url_kwarg="document_id",
+    )
 
     class Meta:
         model = models.WriteOffDocument
         fields = "__all__"
+
+    def to_representation(self, instance):
+        result = super().to_representation(instance)
+        result["warehouse_records"] = result.pop("warehouse_records_on_read", None)
+        return result
 
     def create(self, validated_data):
         # negate quantity
@@ -349,11 +185,21 @@ class ReturnDocumentSerializer(NestedCreateMixin, serializers.ModelSerializer):
     This serializer is basically a copy of `WriteOffDocumentSerializer`.
     """
 
-    warehouse_records = ReturnRecordSerializer(many=True)
+    warehouse_records = ReturnRecordSerializer(many=True, write_only=True)
+    warehouse_records_on_read = serializers.HyperlinkedIdentityField(
+        read_only=True,
+        view_name="internal_api:returnrecord-list",
+        lookup_url_kwarg="document_id",
+    )
 
     class Meta:
         model = models.ReturnDocument
         fields = "__all__"
+
+    def to_representation(self, instance):
+        result = super().to_representation(instance)
+        result["warehouse_records"] = result.pop("warehouse_records_on_read", None)
+        return result
 
     def create(self, validated_data):
         # negate quantity
@@ -369,7 +215,7 @@ class ConversionRecordSerializer(serializers.ModelSerializer):
     """
 
     target_unit = serializers.PrimaryKeyRelatedField(
-        queryset=models.ProductUnit.objects,
+        queryset=ProductUnit.objects,
         write_only=True,
     )
     target_supplier = serializers.PrimaryKeyRelatedField(
@@ -391,11 +237,21 @@ class ConversionRecordSerializer(serializers.ModelSerializer):
 
 
 class ConversionDocumentSerializer(serializers.ModelSerializer):
-    warehouse_records = ConversionRecordSerializer(many=True)
+    warehouse_records = ConversionRecordSerializer(many=True, write_only=True)
+    warehouse_records_on_read = serializers.HyperlinkedIdentityField(
+        read_only=True,
+        view_name="internal_api:conversionrecord-list",
+        lookup_url_kwarg="document_id",
+    )
 
     class Meta:
         model = models.ConversionDocument
         fields = "__all__"
+
+    def to_representation(self, instance):
+        result = super().to_representation(instance)
+        result["warehouse_records"] = result.pop("warehouse_records_on_read", None)
+        return result
 
     def create(self, validated_data):
         source_records = validated_data.pop("warehouse_records", [])
@@ -467,7 +323,12 @@ class MoveDocumentSerializer(serializers.ModelSerializer):
     similar to `ConversionDocumentSerializer`, but targets another shop.
     """
 
-    warehouse_records = MoveRecordSerializer(many=True)
+    warehouse_records = MoveRecordSerializer(many=True, write_only=True)
+    warehouse_records_on_read = serializers.HyperlinkedIdentityField(
+        read_only=True,
+        view_name="internal_api:moverecord-list",
+        lookup_url_kwarg="document_id",
+    )
     target_shop = serializers.PrimaryKeyRelatedField(
         queryset=models.Shop.objects,
         write_only=True,
@@ -476,6 +337,11 @@ class MoveDocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.MoveDocument
         fields = "__all__"
+
+    def to_representation(self, instance):
+        result = super().to_representation(instance)
+        result["warehouse_records"] = result.pop("warehouse_records_on_read", None)
+        return result
 
     def create(self, validated_data):
         source_records = validated_data.pop("warehouse_records", [])
@@ -511,10 +377,9 @@ class MoveDocumentSerializer(serializers.ModelSerializer):
 
 class ReceiptRecordSerializer(serializers.ModelSerializer):
     product_unit = serializers.PrimaryKeyRelatedField(
-        queryset=models.ProductUnit.objects,
+        queryset=ProductUnit.objects,
         write_only=True,
     )
-    warehouse = SimpleWarehouseSerializer(read_only=True)
     price = serializers.DecimalField(
         write_only=True,
         required=False,
@@ -524,28 +389,32 @@ class ReceiptRecordSerializer(serializers.ModelSerializer):
         max_value=Decimal("9999.99"),
         min_value=Decimal("0.01"),
     )
-    vat_rate = serializers.DecimalField(read_only=True, max_digits=7, decimal_places=2)
-    vat_value = serializers.DecimalField(read_only=True, max_digits=7, decimal_places=2)
 
     class Meta:
         model = models.WarehouseRecord
-        fields = (
-            "product_unit",
-            "warehouse",
-            "quantity",
-            "cost",
-            "price",
-            "vat_rate",
-            "vat_value",
-        )
+        fields = ("product_unit", "quantity", "cost", "price")
 
 
 class ReceiptDocumentSerializer(serializers.ModelSerializer):
-    warehouse_records = ReceiptRecordSerializer(many=True)
+    warehouse_records = ReceiptRecordSerializer(many=True, write_only=True)
+    warehouse_records_on_read = serializers.HyperlinkedIdentityField(
+        read_only=True,
+        view_name="internal_api:receiptrecord-list",
+        lookup_url_kwarg="document_id",
+    )
     shop = serializers.PrimaryKeyRelatedField(
         queryset=models.Shop.objects,
         write_only=True,
     )
+
+    class Meta:
+        model = models.ReceiptDocument
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        result = super().to_representation(instance)
+        result["warehouse_records"] = result.pop("warehouse_records_on_read", None)
+        return result
 
     def create(self, validated_data):
         warehouse_records = validated_data.pop("warehouse_records", [])
@@ -573,10 +442,6 @@ class ReceiptDocumentSerializer(serializers.ModelSerializer):
 
         return document
 
-    class Meta:
-        model = models.ReceiptDocument
-        fields = "__all__"
-
 
 class SaleRecordSerializer(serializers.ModelSerializer):
     class Meta:
@@ -585,11 +450,21 @@ class SaleRecordSerializer(serializers.ModelSerializer):
 
 
 class SaleDocumentSerializer(NestedCreateMixin, serializers.ModelSerializer):
-    warehouse_records = SaleRecordSerializer(many=True)
+    warehouse_records = SaleRecordSerializer(many=True, write_only=True)
+    warehouse_records_on_read = serializers.HyperlinkedIdentityField(
+        read_only=True,
+        view_name="internal_api:salerecord-list",
+        lookup_url_kwarg="document_id",
+    )
 
     class Meta:
         model = models.SaleDocument
         fields = "__all__"
+
+    def to_representation(self, instance):
+        result = super().to_representation(instance)
+        result["warehouse_records"] = result.pop("warehouse_records_on_read", None)
+        return result
 
     def create(self, validated_data):
         # invert quantity (same as write-off)
@@ -598,14 +473,12 @@ class SaleDocumentSerializer(NestedCreateMixin, serializers.ModelSerializer):
         return super().create(validated_data)
 
 
-class CancelRecordSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.WarehouseRecord
-        exclude = ("document",)
-
-
 class CancelDocumentSerializer(serializers.ModelSerializer):
-    warehouse_records = CancelRecordSerializer(many=True, read_only=True)
+    warehouse_records = serializers.HyperlinkedIdentityField(
+        read_only=True,
+        view_name="internal_api:cancelrecord-list",
+        lookup_url_kwarg="document_id",
+    )
 
     class Meta:
         model = models.CancelDocument
