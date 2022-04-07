@@ -355,13 +355,16 @@ class ProductAdminSerializer(serializers.ModelSerializer):
         return data
 
 
+class SimpleProductSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+
+    class Meta:
+        model = Product
+        exclude = ("is_archive", "is_sorted")
+
+
 class SimpleProductUnitSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(read_only=True, source="product.name")
-    short_name = serializers.CharField(
-        read_only=True,
-        source="product.short_name",
-    )
-    category = CategorySerializer(read_only=True, source="product.category")
+    product = SimpleProductSerializer(read_only=True)
     unit = serializers.CharField(read_only=True, source="unit.name")
 
     class Meta:
