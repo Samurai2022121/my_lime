@@ -90,6 +90,27 @@ class WarehouseFilter(django_filters.FilterSet):
         method="in_category_filter",
         label="входит в категорию или её подкатегории (Id категории)",
     )
+    
+    order_by = django_filters.OrderingFilter(
+        fields=(
+            ("id", "id"),
+            ("product_unit__barcode", "barcode"),
+            ("product_unit__product__name", "product_name"),
+            ("supplier__name", "supplier_name"),
+            ("auto_order", "auto_order"),
+            ("price", "price"),
+            ("margin", "margin"),
+        ),
+        field_labels={
+            "id": "Warehouse entry id",
+            "product_unit__barcode": "Product barcode",
+            "product_unit__product__name": "Product name",
+            "supplier__name": "Supplier's name",
+            "auto_order": "Product auto order status",
+            "price": "Price",
+            "margin": "Margin",
+        },
+    )
 
     class Meta:
         model = models.Warehouse
