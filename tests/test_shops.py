@@ -102,6 +102,24 @@ class TestWarehouseViewset(ViewSetTest):
     class TestList(UsesGetMethod, UsesListEndpoint, Returns200):
         pass
 
+    class TestOrderBy(UsesGetMethod, UsesListEndpoint, Returns200):
+        @pytest.fixture
+        def common_subject(self, db, django_db_blocker, request, get_response):
+            with django_db_blocker.unblock():
+                call_command(
+                    "loaddata",
+                    Path(request.fspath).parent / "fixtures" / "units.json",
+                    Path(request.fspath).parent / "fixtures" / "warehouses.json",
+                )
+            return get_response
+
+        @pytest.fixture
+        def list_url(self, list_url):
+            return list_url + "?order_by=product_name"
+
+        def test_first_result(self, json):
+            assert json[0]["product_unit"]["product"]["name"] == "Тестовое сырьё"
+
     class TestCreate(UsesPostMethod, UsesListEndpoint, Returns201):
         pass
 
