@@ -13,6 +13,9 @@ class Shop(models.Model):
     name = models.CharField(max_length=255, verbose_name="название")
     date_added = models.DateTimeField(auto_now=True, verbose_name="дата добавления")
     is_archive = models.BooleanField(default=False, verbose_name="архивный")
+    e_shop_base = models.BooleanField(
+        default=False, verbose_name="площадка интернет-магазина"
+    )
 
     class Meta:
         verbose_name = "Филиал"

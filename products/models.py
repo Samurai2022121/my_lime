@@ -158,6 +158,7 @@ class ProductUnit(models.Model):
     )
     for_resale = models.BooleanField("допустима продажа", default=True)
     for_scales = models.BooleanField("весовой товар", default=False)
+    for_weighing_scales = models.BooleanField("для чекопечатающих весов", default=False)
     barcode = models.BigIntegerField("штрихкод", blank=True, null=True)
     weight = models.DecimalField(
         "вес с упаковкой, г",
