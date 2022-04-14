@@ -116,7 +116,7 @@ class InventoryRecordSerializer(serializers.ModelSerializer):
 class InventoryDocumentSerializer(NestedCreateMixin, serializers.ModelSerializer):
     shop = serializers.PrimaryKeyRelatedField(
         queryset=models.Shop.objects,
-        write_only=True,
+        allow_null=True,
     )
     warehouse_records = InventoryRecordSerializer(many=True, write_only=True)
     warehouse_records_on_read = serializers.HyperlinkedIdentityField(
@@ -157,6 +157,10 @@ class WriteOffDocumentSerializer(NestedCreateMixin, serializers.ModelSerializer)
         view_name="internal_api:writeoffrecord-list",
         lookup_url_kwarg="document_id",
     )
+    shop = serializers.PrimaryKeyRelatedField(
+        read_only=True,
+        allow_null=True,
+    )
 
     class Meta:
         model = models.WriteOffDocument
@@ -190,6 +194,10 @@ class ReturnDocumentSerializer(NestedCreateMixin, serializers.ModelSerializer):
         read_only=True,
         view_name="internal_api:returnrecord-list",
         lookup_url_kwarg="document_id",
+    )
+    shop = serializers.PrimaryKeyRelatedField(
+        read_only=True,
+        allow_null=True,
     )
 
     class Meta:
@@ -242,6 +250,10 @@ class ConversionDocumentSerializer(serializers.ModelSerializer):
         read_only=True,
         view_name="internal_api:conversionrecord-list",
         lookup_url_kwarg="document_id",
+    )
+    shop = serializers.PrimaryKeyRelatedField(
+        read_only=True,
+        allow_null=True,
     )
 
     class Meta:
@@ -331,7 +343,11 @@ class MoveDocumentSerializer(serializers.ModelSerializer):
     )
     target_shop = serializers.PrimaryKeyRelatedField(
         queryset=models.Shop.objects,
-        write_only=True,
+        allow_null=True,
+    )
+    source_shop = serializers.PrimaryKeyRelatedField(
+        read_only=True,
+        allow_null=True,
     )
 
     class Meta:
@@ -404,7 +420,7 @@ class ReceiptDocumentSerializer(serializers.ModelSerializer):
     )
     shop = serializers.PrimaryKeyRelatedField(
         queryset=models.Shop.objects,
-        write_only=True,
+        allow_null=True,
     )
 
     class Meta:
@@ -455,6 +471,10 @@ class SaleDocumentSerializer(NestedCreateMixin, serializers.ModelSerializer):
         read_only=True,
         view_name="internal_api:salerecord-list",
         lookup_url_kwarg="document_id",
+    )
+    shop = serializers.PrimaryKeyRelatedField(
+        read_only=True,
+        allow_null=True,
     )
 
     class Meta:

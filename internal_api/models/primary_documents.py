@@ -4,6 +4,73 @@ from model_utils.managers import InheritanceManager
 
 from utils.models_utils import Enumerable, classproperty
 
+from .shops import WarehouseRecord
+
+
+class SingleShopDocumentManager(models.Manager):
+    """Annotate a document with the shop fk, if applicable (or null)."""
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        qs = qs.annotate(
+            shop_count=models.Count(
+                "warehouse_records__warehouse__shop",
+                distinct=True,
+            ),
+            shop=models.Case(
+                models.When(
+                    shop_count=1,
+                    then=models.F("warehouse_records__warehouse__shop"),
+                ),
+                default=None,
+            ),
+        )
+        return qs
+
+
+class MoveDocumentManager(models.Manager):
+    """Annotate a document with source and target shop fks."""
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        qs = qs.annotate(
+            source_shop_count=models.Count(
+                "warehouse_records__warehouse__shop",
+                filter=models.Q(warehouse_records__quantity__lt=0),
+                distinct=True,
+            ),
+            source_shop=models.Case(
+                models.When(
+                    source_shop_count=1,
+                    then=models.Subquery(
+                        WarehouseRecord.objects.filter(
+                            document=models.OuterRef("pk"),
+                            quantity__lt=0,
+                        ).values("warehouse__shop"),
+                    ),
+                ),
+                default=None,
+            ),
+            target_shop_count=models.Count(
+                "warehouse_records__warehouse__shop",
+                filter=models.Q(warehouse_records__quantity__gt=0),
+                distinct=True,
+            ),
+            target_shop=models.Case(
+                models.When(
+                    target_shop_count=1,
+                    then=models.Subquery(
+                        WarehouseRecord.objects.filter(
+                            document=models.OuterRef("pk"),
+                            quantity__gt=0,
+                        ).values("warehouse__shop"),
+                    ),
+                ),
+                default=None,
+            ),
+        )
+        return qs
+
 
 class PrimaryDocument(Enumerable):
     author = models.ForeignKey(
@@ -67,6 +134,8 @@ class ProductionDocument(PrimaryDocument):
         verbose_name="план меню на день",
     )
 
+    objects = SingleShopDocumentManager()
+
     class Meta:
         verbose_name = "Документ учёта произведённой продукции"
         verbose_name_plural = "Документы учёта произведённой продукции"
@@ -100,6 +169,8 @@ class WriteOffDocument(PrimaryDocument):
     )
     reason = models.TextField("причина", null=True, blank=True)
 
+    objects = SingleShopDocumentManager()
+
     class Meta:
         verbose_name = "Документ списания"
         verbose_name_plural = "Документы списания"
@@ -116,6 +187,8 @@ class ConversionDocument(PrimaryDocument):
         related_name="conversion_document",
     )
 
+    objects = SingleShopDocumentManager()
+
     class Meta:
         verbose_name = "Документ перевода единиц хранения"
         verbose_name_plural = "Документы перевода единиц хранения"
@@ -131,6 +204,8 @@ class MoveDocument(PrimaryDocument):
         primary_key=True,
         related_name="move_document",
     )
+
+    objects = MoveDocumentManager()
 
     class Meta:
         verbose_name = "Документ перемещения"
@@ -161,6 +236,8 @@ class ReceiptDocument(PrimaryDocument):
     )
     waybill_date = models.DateField("дата накладной", null=True, blank=True)
 
+    objects = SingleShopDocumentManager()
+
     class Meta:
         verbose_name = "Документ поступления товара"
         verbose_name_plural = "Документы поступления товара"
@@ -176,6 +253,8 @@ class SaleDocument(PrimaryDocument):
         primary_key=True,
         related_name="sale_document",
     )
+
+    objects = SingleShopDocumentManager()
 
     class Meta:
         verbose_name = "Документ продажи"
@@ -216,6 +295,8 @@ class ReturnDocument(PrimaryDocument):
         related_name="return_document",
     )
     reason = models.TextField("причина", null=True, blank=True)
+
+    objects = SingleShopDocumentManager()
 
     class Meta:
         verbose_name = "Документ возврата"
