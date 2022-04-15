@@ -440,7 +440,7 @@ class ReceiptDocumentSerializer(serializers.ModelSerializer):
         supplier = validated_data["order"].supplier
         for record in warehouse_records:
             product_unit = record["product_unit"]
-            warehouse, _ = models.Warehouse.objects.update_or_create(
+            warehouse, _ = models.Warehouse.objects.get_or_create(
                 product_unit=product_unit,
                 supplier=supplier,
                 shop=shop,
