@@ -14,6 +14,7 @@ router.register("product-orders", views.WarehouseOrderViewSet)
 router.register("supplier", views.SupplierViewSet)
 router.register("supply-contracts", views.SupplyContractViewSet)
 router.register("legal-entities", views.LegalEntityViewSet)
+router.register("batches", views.BatchViewSet)
 
 warehouse_router = NestedSimpleRouter(router, "outlets", lookup="shop")
 warehouse_router.register("warehouses", views.WarehouseViewSet)

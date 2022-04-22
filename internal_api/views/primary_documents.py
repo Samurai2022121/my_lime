@@ -218,6 +218,8 @@ class CancelDocumentViewSet(
                 models.WarehouseRecord(
                     warehouse=item.warehouse,
                     quantity=-item.quantity,
+                    batch=item.batch,
+                    cost=item.cost,
                     document=document,
                 )
             )

@@ -17,5 +17,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(convert_phone, reverse_code=lambda: None),
+        migrations.RunPython(convert_phone, reverse_code=lambda x, y: None),
     ]

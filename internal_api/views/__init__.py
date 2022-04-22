@@ -10,7 +10,12 @@ from .primary_documents import (  # noqa
     SaleDocumentViewSet,
     WriteOffDocumentViewSet,
 )
-from .shops import ShopViewSet, WarehouseRecordViewSet, WarehouseViewSet  # noqa
+from .shops import (  # noqa
+    BatchViewSet,
+    ShopViewSet,
+    WarehouseRecordViewSet,
+    WarehouseViewSet,
+)
 from .suppliers import (  # noqa
     LegalEntityViewSet,
     SupplierViewSet,

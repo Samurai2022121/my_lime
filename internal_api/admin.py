@@ -2,8 +2,17 @@ from decimal import Decimal
 
 from django import forms
 from django.contrib import admin
-from django.db.models import DecimalField, Sum
-from django.db.models.functions import Coalesce
+from django.db.models import (
+    CharField,
+    DecimalField,
+    ExpressionWrapper,
+    F,
+    OuterRef,
+    Subquery,
+    Sum,
+    Value,
+)
+from django.db.models.functions import Coalesce, Concat
 from django.urls import path
 
 from products.models import ProductUnit
@@ -134,7 +143,6 @@ class WarehouseAdmin(admin.ModelAdmin):
         "min_remaining",
         "max_remaining",
         "auto_order",
-        "supplier",
         "margin",
     ]
     inlines = [WarehouseRecordInline]
@@ -188,7 +196,7 @@ class WarehouseOrderPositionsAdmin(
 
 @admin.register(models.Supplier)
 class SupplierAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
-    pass
+    search_fields = ("name", "email", "address", "phone_numbers")
 
 
 @admin.register(models.SupplyContract)
@@ -199,3 +207,50 @@ class SupplyContractAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin)
 @admin.register(models.LegalEntities)
 class LegalEntityAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
     pass
+
+
+@admin.register(models.Batch)
+class BatchAdmin(admin.ModelAdmin):
+    list_display = (
+        "warehouse_name",
+        "created_at",
+        "supplier",
+        "production_date",
+        "expiration_date",
+    )
+    autocomplete_fields = ("supplier",)
+    readonly_fields = ("created_at", "warehouse_name")
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        qs = qs.select_related("supplier")
+        name_query = (
+            models.WarehouseRecord.objects.filter(batch__in=OuterRef("id"))
+            .annotate(
+                name=Concat(
+                    F("warehouse__product_unit__unit__name"),
+                    Value(" of "),
+                    F("warehouse__product_unit__product__name"),
+                    Value(" in "),
+                    ExpressionWrapper(
+                        F("warehouse__shop__address"),
+                        output_field=CharField(null=True),
+                    ),
+                ),
+            )
+            .values("name")
+        )
+        qs = qs.annotate(
+            warehouse_name=Subquery(name_query[:1]),
+        ).order_by("created_at")
+        return qs
+
+    def warehouse_name(self, batch):
+        return batch.warehouse_name
+
+    warehouse_name.short_description = "запас"
+
+    def created_at(self, batch):
+        return batch.created_at
+
+    created_at.short_description = "дата создания"

@@ -24,9 +24,11 @@ def django_db_setup(request, django_db_setup, django_db_blocker):
             "loaddata",
             Path(request.fspath).parent / "fixtures" / "shops.json",
             Path(request.fspath).parent / "fixtures" / "units.json",
+            Path(request.fspath).parent / "fixtures" / "warehouses.json",
+            Path(request.fspath).parent / "fixtures" / "suppliers.json",
+            Path(request.fspath).parent / "fixtures" / "batches.json",
         )
-    yield
-    with django_db_blocker.unblock():
+        yield
         call_command("flush", "--no-input")
 
 
@@ -79,6 +81,60 @@ class TestInventoryDocumentViewset(ViewSetTest):
             result = client.get(record_list_url)
             assert result.status_code == status.HTTP_200_OK
             assert len(result.json()["results"]) == 4
+
+    class TestCreateWithExistingBatches(UsesPostMethod, UsesListEndpoint, Returns201):
+        data = static_fixture(
+            {
+                "shop": 1,
+                "warehouse_records": [
+                    {
+                        "product_unit": 1,
+                        "quantity": 100,
+                        "price": "99.95",
+                        "batch": 1,
+                    },
+                    {
+                        "product_unit": 2,
+                        "quantity": 50,
+                        "price": "48.50",
+                        "batch": 2,
+                    },
+                ],
+            }
+        )
+
+        def test_batch_count(self, json, client):
+            result = client.get(url_for("internal_api:batch-list"))
+            # no extra batches
+            assert result.json()["count"] == 2
+
+    class TestCreateWithNewBatches(UsesPostMethod, UsesListEndpoint, Returns201):
+        data = static_fixture(
+            {
+                "shop": 1,
+                "warehouse_records": [
+                    {
+                        "product_unit": 1,
+                        "quantity": 100,
+                        "price": "99.95",
+                        "supplier": 1,
+                        "production_date": "2022-01-01",
+                        "expiration_date": "2022-01-01",
+                    },
+                    {
+                        "product_unit": 2,
+                        "quantity": 50,
+                        "price": "48.50",
+                        "supplier": 1,
+                    },
+                ],
+            }
+        )
+
+        def test_batch_count(self, json, client):
+            result = client.get(url_for("internal_api:batch-list"))
+            # two extra batches created
+            assert result.json()["count"] == 4
 
 
 class TestReceiptDocumentViewset(ViewSetTest):
@@ -141,20 +197,67 @@ class TestReceiptDocumentViewset(ViewSetTest):
             assert result.status_code == status.HTTP_200_OK
             assert len(result.json()["results"]) == 4
 
+    class TestCreateWithExistingBatches(UsesPostMethod, UsesListEndpoint, Returns201):
+        data = static_fixture(
+            {
+                "shop": 1,
+                "order": 1,
+                "warehouse_records": [
+                    {
+                        "product_unit": 1,
+                        "quantity": 100,
+                        "price": "99.95",
+                        "batch": 1,
+                    },
+                    {
+                        "product_unit": 2,
+                        "quantity": 50,
+                        "price": "48.50",
+                        "batch": 2,
+                    },
+                ],
+            }
+        )
+
+        def test_batch_count(self, json, client):
+            result = client.get(url_for("internal_api:batch-list"))
+            # no extra batches
+            assert result.json()["count"] == 2
+
+    class TestCreateWithNewBatches(UsesPostMethod, UsesListEndpoint, Returns201):
+        data = static_fixture(
+            {
+                "shop": 1,
+                "order": 1,
+                "warehouse_records": [
+                    {
+                        "product_unit": 3,
+                        "quantity": 25,
+                        "price": "23.32",
+                        "supplier": 1,
+                    },
+                    {
+                        "product_unit": 4,
+                        "quantity": 13,
+                        "price": "23.32",
+                        "supplier": 1,
+                        "production_date": "2022-01-01",
+                        "expiration_date": "2022-01-01",
+                    },
+                ],
+            }
+        )
+
+        def test_batch_count(self, json, client):
+            result = client.get(url_for("internal_api:batch-list"))
+            # two extra batches created
+            assert result.json()["count"] == 4
+
 
 class TestWriteOffDocumentViewset(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, load_inventory, get_response):
+    def common_subject(self, db, get_response):
         return get_response
-
-    @pytest.fixture
-    def load_inventory(self, request, django_db_blocker):
-        # load inventory data (as in previous test)
-        with django_db_blocker.unblock():
-            call_command(
-                "loaddata",
-                Path(request.fspath).parent / "fixtures" / "warehouses.json",
-            )
 
     list_url = lambda_fixture(lambda: url_for("internal_api:writeoffdocument-list"))
 
@@ -172,6 +275,7 @@ class TestWriteOffDocumentViewset(ViewSetTest):
                     {
                         "warehouse": 1,
                         "quantity": 13,
+                        "batch": 1,
                     },
                 ],
             }
@@ -191,16 +295,8 @@ class TestWriteOffDocumentViewset(ViewSetTest):
 
 class TestReturnDocumentViewset(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, load_inventory, get_response):
+    def common_subject(self, db, get_response):
         return get_response
-
-    @pytest.fixture
-    def load_inventory(self, request, django_db_blocker):
-        with django_db_blocker.unblock():
-            call_command(
-                "loaddata",
-                Path(request.fspath).parent / "fixtures" / "warehouses.json",
-            )
 
     list_url = lambda_fixture(lambda: url_for("internal_api:returndocument-list"))
 
@@ -218,6 +314,7 @@ class TestReturnDocumentViewset(ViewSetTest):
                     {
                         "warehouse": 1,
                         "quantity": 13,
+                        "batch": 1,
                     },
                 ],
             }
@@ -237,7 +334,7 @@ class TestReturnDocumentViewset(ViewSetTest):
 
 class TestConversionDocumentViewset(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, load_inventory, create_conversion, get_response):
+    def common_subject(self, db, create_conversion, get_response):
         return get_response
 
     @pytest.fixture
@@ -252,15 +349,6 @@ class TestConversionDocumentViewset(ViewSetTest):
             format="json",
         )
         assert result.status_code == status.HTTP_201_CREATED
-
-    @pytest.fixture
-    def load_inventory(self, request, django_db_blocker):
-        # load inventory data (as in previous test)
-        with django_db_blocker.unblock():
-            call_command(
-                "loaddata",
-                Path(request.fspath).parent / "fixtures" / "warehouses.json",
-            )
 
     list_url = lambda_fixture(lambda: url_for("internal_api:conversiondocument-list"))
 
@@ -294,17 +382,8 @@ class TestConversionDocumentViewset(ViewSetTest):
 
 class TestMoveDocumentViewset(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, load_inventory, get_response):
+    def common_subject(self, db, get_response):
         return get_response
-
-    @pytest.fixture
-    def load_inventory(self, request, django_db_blocker):
-        # load inventory data (as in previous test)
-        with django_db_blocker.unblock():
-            call_command(
-                "loaddata",
-                Path(request.fspath).parent / "fixtures" / "warehouses.json",
-            )
 
     list_url = lambda_fixture(lambda: url_for("internal_api:movedocument-list"))
 
@@ -319,10 +398,12 @@ class TestMoveDocumentViewset(ViewSetTest):
                     {
                         "warehouse": 1,
                         "quantity": 30,
+                        "batch": 1,
                     },
                     {
                         "warehouse": 2,
                         "quantity": 15,
+                        "batch": 2,
                     },
                 ],
             }
@@ -342,17 +423,8 @@ class TestMoveDocumentViewset(ViewSetTest):
 
 class TestSaleDocumentViewset(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, load_inventory, get_response):
+    def common_subject(self, db, get_response):
         return get_response
-
-    @pytest.fixture
-    def load_inventory(self, request, django_db_blocker):
-        # load inventory data (as in previous test)
-        with django_db_blocker.unblock():
-            call_command(
-                "loaddata",
-                Path(request.fspath).parent / "fixtures" / "warehouses.json",
-            )
 
     list_url = lambda_fixture(lambda: url_for("internal_api:saledocument-list"))
 
@@ -367,10 +439,12 @@ class TestSaleDocumentViewset(ViewSetTest):
                     {
                         "warehouse": 1,
                         "quantity": 30,
+                        "batch": 1,
                     },
                     {
                         "warehouse": 2,
                         "quantity": 15,
+                        "batch": 2,
                     },
                 ],
             }

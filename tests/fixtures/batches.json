@@ -1,0 +1,20 @@
+[
+    {
+        "model": "internal_api.batch",
+        "pk": 1,
+        "fields": {
+            "supplier": 1,
+            "expiration_date": "2022-04-21",
+            "production_date": "2022-04-01"
+        }
+    },
+    {
+        "model": "internal_api.batch",
+        "pk": 2,
+        "fields": {
+            "supplier": 1,
+            "expiration_date": "2022-04-21",
+            "production_date": "2022-04-01"
+        }
+    }
+]

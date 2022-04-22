@@ -3,6 +3,7 @@ from decimal import Decimal
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models.functions import Coalesce
+from rest_framework.exceptions import ValidationError
 
 from products.models import ProductUnit
 from utils.models_utils import Timestampable
@@ -51,17 +52,16 @@ class Warehouse(models.Model):
     product_unit = models.ForeignKey(ProductUnit, on_delete=models.PROTECT)
     shop = models.ForeignKey(Shop, on_delete=models.PROTECT)
     min_remaining = models.DecimalField(
-        default=0, max_digits=7, decimal_places=2, verbose_name="минимальный остаток"
+        "минимальный остаток",
+        default=0,
+        max_digits=7,
+        decimal_places=2,
     )
     max_remaining = models.DecimalField(
-        default=0, max_digits=7, decimal_places=2, verbose_name="максимальный остаток"
-    )
-    supplier = models.ForeignKey(
-        "internal_api.Supplier",
-        on_delete=models.PROTECT,
-        blank=True,
-        null=True,
-        related_name="warehouse",
+        "максимальный остаток",
+        default=0,
+        max_digits=7,
+        decimal_places=2,
     )
     margin = models.DecimalField(
         "наценка, %",
@@ -70,11 +70,11 @@ class Warehouse(models.Model):
         max_digits=6,
         decimal_places=2,
     )
-    auto_order = models.BooleanField(default=False, verbose_name="автоматический заказ")
+    auto_order = models.BooleanField("автоматический заказ", default=False)
     price = models.DecimalField(
+        "Цена",
         decimal_places=2,
         max_digits=6,
-        verbose_name="Цена",
         validators=[MinValueValidator(0.01), MaxValueValidator(9999.99)],
     )
 
@@ -92,7 +92,37 @@ class Warehouse(models.Model):
         )
 
     def __str__(self):
-        return f"{self.product_unit} in {self.shop}"
+        return f"{self.product_unit.unit} of {self.product_unit.product} in {self.shop}"
+
+
+class BatchManager(models.Manager):
+    def get_queryset(self):
+        qs = super().get_queryset()
+        qs = qs.annotate(created_at=models.Min("warehouse_records__created_at"))
+        return qs
+
+
+class Batch(models.Model):
+    supplier = models.ForeignKey(
+        "internal_api.Supplier",
+        on_delete=models.PROTECT,
+        verbose_name="поставщик",
+        related_name="batches",
+        blank=True,
+        null=True,
+    )
+    expiration_date = models.DateField("годен до", blank=True, null=True)
+    production_date = models.DateField("дата производства", blank=True, null=True)
+
+    objects = BatchManager()
+
+    class Meta:
+        verbose_name = "партия"
+        verbose_name_plural = "партии"
+        default_related_name = "batches"
+
+    def __str__(self):
+        return f"Партия {self.id}"
 
 
 class WarehouseRecordManager(models.Manager):
@@ -119,6 +149,13 @@ class WarehouseRecordManager(models.Manager):
 
 
 class WarehouseRecord(Timestampable, models.Model):
+    batch = models.ForeignKey(
+        Batch,
+        on_delete=models.CASCADE,
+        verbose_name="партия",
+        blank=True,
+        null=True,
+    )
     warehouse = models.ForeignKey(
         Warehouse,
         on_delete=models.PROTECT,
@@ -151,3 +188,20 @@ class WarehouseRecord(Timestampable, models.Model):
 
     def __str__(self):
         return f"Изменение {self.warehouse}"
+
+    def save(self, *args, **kwargs):
+        if self.batch:
+            product_units = self.batch.warehouse_records.values_list(
+                "warehouse__product_unit",
+                flat=True,
+            )
+            if product_units.count() > 1:
+                raise ValidationError(f"{self.batch} is invalid")
+
+            if product_units and self.warehouse.product_unit.id != product_units[0]:
+                raise ValidationError(
+                    f"{self.batch} represent only"
+                    f" {self.batch.warehouse_records.first().warehouse.product_unit}"
+                )
+
+        super().save(*args, **kwargs)

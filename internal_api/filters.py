@@ -90,7 +90,7 @@ class WarehouseFilter(django_filters.FilterSet):
         method="in_category_filter",
         label="входит в категорию или её подкатегории (Id категории)",
     )
-    
+
     order_by = django_filters.OrderingFilter(
         fields=(
             ("id", "id"),
@@ -135,6 +135,39 @@ class WarehouseFilter(django_filters.FilterSet):
                 include_self=True
             ),
         )
+
+
+class BatchFilter(django_filters.FilterSet):
+    created = django_filters.DateFromToRangeFilter(
+        field_name="created_at",
+        label="период создания записи",
+    )
+    expired = django_filters.DateFromToRangeFilter(
+        field_name="expiration_date",
+        label="период истечения срока годности",
+    )
+    produced = django_filters.DateFromToRangeFilter(
+        field_name="production_date",
+        label="период производства",
+    )
+    shop = django_filters.ModelChoiceFilter(
+        field_name="warehouse_records__warehouse__shop",
+        queryset=models.Shop.objects.all(),
+        label="филиал",
+    )
+    warehouse = django_filters.ModelChoiceFilter(
+        field_name="warehouse_records__warehouse",
+        queryset=models.Warehouse.objects.select_related(
+            "product_unit__product",
+            "product_unit__unit",
+            "shop",
+        ),
+        label="запас",
+    )
+
+    class Meta:
+        model = models.Batch
+        fields = ("supplier",)
 
 
 class PrimaryDocumentFilter(django_filters.FilterSet):

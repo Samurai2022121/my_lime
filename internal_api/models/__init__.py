@@ -10,7 +10,7 @@ from .primary_documents import (  # noqa
     SaleDocument,
     WriteOffDocument,
 )
-from .shops import Shop, Warehouse, WarehouseRecord  # noqa
+from .shops import Batch, Shop, Warehouse, WarehouseRecord  # noqa
 from .suppliers import (  # noqa
     LegalEntities,
     Supplier,

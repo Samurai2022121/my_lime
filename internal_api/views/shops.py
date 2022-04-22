@@ -56,8 +56,10 @@ class WarehouseViewSet(NestedViewSetMixin, ModelViewSet):
         return qs
 
     def get_serializer_class(self):
-        serializer = super().get_serializer_class()
-        return exclude_field(serializer, "shop")
+        serializer_class = super().get_serializer_class()
+        if self.request.method == "get":
+            serializer_class = exclude_field(serializer_class, "shop")
+        return serializer_class
 
     def perform_create(self, serializer):
         serializer.save(shop_id=self.kwargs.get("shop_id", None))
@@ -74,10 +76,21 @@ class WarehouseRecordViewSet(NestedViewSetMixin, ModelViewSet):
     queryset = models.WarehouseRecord.objects
 
     def get_serializer_class(self):
-        serializer = super().get_serializer_class()
-        return exclude_field(serializer, "warehouse")
+        serializer_class = super().get_serializer_class()
+        if self.request.method == "get":
+            serializer_class = exclude_field(serializer_class, "warehouse")
+        return serializer_class
 
     def perform_create(self, serializer):
         serializer.save(
             warehouse_id=self.kwargs.get("warehouse_id", None),
         )
+
+
+class BatchViewSet(ModelViewSet):
+    permission_classes = (AllowAny,)
+    lookup_field = "id"
+    serializer_class = serializers.BatchSerializer
+    filter_backends = (df_filters.DjangoFilterBackend,)
+    filterset_class = filters.BatchFilter
+    queryset = models.Batch.objects.order_by("created_at")

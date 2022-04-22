@@ -10,6 +10,7 @@ from .primary_documents import (  # noqa
     WriteOffDocumentSerializer,
 )
 from .shops import (  # noqa
+    BatchSerializer,
     ShopSerializer,
     WarehouseRecordSerializer,
     WarehouseSerializer,

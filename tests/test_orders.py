@@ -25,8 +25,7 @@ def django_db_setup(request, django_db_setup, django_db_blocker):
             Path(request.fspath).parent / "fixtures" / "shops.json",
             Path(request.fspath).parent / "fixtures" / "units.json",
         )
-    yield
-    with django_db_blocker.unblock():
+        yield
         call_command("flush", "--no-input")
 
 

@@ -1,8 +1,8 @@
-from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.db.models.constraints import UniqueConstraint
 from mptt.models import MPTTModel, TreeForeignKey
+from rest_framework.exceptions import ValidationError
 
 from utils.models_utils import Timestampable
 
@@ -93,15 +93,6 @@ class Product(Timestampable, models.Model):
     origin = models.CharField(
         max_length=50, blank=True, null=True, verbose_name="Страна происхождения"
     )
-
-    # TODO: these two belong to proposed `Batch` model (for batch accounting)
-    expiration_date = models.DateField(
-        blank=True, null=True, verbose_name="Срок годности"
-    )
-    production_date = models.DateField(
-        blank=True, null=True, verbose_name="Дата производства"
-    )
-
     own_production = models.BooleanField(
         default=False, verbose_name="Собственное производство"
     )

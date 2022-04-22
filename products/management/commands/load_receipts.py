@@ -10,6 +10,7 @@ from django.utils.timezone import get_current_timezone
 from openpyxl import load_workbook
 
 from internal_api.models import (
+    Batch,
     ReceiptDocument,
     Shop,
     Supplier,
@@ -69,8 +70,16 @@ class Command(BaseCommand):
             type=str,
             help="Input file (*.xlsx)",
         )
+        parser.add_argument(
+            "--new-batch",
+            action="store_true",
+            help=(
+                "Create new batches for each record"
+                " (default: use the latest existing batch)"
+            ),
+        )
 
-    def handle(self, input_file, *args, **options):
+    def handle(self, input_file, new_batch, *args, **options):
         wb = load_workbook(input_file, read_only=True)
         ws = wb["TDSheet"]
 
@@ -149,13 +158,26 @@ class Command(BaseCommand):
                     warehouse, _ = Warehouse.objects.get_or_create(
                         shop=shop,
                         product_unit=product_unit,
-                        supplier=supplier,
                         defaults={
                             "price": price,
                             "margin": round(price / cost * 100 - Decimal(100), 2),
                         },
                     )
+                    if not new_batch:
+                        batch = (
+                            Batch.objects.filter(
+                                supplier=supplier,
+                                warehouse_records__warehouse__product_unit=product_unit,
+                            )
+                            .order_by("created_at")
+                            .last()
+                        )
+                        if not batch:
+                            batch = Batch.objects.create(supplier=supplier)
+                    else:
+                        batch = Batch.objects.create(supplier=supplier)
                     record = WarehouseRecord(
+                        batch=batch,
                         document=receipt,
                         warehouse=warehouse,
                         quantity=quantity,

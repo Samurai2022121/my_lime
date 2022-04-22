@@ -20,7 +20,33 @@ class ShopSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class BatchSerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(
+        read_only=True,
+        label="дата создания",
+    )
+
+    class Meta:
+        model = models.Batch
+        fields = "__all__"
+
+
 class WarehouseRecordSerializer(serializers.ModelSerializer):
+    batch_on_read = serializers.HyperlinkedRelatedField(
+        allow_null=True,
+        label="партия",
+        lookup_url_kwarg="id",
+        source="batch",
+        read_only=True,
+        view_name="internal_api:batch-detail",
+    )
+    batch = serializers.PrimaryKeyRelatedField(
+        allow_null=True,
+        label="партия",
+        required=False,
+        queryset=models.Batch.objects.all(),
+        write_only=True,
+    )
     vat_rate = serializers.DecimalField(
         read_only=True,
         max_digits=7,
@@ -37,6 +63,11 @@ class WarehouseRecordSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.WarehouseRecord
         fields = "__all__"
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["batch"] = data.pop("batch_on_read", None)
+        return data
 
 
 class WarehouseSerializer(serializers.ModelSerializer):

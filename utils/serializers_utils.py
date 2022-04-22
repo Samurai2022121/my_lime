@@ -18,17 +18,27 @@ class BulkActionSerializer(serializers.Serializer):
 
 
 def exclude_field(
-    serializer: Type[serializers.Serializer],
+    serializer_class: Type[serializers.Serializer],
     field: str,
-) -> Type[serializers.Serializer]:
-    """Exclude field from serializer. Optional chaining."""
-    fields = getattr(serializer.Meta, "fields", None)
+) -> Type:
+    """Exclude field from serializer class."""
+    new_class = type(
+        serializer_class.__name__,
+        serializer_class.__bases__,
+        dict(serializer_class.__dict__),
+    )
+    new_class.Meta = type(
+        serializer_class.Meta.__name__,
+        serializer_class.Meta.__bases__,
+        dict(serializer_class.Meta.__dict__),
+    )
+    fields = getattr(new_class.Meta, "fields", None)
     if fields == "__all__":
-        del serializer.Meta.fields
-        serializer.Meta.exclude = [field]
+        del new_class.Meta.fields
+        new_class.Meta.exclude = [field]
     elif fields is None:
-        serializer.Meta.exclude.append(field)
-        serializer.Meta.exclude = list(set(serializer.Meta.exclude))
+        new_class.Meta.exclude.append(field)
+        new_class.Meta.exclude = list(set(new_class.Meta.exclude))
     else:
-        serializer.Meta.fields.remove(field)
-    return serializer
+        new_class.Meta.fields.remove(field)
+    return new_class
