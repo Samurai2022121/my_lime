@@ -81,8 +81,8 @@ class WarehouseSerializer(serializers.ModelSerializer):
     )
     remaining = serializers.DecimalField(
         read_only=True,
-        max_digits=7,
-        decimal_places=2,
+        max_digits=9,
+        decimal_places=4,
     )
     recommended_price = serializers.DecimalField(
         read_only=True,
@@ -119,8 +119,8 @@ class SimpleWarehouseSerializer(serializers.ModelSerializer):
     )
     remaining = serializers.DecimalField(
         read_only=True,
-        max_digits=7,
-        decimal_places=2,
+        max_digits=9,
+        decimal_places=4,
     )
     recommended_price = serializers.DecimalField(
         read_only=True,
@@ -138,3 +138,55 @@ class SimpleWarehouseSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         data["product_unit"] = data.pop("product_unit_on_read")
         return data
+
+
+class WarehouseForScalesSerializer(serializers.ModelSerializer):
+    barcode = serializers.IntegerField(source="product_unit.barcode")
+    for_scales = serializers.BooleanField(source="product_unit.for_scales")
+    for_weighing_scales = serializers.BooleanField(
+        source="product_unit.for_weighing_scales"
+    )
+    vat_rate = serializers.DecimalField(
+        source="product_unit.vat_rate",
+        read_only=True,
+        allow_null=True,
+        max_digits=7,
+        decimal_places=2,
+    )
+    weight = serializers.DecimalField(
+        source="product_unit.weight",
+        read_only=True,
+        allow_null=True,
+        max_digits=9,
+        decimal_places=4,
+    )
+    packing_weight = serializers.DecimalField(
+        source="product_unit.packing_weight",
+        read_only=True,
+        allow_null=True,
+        max_digits=9,
+        decimal_places=4,
+    )
+    category_id = serializers.IntegerField()
+    category_name = serializers.CharField()
+    unit_id = serializers.IntegerField(source="product_unit.unit.id")
+    unit_name = serializers.CharField(source="product_unit.unit.name")
+    product_name = serializers.CharField(source="product_unit.product.name")
+
+    class Meta:
+        model = models.Warehouse
+        fields = (
+            "id",
+            "price",
+            "barcode",
+            "for_scales",
+            "for_weighing_scales",
+            "vat_rate",
+            "weight",
+            "packing_weight",
+            "unit_name",
+            "unit_id",
+            "category_id",
+            "category_name",
+            "product_name",
+        )

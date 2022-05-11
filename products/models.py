@@ -155,8 +155,15 @@ class ProductUnit(models.Model):
         "вес с упаковкой, г",
         blank=True,
         null=True,
-        max_digits=7,
-        decimal_places=2,
+        max_digits=9,
+        decimal_places=4,
+    )
+    packing_weight = models.DecimalField(
+        "вес упаковки, г",
+        blank=True,
+        null=True,
+        max_digits=9,
+        decimal_places=4,
     )
 
     class Meta:

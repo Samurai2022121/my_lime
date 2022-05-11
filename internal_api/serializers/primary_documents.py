@@ -178,11 +178,16 @@ class InventoryRecordSerializer(
             if margin and cost
             else None,
         )
-        warehouse, _ = models.Warehouse.objects.get_or_create(
+        warehouse, created = models.Warehouse.objects.get_or_create(
             product_unit=product_unit,
             shop=self.context.get("shop", None),
             defaults={"price": price, "margin": margin},
         )
+        if not created:
+            warehouse.price = price
+            warehouse.margin = margin
+            warehouse.save()
+
         validated_data["warehouse"] = warehouse
         validated_data["batch"] = self.provide_new_or_existing_batch(validated_data)
         return super().create(validated_data)
@@ -257,11 +262,16 @@ class ReceiptRecordSerializer(
             if margin and cost
             else None,
         )
-        warehouse, _ = models.Warehouse.objects.get_or_create(
+        warehouse, created = models.Warehouse.objects.get_or_create(
             product_unit=product_unit,
             shop=self.context.get("shop", None),
             defaults={"price": price, "margin": margin},
         )
+        if not created:
+            warehouse.price = price
+            warehouse.margin = margin
+            warehouse.save()
+
         validated_data["warehouse"] = warehouse
         validated_data["batch"] = self.provide_new_or_existing_batch(validated_data)
         return super().create(validated_data)

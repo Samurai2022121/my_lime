@@ -13,6 +13,7 @@ from .primary_documents import (  # noqa
 from .shops import (  # noqa
     BatchViewSet,
     ShopViewSet,
+    WarehouseForScalesListView,
     WarehouseRecordViewSet,
     WarehouseViewSet,
 )

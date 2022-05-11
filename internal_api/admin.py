@@ -164,8 +164,8 @@ class WarehouseAdmin(admin.ModelAdmin):
                 Sum("warehouse_records__quantity"),
                 Decimal(0),
                 output_field=DecimalField(
-                    max_digits=7,
-                    decimal_places=2,
+                    max_digits=9,
+                    decimal_places=4,
                 ),
             )
         )

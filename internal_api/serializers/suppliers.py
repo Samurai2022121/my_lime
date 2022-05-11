@@ -57,6 +57,12 @@ class WarehouseOrderPositionsSerializer(serializers.ModelSerializer):
         exclude = ("warehouse_order",)
 
 
+class WarehouseOrderReceiptDocumentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ReceiptDocument
+        fields = ("waybill", "waybill_date")
+
+
 class WarehouseOrderSerializer(WritableNestedModelSerializer):
     order_positions = WarehouseOrderPositionsSerializer(
         many=True,
@@ -77,6 +83,9 @@ class WarehouseOrderSerializer(WritableNestedModelSerializer):
     shop_address = serializers.CharField(source="shop.address", read_only=True)
     shop = serializers.PrimaryKeyRelatedField(queryset=models.Shop.objects)
     created_at = serializers.DateTimeField(required=False)
+    waybills = WarehouseOrderReceiptDocumentSerializer(
+        source="receipts", many=True, read_only=True
+    )
 
     class Meta:
         model = models.WarehouseOrder

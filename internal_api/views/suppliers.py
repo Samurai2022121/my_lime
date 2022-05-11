@@ -31,7 +31,13 @@ class WarehouseOrderViewSet(
         qs = (
             super()
             .get_queryset()
-            .prefetch_related("warehouse_order_positions")
+            .prefetch_related(
+                "warehouse_order_positions",
+                "supplier__supply_contract",
+                "supplier",
+                "shop",
+                "receipts",
+            )
             .annotate(
                 total=Sum(
                     F("warehouse_order_positions__quantity")

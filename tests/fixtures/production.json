@@ -680,7 +680,8 @@
             "for_resale": true,
             "for_scales": false,
             "barcode": null,
-            "weight": null
+            "weight": null,
+            "packing_weight": null
         }
     },
     {
@@ -692,7 +693,8 @@
             "for_resale": true,
             "for_scales": false,
             "barcode": null,
-            "weight": null
+            "weight": null,
+            "packing_weight": null
         }
     },
     {
@@ -704,7 +706,8 @@
             "for_resale": true,
             "for_scales": false,
             "barcode": null,
-            "weight": null
+            "weight": null,
+            "packing_weight": null
         }
     },
     {
@@ -716,7 +719,8 @@
             "for_resale": false,
             "for_scales": false,
             "barcode": null,
-            "weight": null
+            "weight": null,
+            "packing_weight": null
         }
     },
     {
@@ -728,7 +732,8 @@
             "for_resale": true,
             "for_scales": false,
             "barcode": null,
-            "weight": null
+            "weight": null,
+            "packing_weight": null
         }
     },
     {
@@ -740,7 +745,8 @@
             "for_resale": true,
             "for_scales": false,
             "barcode": null,
-            "weight": null
+            "weight": null,
+            "packing_weight": null
         }
     },
     {
@@ -752,7 +758,8 @@
             "for_resale": false,
             "for_scales": false,
             "barcode": null,
-            "weight": null
+            "weight": null,
+            "packing_weight": null
         }
     },
     {
@@ -764,7 +771,8 @@
             "for_resale": true,
             "for_scales": false,
             "barcode": null,
-            "weight": null
+            "weight": null,
+            "packing_weight": null
         }
     },
     {
@@ -776,7 +784,8 @@
             "for_resale": true,
             "for_scales": false,
             "barcode": null,
-            "weight": null
+            "weight": null,
+            "packing_weight": null
         }
     },
     {
@@ -788,7 +797,8 @@
             "for_resale": true,
             "for_scales": false,
             "barcode": null,
-            "weight": null
+            "weight": null,
+            "packing_weight": null
         }
     },
     {
@@ -800,7 +810,8 @@
             "for_resale": false,
             "for_scales": false,
             "barcode": null,
-            "weight": null
+            "weight": null,
+            "packing_weight": null
         }
     },
     {
@@ -812,7 +823,8 @@
             "for_resale": true,
             "for_scales": false,
             "barcode": null,
-            "weight": null
+            "weight": null,
+            "packing_weight": null
         }
     },
     {
@@ -824,7 +836,8 @@
             "for_resale": true,
             "for_scales": false,
             "barcode": null,
-            "weight": null
+            "weight": null,
+            "packing_weight": null
         }
     },
     {
@@ -836,7 +849,8 @@
             "for_resale": true,
             "for_scales": false,
             "barcode": null,
-            "weight": null
+            "weight": null,
+            "packing_weight": null
         }
     },
     {

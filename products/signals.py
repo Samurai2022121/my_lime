@@ -1,8 +1,8 @@
 from copy import deepcopy
 
+import pngquant
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-import pngquant
 
 from utils.models_utils import compress_image
 

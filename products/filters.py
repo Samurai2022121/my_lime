@@ -31,8 +31,7 @@ class ProductFilter(filters.FilterSet):
         label="для выгрузки на весы",
     )
     barcode = filters.CharFilter(
-        field_name="units__barcode",
-        method="exact",
+        method="barcode_filter",
         label="штрихкод",
     )
 
@@ -63,6 +62,10 @@ class ProductFilter(filters.FilterSet):
             return qs
 
         return qs.filter(**{name: BooleanField().to_representation(value)})
+
+    @staticmethod
+    def barcode_filter(qs, name, value):
+        return qs.filter(units__barcode=value)
 
     @staticmethod
     def in_category_filter(qs, name, value):

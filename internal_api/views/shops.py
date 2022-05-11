@@ -1,8 +1,11 @@
+from django.db.models import F
 from django_filters import rest_framework as df_filters
 from rest_framework.permissions import AllowAny
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework_nested.viewsets import NestedViewSetMixin
 
+from products.models import Category
 from utils.serializers_utils import exclude_field
 from utils.views_utils import (
     BulkChangeArchiveStatusViewSetMixin,
@@ -73,7 +76,9 @@ class WarehouseRecordViewSet(NestedViewSetMixin, ModelViewSet):
         "shop_id": "warehouse__shop_id",
         "warehouse_id": "warehouse__id",
     }
-    queryset = models.WarehouseRecord.objects
+    queryset = models.WarehouseRecord.objects.prefetch_related(
+        "batch", "batch__supplier"
+    ).order_by("-updated_at")
 
     def get_serializer_class(self):
         serializer_class = super().get_serializer_class()
@@ -85,6 +90,50 @@ class WarehouseRecordViewSet(NestedViewSetMixin, ModelViewSet):
         serializer.save(
             warehouse_id=self.kwargs.get("warehouse_id", None),
         )
+
+
+class WarehouseForScalesListView(NestedViewSetMixin, ReadOnlyModelViewSet):
+    permission_classes = (AllowAny,)
+    pagination_class = None
+    serializer_class = serializers.WarehouseForScalesSerializer
+    queryset = models.Warehouse.objects
+    parent_lookup_kwargs = {"shop_id": "shop__id"}
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        qs = qs.prefetch_related(
+            "product_unit", "product_unit__unit", "product_unit__product"
+        )
+        qs = qs.annotate(
+            category_id=F("product_unit__product__category__id"),
+            category_name=F("product_unit__product__category__name"),
+        )
+        return qs
+
+    # TODO: Использовать сериалайзер, оптимизировать запрос;
+    def list(self, request, *args, **kwargs):
+        response = super(WarehouseForScalesListView, self).list(
+            self, request, *args, **kwargs
+        )
+        new_response = dict()
+        categories_dict = {}
+        categories = Category.objects.filter(level=0)
+        for category in categories:
+            category_children = category.get_descendants(include_self=True).values_list(
+                "id", flat=True
+            )
+            categories_dict.update({category.id: list(category_children)})
+        for i in response.data:
+            parent_category = None
+            for category in categories_dict:
+                if i["category_id"] in categories_dict[category]:
+                    parent_category = category
+                    break
+            if parent_category not in new_response:
+                new_response.update({parent_category: [i]})
+            else:
+                new_response[parent_category].append(i)
+        return Response(data=new_response)
 
 
 class BatchViewSet(ModelViewSet):

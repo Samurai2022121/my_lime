@@ -54,14 +54,14 @@ class Warehouse(models.Model):
     min_remaining = models.DecimalField(
         "минимальный остаток",
         default=0,
-        max_digits=7,
-        decimal_places=2,
+        max_digits=9,
+        decimal_places=4,
     )
     max_remaining = models.DecimalField(
         "максимальный остаток",
         default=0,
-        max_digits=7,
-        decimal_places=2,
+        max_digits=9,
+        decimal_places=4,
     )
     margin = models.DecimalField(
         "наценка, %",
@@ -163,8 +163,8 @@ class WarehouseRecord(Timestampable, models.Model):
     )
     quantity = models.DecimalField(
         "количество",
-        max_digits=7,
-        decimal_places=2,
+        max_digits=9,
+        decimal_places=4,
     )
     cost = models.DecimalField(
         "стоимость",

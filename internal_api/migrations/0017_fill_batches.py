@@ -7,10 +7,14 @@ def fill_batches(apps, schema_editor):
 
     for whr in WarehouseRecord.objects.iterator():
         if whr.warehouse.supplier:
-            whr.batch, _ = Batch.objects.filter(
-                warehouse_records__warehouse_id=whr.warehouse_id,
-            ).get_or_create(
-                supplier=whr.warehouse.supplier,
+            whr.batch, _ = (
+                Batch.objects.filter(
+                    warehouse_records__warehouse_id=whr.warehouse_id,
+                )
+                .distinct()
+                .get_or_create(
+                    supplier=whr.warehouse.supplier,
+                )
             )
             whr.save()
 

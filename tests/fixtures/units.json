@@ -139,6 +139,7 @@
             "product": 1,
             "unit": 1,
             "weight": null,
+            "packing_weight": null,
             "barcode": null,
             "for_resale": true,
             "for_scales": false
@@ -151,6 +152,7 @@
             "product": 2,
             "unit": 2,
             "weight": null,
+            "packing_weight": null,
             "barcode": null,
             "for_resale": false,
             "for_scales": false
@@ -163,6 +165,7 @@
             "product": 3,
             "unit": 3,
             "weight": null,
+            "packing_weight": null,
             "barcode": null,
             "for_resale": true,
             "for_scales": false
@@ -175,6 +178,7 @@
             "product": 3,
             "unit": 2,
             "weight": null,
+            "packing_weight": null,
             "barcode": null,
             "for_resale": false,
             "for_scales": false

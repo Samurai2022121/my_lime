@@ -18,6 +18,7 @@ router.register("batches", views.BatchViewSet)
 
 warehouse_router = NestedSimpleRouter(router, "outlets", lookup="shop")
 warehouse_router.register("warehouses", views.WarehouseViewSet)
+warehouse_router.register("warehouses-scales", views.WarehouseForScalesListView)
 
 warehouse_record_router = NestedSimpleRouter(
     warehouse_router,

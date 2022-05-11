@@ -12,6 +12,7 @@ from .primary_documents import (  # noqa
 from .shops import (  # noqa
     BatchSerializer,
     ShopSerializer,
+    WarehouseForScalesSerializer,
     WarehouseRecordSerializer,
     WarehouseSerializer,
 )
