@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("products", "0030_productunit_barcode_productunit_for_scales_and_more"),
+        ("internal_api", "0004_alter_warehouse_price"),
     ]
 
     operations = [

@@ -20,7 +20,8 @@ class ProductUnitConversionAdmin(admin.ModelAdmin):
 
 @admin.register(Category)
 class CategoryAdmin(MPTTModelAdmin):
-    fields = ["name", "parent", "description", "image"]
+    fields = ("name", "parent", "description", "image")
+    search_fields = ("name", "description")
 
 
 @admin.register(MeasurementUnit)
@@ -42,7 +43,8 @@ class ProductUnitInline(admin.TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
-    inlines = [ProductUnitInline]
+    inlines = (ProductUnitInline,)
+    search_fields = ("name", "short_name")
 
 
 @admin.register(ProductImages)

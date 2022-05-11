@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "internal_api",
     "users",
     "production",
+    "discounts",
 ]
 
 MIDDLEWARE = [

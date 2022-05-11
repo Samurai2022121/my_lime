@@ -1,0 +1,301 @@
+[
+    {
+        "model": "discounts.range",
+        "pk": 1,
+        "fields": {
+            "includes_all": true,
+            "name": "Все товары",
+            "include_product_units": [],
+            "include_products": [],
+            "include_categories": [],
+            "exclude_product_units": [],
+            "exclude_products": [],
+            "exclude_categories": []
+        }
+    },
+    {
+        "model": "discounts.range",
+        "pk": 2,
+        "fields": {
+            "includes_all": false,
+            "name": "Хлеб и хлебобулочные изделия",
+            "include_product_units": [],
+            "include_products": [],
+            "include_categories": [
+                5,
+                7
+            ],
+            "exclude_product_units": [],
+            "exclude_products": [],
+            "exclude_categories": []
+        }
+    },
+    {
+        "model": "discounts.range",
+        "pk": 3,
+        "fields": {
+            "includes_all": false,
+            "name": "Всё, кроме скоропортящихся товаров",
+            "include_product_units": [],
+            "include_products": [],
+            "include_categories": [],
+            "exclude_product_units": [],
+            "exclude_products": [
+                2
+            ],
+            "exclude_categories": []
+        }
+    },
+    {
+        "model": "discounts.range",
+        "pk": 4,
+        "fields": {
+            "includes_all": false,
+            "name": "Тест товарной единицы",
+            "include_product_units": [
+                1
+            ],
+            "include_products": [],
+            "include_categories": [],
+            "exclude_product_units": [],
+            "exclude_products": [],
+            "exclude_categories": []
+        }
+    },
+    {
+        "model": "discounts.condition",
+        "pk": 1,
+        "fields": {
+            "range": 2,
+            "type": "value",
+            "value": "20.00"
+        }
+    },
+    {
+        "model": "discounts.condition",
+        "pk": 2,
+        "fields": {
+            "range": 1,
+            "type": "count",
+            "value": "0.00"
+        }
+    },
+    {
+        "model": "discounts.condition",
+        "pk": 3,
+        "fields": {
+            "range": 1,
+            "type": "count",
+            "value": "0.00"
+        }
+    },
+    {
+        "model": "discounts.condition",
+        "pk": 4,
+        "fields": {
+            "range": 1,
+            "type": "count",
+            "value": "0.00"
+        }
+    },
+    {
+        "model": "discounts.condition",
+        "pk": 5,
+        "fields": {
+            "range": 1,
+            "type": "count",
+            "value": "0.00"
+        }
+    },
+    {
+        "model": "discounts.benefit",
+        "pk": 1,
+        "fields": {
+            "range": 1,
+            "type": "percentage",
+            "value": "3.00"
+        }
+    },
+    {
+        "model": "discounts.benefit",
+        "pk": 2,
+        "fields": {
+            "range": 1,
+            "type": "percentage",
+            "value": "5.00"
+        }
+    },
+    {
+        "model": "discounts.benefit",
+        "pk": 3,
+        "fields": {
+            "range": 1,
+            "type": "percentage",
+            "value": "5.00"
+        }
+    },
+    {
+        "model": "discounts.benefit",
+        "pk": 4,
+        "fields": {
+            "range": 1,
+            "type": "percentage",
+            "value": "5.00"
+        }
+    },
+    {
+        "model": "discounts.benefit",
+        "pk": 5,
+        "fields": {
+            "range": 1,
+            "type": "percentage",
+            "value": "5.00"
+        }
+    },
+    {
+        "model": "discounts.offer",
+        "pk": 1,
+        "fields": {
+            "condition": 1,
+            "benefit": 1,
+            "name": "Скидка на хлеб",
+            "description": "При покупке хлеба и хлебобулочных изделий на сумму 20 руб. и более, 3% скидка на все товары",
+            "created_at": "2022-05-04T14:54:04.322Z",
+            "is_public": true,
+            "is_active": true,
+            "type": "site",
+            "started_at": "2022-05-04T14:51:14Z",
+            "ended_at": "2042-09-03T14:51:14Z",
+            "order_limit": 1,
+            "site_limit": 0,
+            "buyer_limit": 0,
+            "application_count": 0
+        }
+    },
+    {
+        "model": "discounts.offer",
+        "pk": 2,
+        "fields": {
+            "condition": 2,
+            "benefit": 2,
+            "name": "Скидка 5% по ваучеру",
+            "description": null,
+            "created_at": "2022-05-04T14:54:04.322Z",
+            "is_public": false,
+            "is_active": true,
+            "type": "voucher",
+            "started_at": "2022-05-04T14:51:14Z",
+            "ended_at": "2042-09-03T14:51:14Z",
+            "order_limit": 1,
+            "site_limit": 0,
+            "buyer_limit": 0,
+            "application_count": 0
+        }
+    },
+    {
+        "model": "discounts.offer",
+        "pk": 3,
+        "fields": {
+            "condition": 3,
+            "benefit": 3,
+            "name": "Неактивное предложение",
+            "description": null,
+            "created_at": "2022-05-04T14:54:04.322Z",
+            "is_public": true,
+            "is_active": false,
+            "type": "voucher",
+            "started_at": "2022-05-04T14:51:14Z",
+            "ended_at": "2022-09-03T14:51:14Z",
+            "order_limit": 1,
+            "site_limit": 0,
+            "buyer_limit": 0,
+            "application_count": 0
+        }
+    },
+    {
+        "model": "discounts.offer",
+        "pk": 4,
+        "fields": {
+            "condition": 4,
+            "benefit": 4,
+            "name": "Скидка 5% по карте",
+            "description": null,
+            "created_at": "2022-05-04T14:54:04.322Z",
+            "is_public": false,
+            "is_active": true,
+            "type": "loyalty",
+            "started_at": "2022-05-04T14:51:14Z",
+            "ended_at": "2042-09-03T14:51:14Z",
+            "order_limit": 1,
+            "site_limit": 0,
+            "buyer_limit": 0,
+            "application_count": 0
+        }
+    },
+    {
+        "model": "discounts.offer",
+        "pk": 5,
+        "fields": {
+            "condition": 5,
+            "benefit": 5,
+            "name": "Скидка для пользователей интернет-магазина",
+            "description": null,
+            "created_at": "2022-05-04T14:54:04.322Z",
+            "is_public": true,
+            "is_active": true,
+            "type": "buyer",
+            "started_at": "2022-05-04T14:51:14Z",
+            "ended_at": "2042-09-03T14:51:14Z",
+            "order_limit": 1,
+            "site_limit": 0,
+            "buyer_limit": 1,
+            "application_count": 0
+        }
+    },
+    {
+        "model": "discounts.voucher",
+        "pk": "0170649a-5f45-4eeb-9b11-36b9eba338e2",
+        "fields": {
+            "created_at": "2022-05-05T07:05:12.859Z",
+            "is_active": true,
+            "offer": 2
+        }
+    },
+    {
+        "model": "discounts.voucher",
+        "pk": "4bb96843-8c43-46f7-8fb1-046b51cdb73f",
+        "fields": {
+            "created_at": "2022-05-05T07:05:01.300Z",
+            "is_active": true,
+            "offer": 2
+        }
+    },
+    {
+        "model": "discounts.voucher",
+        "pk": "4cd6fbd4-2597-4751-b555-d653b4640410",
+        "fields": {
+            "created_at": "2022-05-05T07:05:01.300Z",
+            "is_active": false,
+            "offer": 2
+        }
+    },
+    {
+        "model": "discounts.voucher",
+        "pk": "6bb5544d-9248-47ad-a4a0-7f34bdbdd4fc",
+        "fields": {
+            "created_at": "2022-05-05T07:05:01.300Z",
+            "is_active": true,
+            "offer": 3
+        }
+    },
+    {
+        "model": "discounts.loyaltycard",
+        "pk": "69e0a2a6-cacc-4b39-a7b3-02a2759160ac",
+        "fields": {
+            "created_at": "2022-05-08T08:12:56.714Z",
+            "is_active": true,
+            "buyer": 1,
+            "offer": 4
+        }
+    }
+]
