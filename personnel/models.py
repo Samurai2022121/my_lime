@@ -90,7 +90,7 @@ class LocalPassport(models.Model):
     active = models.BooleanField("действителен", default=True)
     first_name = models.CharField("имя", max_length=255)
     last_name = models.CharField("фамилия", max_length=255)
-    patronymic = models.CharField("отчество", max_length=255)
+    patronymic = models.CharField("отчество", max_length=255, null=True, blank=True)
     date_of_birth = models.DateField("дата рождения")
     place_of_birth = models.CharField(
         "место рождения",

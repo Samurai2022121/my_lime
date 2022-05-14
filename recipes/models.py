@@ -64,13 +64,13 @@ class Recipe(Timestampable, models.Model):
         null=True, blank=True, verbose_name="Изображение", upload_to="recipe/"
     )
     protein = models.DecimalField(
-        blank=True, null=True, verbose_name="Белки", max_digits=4, decimal_places=2
+        blank=True, null=True, verbose_name="Белки", max_digits=5, decimal_places=2
     )
     carbohydrates = models.DecimalField(
-        blank=True, null=True, verbose_name="Углеводы", max_digits=4, decimal_places=2
+        blank=True, null=True, verbose_name="Углеводы", max_digits=5, decimal_places=2
     )
     fats = models.DecimalField(
-        blank=True, null=True, verbose_name="Жиры", max_digits=4, decimal_places=2
+        blank=True, null=True, verbose_name="Жиры", max_digits=5, decimal_places=2
     )
     calories = models.DecimalField(
         blank=True,

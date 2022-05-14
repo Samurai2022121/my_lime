@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
+from internal_api.models import Shop
 from users.serializers import UserSerializer
 
 from .models import LocalPassport, Personnel, PersonnelDocument, Position
@@ -25,7 +26,16 @@ class LocalPassportSerializer(serializers.ModelSerializer):
         exclude = ("employee",)
 
 
+class PersonnelWorkplaceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Shop
+        fields = ("id", "address")
+
+
 class PersonnelSerializer(serializers.ModelSerializer):
+    workplaces_on_read = PersonnelWorkplaceSerializer(
+        source="workplaces", many=True, read_only=True
+    )
     user = serializers.PrimaryKeyRelatedField(
         queryset=get_user_model().objects,
         required=False,
@@ -47,4 +57,5 @@ class PersonnelSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data["user"] = data.pop("user_on_read", None)
+        data["workplaces"] = data.pop("workplaces_on_read", None)
         return data
