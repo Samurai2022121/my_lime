@@ -167,10 +167,10 @@ class WarehouseOrderPositions(models.Model):
         on_delete=models.PROTECT,
     )
     product_unit = models.ForeignKey(ProductUnit, on_delete=models.PROTECT)
-    quantity = models.DecimalField(default=0, max_digits=7, decimal_places=2)
+    quantity = models.DecimalField(default=0, max_digits=9, decimal_places=4)
     bonus = models.IntegerField(default=0)
-    special = models.DecimalField(default=0, max_digits=7, decimal_places=2)
-    flaw = models.DecimalField(default=0, max_digits=7, decimal_places=2)
+    special = models.DecimalField(default=0, max_digits=9, decimal_places=4)
+    flaw = models.DecimalField(default=0, max_digits=9, decimal_places=4)
     buying_price = models.DecimalField(default=0, max_digits=7, decimal_places=2)
     value_added_tax = models.DecimalField(default=0, max_digits=4, decimal_places=2)
     value_added_tax_value = models.DecimalField(
