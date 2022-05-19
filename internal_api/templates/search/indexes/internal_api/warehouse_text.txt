@@ -1,0 +1,7 @@
+{{ object.id }}
+{{ object.product_unit.barcode }}
+{{ object.product_unit.product.name }}
+{{ object.product_unit.product.short_name }}
+{{ object.product_unit.product.description }}
+{{ object.product_unit.product.category.name }}
+{{ object.product_unit.product.id }}

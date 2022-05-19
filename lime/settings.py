@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "django_filters",
     "rest_framework_simplejwt",
     "django_extensions",
+    "haystack",
     "news",
     "orders",
     "personnel",
@@ -131,6 +132,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "internal_api.tasks.auto_order",
         "schedule": 60.0,
     },
+    "update_search_index": {
+        "task": "internal_api.tasks.update_search_index",
+        "schedule": 300.0,
+    },
 }
 
 ACCESS_TOKEN_LIFETIME = timedelta(days=10)
@@ -166,6 +171,16 @@ STATIC_ROOT = BASE_DIR.parent / "staticfiles"
 MEDIA_URL = "/mediafiles/"
 MEDIA_ROOT = BASE_DIR.parent / "mediafiles"
 
+HAYSTACK_CONNECTIONS = {
+    "default": {
+        "ENGINE": "xapian_backend.XapianEngine",
+        "HAYSTACK_XAPIAN_LANGUAGE": "ru",
+        "PATH": env(
+            "xapian_index",
+            default=str(BASE_DIR.parent / "xapian_index"),
+        ),
+    },
+}
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

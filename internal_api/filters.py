@@ -1,27 +1,43 @@
 import django_filters
 from django.db.models import Q
+from haystack.inputs import Clean, Exact
+from haystack.query import SearchQuerySet
 
 from products.models import Category
 
 from . import models
 
 
+class FullTextFilter(django_filters.CharFilter):
+    QUERY_MIN_LENGTH = 2
+
+    def get_search_queryset(self, queryset):
+        return SearchQuerySet().models(queryset.model)
+
+    def filter(self, qs, value):
+        # the shorter the search term, the longer the list of keys
+        if len(value) >= FullTextFilter.QUERY_MIN_LENGTH:
+            sqs = self.get_search_queryset(qs)
+            # search for all terms
+            for term in value.split():
+                sqs = sqs.filter(content=Clean(term))
+            qs = qs.filter(pk__in=sqs.values_list("pk", flat=True))
+        return qs
+
+
+class WarehouseFullTextFilter(FullTextFilter):
+    def get_search_queryset(self, queryset):
+        sqs = super().get_search_queryset(queryset)
+        # filter by URL parameters (small optimization)
+        return sqs.filter(shop=Exact(self.parent.data["shop"]))
+
+
 class SupplierFilter(django_filters.FilterSet):
-    s = django_filters.CharFilter(
-        method="search",
-        label="поиск по имени, емейлу и телефону",
-    )
+    s = FullTextFilter(label="поиск по имени, емейлу и телефону")
 
     class Meta:
         model = models.Supplier
         fields = {"is_archive": ["exact"]}
-
-    def search(self, qs, name, value):
-        return qs.filter(
-            Q(name__icontains=value)
-            | Q(email__icontains=value)
-            | Q(phone_numbers__icontains=value)
-        )
 
 
 class WarehouseOrderFilter(django_filters.FilterSet):
@@ -42,40 +58,23 @@ class LegalEntityFilterSet(django_filters.FilterSet):
 
     """Searches through `registration_id` and/or `name` fields."""
 
-    s = django_filters.CharFilter(
-        method="search_by_id_or_name",
-        label="регистрационный номер или наименование",
-    )
+    s = FullTextFilter(label="регистрационный номер или наименование")
 
     class Meta:
         model = models.LegalEntities
         fields = ("s",)
 
-    def search_by_id_or_name(self, qs, name, value):
-        return qs.filter(Q(registration_id__contains=value) | Q(name__icontains=value))
-
 
 class ShopFilter(django_filters.FilterSet):
-    s = django_filters.CharFilter(
-        method="search",
-        label="поиск по названию, адресу, id",
-    )
+    s = FullTextFilter(label="поиск по названию, адресу, id")
 
     class Meta:
         model = models.Shop
         fields = {"is_archive": ["exact"]}
 
-    def search(self, qs, name, value):
-        return qs.filter(
-            Q(name__icontains=value)
-            | Q(address__icontains=value)
-            | Q(id__icontains=value)
-        )
-
 
 class WarehouseFilter(django_filters.FilterSet):
-    s = django_filters.CharFilter(
-        method="search",
+    s = WarehouseFullTextFilter(
         label="поиск по наименованию продукта, штрихкоду продукта, id продукта",
     )
     is_archive = django_filters.BooleanFilter(
@@ -115,13 +114,6 @@ class WarehouseFilter(django_filters.FilterSet):
     class Meta:
         model = models.Warehouse
         fields = ("s",)
-
-    def search(self, qs, name, value):
-        return qs.filter(
-            Q(product_unit__product__name__icontains=value)
-            | Q(product_unit__barcode__icontains=value)
-            | Q(product_unit__product__id__icontains=value)
-        )
 
     @staticmethod
     def in_category_filter(qs, name, value):

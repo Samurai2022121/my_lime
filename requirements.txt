@@ -54,6 +54,7 @@ django==4.0.1
     #   django-debug-toolbar
     #   django-extensions
     #   django-filter
+    #   django-haystack
     #   django-model-utils
     #   django-sql-utils
     #   djangorestframework
@@ -61,6 +62,7 @@ django==4.0.1
     #   drf-base64
     #   drf-nested-routers
     #   drf-yasg
+    #   xapian-haystack
 django-cors-headers==3.11.0
     # via -r requirements.in
 django-debug-toolbar==3.2.4
@@ -69,6 +71,10 @@ django-extensions==3.1.5
     # via -r requirements.in
 django-filter==21.1
     # via -r requirements.in
+django-haystack==3.2.1
+    # via
+    #   -r requirements.in
+    #   xapian-haystack
 django-js-asset==1.2.2
     # via
     #   -r requirements.in
@@ -277,6 +283,10 @@ wrapt==1.13.3
     # via
     #   deprecated
     #   pytest-lambda
+xapian-bindings==0.1.0
+    # via -r requirements.in
+xapian-haystack==3.0.1
+    # via -r requirements.in
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

@@ -1,0 +1,6 @@
+{{ object.id }}
+{{ object.number }}
+{{ object.supplier.name }}
+{{ object.supplier.address }}
+{{ object.supplier.email }}
+{{ object.supplier.phone_numbers }}
