@@ -195,7 +195,7 @@ SENTRY_PROJECT = env("SENTRY_PROJECT", default=None)
 
 if SENTRY_KEY and SENTRY_PROJECT:
     sentry_sdk.init(
-        dsn="https://{key}@sentry.io/{project}".format(
+        dsn="https://{key}@sentry.thefresh.by/{project}".format(
             key=SENTRY_KEY, project=SENTRY_PROJECT
         ),
         integrations=[DjangoIntegration()],
