@@ -1,6 +1,5 @@
 from django.contrib.contenttypes.models import ContentType
 from rest_framework.generics import CreateAPIView, DestroyAPIView
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -8,6 +7,7 @@ from products.models import Product
 from products.serializers import ProductSerializer
 from recipes.models import Recipe
 from recipes.serializers import RecipeSerializer
+from utils import permissions as perms
 from utils.serializers_utils import CONTENT_TYPES as content_types
 from utils.views_utils import BulkChangeArchiveStatusViewSetMixin
 
@@ -16,7 +16,7 @@ from .serializers import FavouriteSerializer, StarSerializer
 
 
 class FavouriteGenericAPIView(CreateAPIView, DestroyAPIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (perms.ReadWritePermission(write=perms.allow_authenticated),)
     pagination_class = None
     serializer_class = FavouriteSerializer
     queryset = Favourite.objects.all()
@@ -85,7 +85,12 @@ class FavouriteObjectsListAPIView(APIView):
 class StarGenericAPIView(
     BulkChangeArchiveStatusViewSetMixin, CreateAPIView, DestroyAPIView
 ):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(
+            write=perms.allow_authenticated,
+            change_archive_status=perms.allow_staff,
+        ),
+    )
     pagination_class = None
     serializer_class = StarSerializer
     queryset = Star.objects.all()

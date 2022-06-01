@@ -42,3 +42,22 @@ def exclude_field(
     else:
         new_class.Meta.fields.remove(field)
     return new_class
+
+
+class AuthorMixin(metaclass=serializers.SerializerMetaclass):
+    """
+    Assign an active user as an author, but allow admin to provide a specific
+    author.
+    """
+
+    AUTHOR_FIELD = "author"
+
+    def create(self, validated_data):
+        acting_user = self.context["request"].user
+        if acting_user.is_superuser:
+            # allow admin to directly set document's author
+            validated_data.setdefault(self.AUTHOR_FIELD, acting_user)
+        else:
+            # set current user as an author
+            validated_data[self.AUTHOR_FIELD] = acting_user
+        return super().create(validated_data)

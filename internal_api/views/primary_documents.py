@@ -3,11 +3,12 @@ from django.utils.decorators import method_decorator
 from django_filters import rest_framework as df_filters
 from rest_framework.exceptions import APIException
 from rest_framework.mixins import CreateModelMixin, DestroyModelMixin
-from rest_framework.permissions import AllowAny
 from rest_framework.reverse import reverse
 from rest_framework.status import HTTP_409_CONFLICT
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework_nested.viewsets import NestedViewSetMixin
+
+from utils import permissions as perms
 
 from .. import filters, models, serializers
 
@@ -16,8 +17,16 @@ class CreateProductionDocumentException(APIException):
     status_code = HTTP_409_CONFLICT
 
 
+def allow_staff_or_buyer(perm, request, view):
+    # allow e-commerce site users to view only sale document records
+    if view.basename == "salerecord":
+        return request.user.is_authenticated
+    else:
+        return request.user.is_staff
+
+
 class PrimaryDocumentRecordViewSet(NestedViewSetMixin, ReadOnlyModelViewSet):
-    permission_classes = (AllowAny,)
+    permission_classes = (perms.ReadWritePermission(read=allow_staff_or_buyer),)
     queryset = models.WarehouseRecord.objects.order_by(
         "warehouse__product_unit__product__name",
     )
@@ -25,16 +34,19 @@ class PrimaryDocumentRecordViewSet(NestedViewSetMixin, ReadOnlyModelViewSet):
     lookup_field = "id"
     parent_lookup_kwargs = {"document_id": "document__id"}
 
-    def perform_create(self, serializer):
-        serializer.save(shop_id=self.kwargs.get("document_id"))
-
 
 class ProductionDocumentViewSet(
     CreateModelMixin,
     DestroyModelMixin,
     ReadOnlyModelViewSet,
 ):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(
+            read=perms.allow_staff,
+            create=perms.allow_staff,
+            destroy=perms.allow_staff,
+        ),
+    )
     queryset = models.ProductionDocument.objects.order_by("created_at", "number")
     serializer_class = serializers.ProductionDocumentSerializer
     lookup_field = "id"
@@ -103,7 +115,13 @@ class InventoryDocumentViewSet(
     DestroyModelMixin,
     ReadOnlyModelViewSet,
 ):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(
+            read=perms.allow_staff,
+            create=perms.allow_staff,
+            destroy=perms.allow_staff,
+        ),
+    )
     queryset = models.InventoryDocument.objects.order_by("created_at", "number")
     serializer_class = serializers.InventoryDocumentSerializer
     lookup_field = "id"
@@ -117,7 +135,13 @@ class WriteOffDocumentViewSet(
     DestroyModelMixin,
     ReadOnlyModelViewSet,
 ):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(
+            read=perms.allow_staff,
+            create=perms.allow_staff,
+            destroy=perms.allow_staff,
+        ),
+    )
     queryset = models.WriteOffDocument.objects.order_by("created_at", "number")
     serializer_class = serializers.WriteOffDocumentSerializer
     lookup_field = "id"
@@ -131,7 +155,13 @@ class ReturnDocumentViewSet(
     DestroyModelMixin,
     ReadOnlyModelViewSet,
 ):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(
+            read=perms.allow_staff,
+            create=perms.allow_staff,
+            destroy=perms.allow_staff,
+        ),
+    )
     queryset = models.ReturnDocument.objects.order_by("created_at", "number")
     serializer_class = serializers.ReturnDocumentSerializer
     lookup_field = "id"
@@ -145,7 +175,13 @@ class ConversionDocumentViewSet(
     DestroyModelMixin,
     ReadOnlyModelViewSet,
 ):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(
+            read=perms.allow_staff,
+            create=perms.allow_staff,
+            destroy=perms.allow_staff,
+        ),
+    )
     queryset = models.ConversionDocument.objects.order_by("created_at", "number")
     serializer_class = serializers.ConversionDocumentSerializer
     lookup_field = "id"
@@ -159,7 +195,13 @@ class MoveDocumentViewSet(
     DestroyModelMixin,
     ReadOnlyModelViewSet,
 ):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(
+            read=perms.allow_staff,
+            create=perms.allow_staff,
+            destroy=perms.allow_staff,
+        ),
+    )
     queryset = models.MoveDocument.objects.order_by("created_at", "number")
     serializer_class = serializers.MoveDocumentSerializer
     lookup_field = "id"
@@ -173,7 +215,13 @@ class ReceiptDocumentViewSet(
     DestroyModelMixin,
     ReadOnlyModelViewSet,
 ):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(
+            read=perms.allow_staff,
+            create=perms.allow_staff,
+            destroy=perms.allow_staff,
+        ),
+    )
     queryset = models.ReceiptDocument.objects.order_by("created_at", "number")
     serializer_class = serializers.ReceiptDocumentSerializer
     lookup_field = "id"
@@ -187,12 +235,26 @@ class SaleDocumentViewSet(
     DestroyModelMixin,
     ReadOnlyModelViewSet,
 ):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(
+            read=perms.allow_authenticated,
+            create=perms.allow_authenticated,
+            destroy=perms.allow_staff,
+        ),
+    )
     queryset = models.SaleDocument.objects.order_by("created_at", "number")
     serializer_class = serializers.SaleDocumentSerializer
     lookup_field = "id"
     filter_backends = (df_filters.DjangoFilterBackend,)
     filterset_class = filters.PrimaryDocumentFilter
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        user = self.request.user
+        if user.is_staff or user.is_superuser:
+            return qs
+
+        return qs.filter(author=user)
 
 
 class CancelDocumentViewSet(
@@ -200,7 +262,13 @@ class CancelDocumentViewSet(
     DestroyModelMixin,
     ReadOnlyModelViewSet,
 ):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(
+            read=perms.allow_staff,
+            create=perms.allow_staff,
+            destroy=perms.allow_staff,
+        ),
+    )
     queryset = models.CancelDocument.objects.order_by("created_at", "number")
     serializer_class = serializers.CancelDocumentSerializer
     lookup_field = "id"

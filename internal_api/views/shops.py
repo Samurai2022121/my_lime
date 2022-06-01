@@ -1,11 +1,11 @@
 from django.db.models import F
 from django_filters import rest_framework as df_filters
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework_nested.viewsets import NestedViewSetMixin
 
 from products.models import Category
+from utils import permissions as perms
 from utils.serializers_utils import exclude_field
 from utils.views_utils import (
     BulkChangeArchiveStatusViewSetMixin,
@@ -24,7 +24,14 @@ class ShopViewSet(
     ModelViewSet,
     OrderingModelViewsetMixin,
 ):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(
+            read=perms.allow_staff,
+            write=perms.allow_staff,
+            change_archive_status=perms.allow_staff,
+            bulk_update=perms.allow_staff,
+        ),
+    )
     serializer_class = serializers.ShopSerializer
     filter_backends = (df_filters.DjangoFilterBackend,)
     filterset_class = filters.ShopFilter
@@ -42,7 +49,9 @@ class ShopViewSet(
 
 
 class WarehouseViewSet(NestedViewSetMixin, ModelViewSet):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(read=perms.allow_staff, write=perms.allow_staff),
+    )
     serializer_class = serializers.WarehouseSerializer
     filter_backends = (df_filters.DjangoFilterBackend,)
     filterset_class = filters.WarehouseFilter
@@ -69,7 +78,9 @@ class WarehouseViewSet(NestedViewSetMixin, ModelViewSet):
 
 
 class WarehouseRecordViewSet(NestedViewSetMixin, ModelViewSet):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(read=perms.allow_staff, write=perms.allow_staff),
+    )
     serializer_class = serializers.WarehouseRecordSerializer
     lookup_field = "id"
     parent_lookup_kwargs = {
@@ -93,7 +104,7 @@ class WarehouseRecordViewSet(NestedViewSetMixin, ModelViewSet):
 
 
 class WarehouseForScalesListView(NestedViewSetMixin, ReadOnlyModelViewSet):
-    permission_classes = (AllowAny,)
+    permission_classes = (perms.ReadWritePermission(read=perms.allow_staff),)
     pagination_class = None
     serializer_class = serializers.WarehouseForScalesSerializer
     queryset = models.Warehouse.objects
@@ -137,7 +148,9 @@ class WarehouseForScalesListView(NestedViewSetMixin, ReadOnlyModelViewSet):
 
 
 class BatchViewSet(ModelViewSet):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(read=perms.allow_staff, write=perms.allow_staff),
+    )
     lookup_field = "id"
     serializer_class = serializers.BatchSerializer
     filter_backends = (df_filters.DjangoFilterBackend,)

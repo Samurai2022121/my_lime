@@ -22,6 +22,8 @@ class Order(Timestampable, models.Model):
     customer = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="orders", verbose_name="Покупатель"
     )
+    # TODO: this must be the order lines with ProductUnit key, quantity,
+    #   frozen price, et c. each
     products = models.ManyToManyField(Product, verbose_name="Покупки")
     payment_status = models.CharField(max_length=75)
     order_status = models.CharField(

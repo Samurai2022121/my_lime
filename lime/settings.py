@@ -125,6 +125,11 @@ REST_FRAMEWORK = {
     "TIME_FORMAT": "%H:%M",
 }
 
+SWAGGER_SETTINGS = {
+    "LOGIN_URL": "admin:login",
+    "LOGOUT_URL": "admin:logout",
+}
+
 CELERY_BROKER_URL = env("CELERY_BROKER_URL")
 CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER", default=False)
 CELERY_BEAT_SCHEDULE = {

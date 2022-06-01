@@ -25,6 +25,7 @@ from users.serializers import (
     UserSerializer,
     ValidateRegistrationCodeSerializer,
 )
+from utils import permissions as perms
 from utils.models_utils import generate_new_password
 from utils.views_utils import (
     BulkChangeArchiveStatusViewSetMixin,
@@ -177,7 +178,13 @@ class UserView(
     viewsets.ModelViewSet,
 ):
     filterset_class = UserFilter
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(
+            read=perms.allow_staff,
+            write=perms.allow_staff,
+            get_current_user=perms.allow_authenticated,
+        ),
+    )
     serializer_class = UserSerializer
     lookup_field = "id"
     queryset = User.objects.all()

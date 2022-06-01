@@ -5,10 +5,11 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework_nested.viewsets import NestedViewSetMixin
+
+from utils import permissions as perms
 
 from .filters import BuyerCountFilter, OfferFilterSet
 from .models import BuyerCount, LoyaltyCard, Offer, Range, Voucher
@@ -28,7 +29,13 @@ class OfferViewSet(ModelViewSet):
     lookup_field = "id"
     filter_backends = (DjangoFilterBackend,)
     filterset_class = OfferFilterSet
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(
+            read=perms.allow_all,
+            write=perms.allow_staff,
+            apply=perms.allow_staff,
+        ),
+    )
 
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
@@ -90,21 +97,37 @@ class BuyerCountViewSet(NestedViewSetMixin, ReadOnlyModelViewSet):
     }
     filter_backends = (DjangoFilterBackend,)
     filterset_class = BuyerCountFilter
-    permission_classes = (AllowAny,)
+    permission_classes = (perms.ReadWritePermission(read=perms.allow_authenticated),)
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        user = self.request.user
+        if user.is_staff or user.is_superuser:
+            return qs
+
+        return qs.filter(buyer=user)
 
 
 class RangeViewSet(ModelViewSet):
     serializer_class = RangeSerializer
     queryset = Range.objects.order_by("name")
     lookup_field = "id"
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(read=perms.allow_all, write=perms.allow_staff),
+    )
 
 
 class VoucherViewSet(ModelViewSet):
     serializer_class = VoucherSerializer
     queryset = Voucher.objects.order_by("-created_at")
     lookup_field = "id"
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(
+            read=perms.allow_staff,
+            write=perms.allow_staff,
+            apply=perms.allow_staff,
+        ),
+    )
 
     @action(methods=("post",), detail=True)
     @transaction.atomic
@@ -135,7 +158,21 @@ class LoyaltyCardViewSet(ModelViewSet):
     serializer_class = LoyaltyCardSerializer
     queryset = LoyaltyCard.objects.order_by("-created_at")
     lookup_field = "id"
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(
+            read=perms.allow_authenticated,
+            write=perms.allow_staff,
+            apply=perms.allow_staff,
+        ),
+    )
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        user = self.request.user
+        if user.is_staff or user.is_superuser:
+            return qs
+
+        return qs.filter(buyer=user)
 
     @action(methods=("post",), detail=True)
     @transaction.atomic

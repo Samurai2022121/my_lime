@@ -17,21 +17,17 @@ from utils.views_utils import ViewSetTest
 
 
 @pytest.fixture(scope="module")
-def django_db_setup(request, django_db_setup, django_db_blocker):
+def django_db_setup(request, django_db_setup):
     # load a fixture from current directory
-    with django_db_blocker.unblock():
-        call_command(
-            "loaddata",
-            Path(request.fspath).parent / "fixtures" / "users.json",
-            Path(request.fspath).parent / "fixtures" / "production.json",
-        )
-        yield
-        call_command("flush", "--no-input")
+    call_command(
+        "loaddata",
+        Path(request.fspath).parent / "fixtures" / "production.json",
+    )
 
 
 class TestDailyMenuViewset(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, get_response):
+    def common_subject(self, db, staff_client, get_response):
         # this test set is going to use database
         return get_response
 
@@ -64,7 +60,6 @@ class TestDailyMenuViewset(ViewSetTest):
         data = static_fixture(
             {
                 "shop": 1,
-                "author": 1,
                 "menu_dishes": [
                     {
                         "dish": 2,
@@ -91,7 +86,7 @@ class TestDailyMenuViewset(ViewSetTest):
 
 class TestTechCardViewset(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, get_response):
+    def common_subject(self, db, staff_client, get_response):
         return get_response
 
     list_url = lambda_fixture(lambda: url_for("production:techcard-list"))
@@ -108,7 +103,6 @@ class TestTechCardViewset(ViewSetTest):
         data = static_fixture(
             {
                 "name": "Test Product 666 Tech Card",
-                "author": 1,
                 "ingredients": [
                     {
                         "product_unit": 22,

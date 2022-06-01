@@ -40,7 +40,7 @@ class OrderingModelViewsetMixin:
         return ordering_values
 
 
-class BulkUpdateViewSetMixin(object):
+class BulkUpdateViewSetMixin:
     @action(detail=False, methods=["post"], url_path="bulk_update")
     def bulk_update(self, request, **kwargs):
         serialized_data = BulkUpdateSerializer(data=request.data)
@@ -51,7 +51,7 @@ class BulkUpdateViewSetMixin(object):
         return Response(status=status.HTTP_200_OK)
 
 
-class ChangeDestroyToArchiveMixin(object):
+class ChangeDestroyToArchiveMixin:
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.is_archive = True
@@ -59,7 +59,7 @@ class ChangeDestroyToArchiveMixin(object):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class BulkChangeArchiveStatusViewSetMixin(object):
+class BulkChangeArchiveStatusViewSetMixin:
     @action(detail=False, methods=["post"], url_path="bulk-archive")
     def change_archive_status(self, request, **kwargs):
         serialized_data = BulkActionSerializer(data=request.data)

@@ -1,8 +1,11 @@
+from django.contrib.auth import get_user_model
 from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework import serializers
 
 from products.models import ProductUnit
 from products.serializers import SimpleProductUnitSerializer
+from users.serializers import UserSerializer
+from utils.serializers_utils import AuthorMixin
 
 from .models import DailyMenuPlan, MenuDish, TechCard, TechCardProduct
 
@@ -27,12 +30,28 @@ class TechProductSerializer(serializers.ModelSerializer):
         return data
 
 
-class TechCardSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+class TechCardSerializer(
+    AuthorMixin,
+    WritableNestedModelSerializer,
+    serializers.ModelSerializer,
+):
     ingredients = TechProductSerializer(source="tech_products", many=True)
+    author = serializers.PrimaryKeyRelatedField(
+        label="автор",
+        queryset=get_user_model().objects.all(),
+        required=False,
+        write_only=True,
+    )
+    author_on_read = UserSerializer(label="автор", read_only=True)
 
     class Meta:
         model = TechCard
         fields = "__all__"
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["author"] = data.pop("author_on_read", None)
+        return data
 
 
 class MenuDishSerializer(serializers.ModelSerializer):
@@ -51,12 +70,36 @@ class MenuDishSerializer(serializers.ModelSerializer):
         return result
 
 
-class DailyMenuSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+class DailyMenuSerializer(
+    AuthorMixin,
+    WritableNestedModelSerializer,
+    serializers.ModelSerializer,
+):
     menu_dishes = MenuDishSerializer(many=True)
+    author = serializers.PrimaryKeyRelatedField(
+        label="автор",
+        queryset=get_user_model().objects.all(),
+        required=False,
+        write_only=True,
+    )
+    author_on_read = UserSerializer(label="автор", read_only=True)
 
     class Meta:
         model = DailyMenuPlan
-        fields = ["id", "shop", "author", "menu_dishes", "created_at", "updated_at"]
+        fields = [
+            "id",
+            "shop",
+            "author",
+            "author_on_read",
+            "menu_dishes",
+            "created_at",
+            "updated_at",
+        ]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["author"] = data.pop("author_on_read", None)
+        return data
 
 
 class DailyMenuLayoutSerializer(serializers.Serializer):

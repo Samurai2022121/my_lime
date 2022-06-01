@@ -1,11 +1,11 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_nested.viewsets import NestedViewSetMixin
 
+from utils import permissions as perms
 from utils.serializers_utils import BulkActionSerializer
 from utils.views_utils import OrderingModelViewsetMixin
 
@@ -20,7 +20,9 @@ from .serializers import (
 
 
 class PositionViewSet(ModelViewSet):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(read=perms.allow_staff, write=perms.allow_staff),
+    )
     serializer_class = PositionSerializer
     lookup_field = "id"
     queryset = Position.objects.order_by("name")
@@ -29,7 +31,9 @@ class PositionViewSet(ModelViewSet):
 class PersonnelViewSet(ModelViewSet, OrderingModelViewsetMixin):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = PersonnelFilter
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(read=perms.allow_staff, write=perms.allow_staff),
+    )
     serializer_class = PersonnelSerializer
     lookup_field = "id"
     queryset = Personnel.objects.exclude(status=Personnel.WORK_STATUS.archived)
@@ -52,7 +56,9 @@ class PersonnelViewSet(ModelViewSet, OrderingModelViewsetMixin):
 
 
 class PersonnelDocumentViewSet(NestedViewSetMixin, ModelViewSet):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(read=perms.allow_staff, write=perms.allow_staff),
+    )
     serializer_class = PersonnelDocumentSerializer
     lookup_field = "id"
     parent_lookup_kwargs = {
@@ -65,7 +71,9 @@ class PersonnelDocumentViewSet(NestedViewSetMixin, ModelViewSet):
 
 
 class LocalPassportViewSet(NestedViewSetMixin, ModelViewSet):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(read=perms.allow_staff, write=perms.allow_staff),
+    )
     serializer_class = LocalPassportSerializer
     lookup_field = "id"
     parent_lookup_kwargs = {

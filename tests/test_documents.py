@@ -17,24 +17,21 @@ from utils.views_utils import ViewSetTest
 
 
 @pytest.fixture(scope="module")
-def django_db_setup(request, django_db_setup, django_db_blocker):
+def django_db_setup(request, django_db_setup):
     # load a fixture from current directory
-    with django_db_blocker.unblock():
-        call_command(
-            "loaddata",
-            Path(request.fspath).parent / "fixtures" / "shops.json",
-            Path(request.fspath).parent / "fixtures" / "units.json",
-            Path(request.fspath).parent / "fixtures" / "warehouses.json",
-            Path(request.fspath).parent / "fixtures" / "suppliers.json",
-            Path(request.fspath).parent / "fixtures" / "batches.json",
-        )
-        yield
-        call_command("flush", "--no-input")
+    call_command(
+        "loaddata",
+        Path(request.fspath).parent / "fixtures" / "shops.json",
+        Path(request.fspath).parent / "fixtures" / "units.json",
+        Path(request.fspath).parent / "fixtures" / "warehouses.json",
+        Path(request.fspath).parent / "fixtures" / "suppliers.json",
+        Path(request.fspath).parent / "fixtures" / "batches.json",
+    )
 
 
 class TestInventoryDocumentViewset(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, get_response):
+    def common_subject(self, db, staff_client, get_response):
         return get_response
 
     list_url = lambda_fixture(lambda: url_for("internal_api:inventorydocument-list"))
@@ -139,17 +136,16 @@ class TestInventoryDocumentViewset(ViewSetTest):
 
 class TestReceiptDocumentViewset(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, load_order, get_response):
+    def common_subject(self, db, load_order, staff_client, get_response):
         return get_response
 
     @pytest.fixture
-    def load_order(self, request, django_db_blocker):
+    def load_order(self, request):
         # load order
-        with django_db_blocker.unblock():
-            call_command(
-                "loaddata",
-                Path(request.fspath).parent / "fixtures" / "orders.json",
-            )
+        call_command(
+            "loaddata",
+            Path(request.fspath).parent / "fixtures" / "orders.json",
+        )
 
     list_url = lambda_fixture(lambda: url_for("internal_api:receiptdocument-list"))
 
@@ -256,7 +252,7 @@ class TestReceiptDocumentViewset(ViewSetTest):
 
 class TestWriteOffDocumentViewset(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, get_response):
+    def common_subject(self, db, staff_client, get_response):
         return get_response
 
     list_url = lambda_fixture(lambda: url_for("internal_api:writeoffdocument-list"))
@@ -295,7 +291,7 @@ class TestWriteOffDocumentViewset(ViewSetTest):
 
 class TestReturnDocumentViewset(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, get_response):
+    def common_subject(self, db, staff_client, get_response):
         return get_response
 
     list_url = lambda_fixture(lambda: url_for("internal_api:returndocument-list"))
@@ -334,13 +330,13 @@ class TestReturnDocumentViewset(ViewSetTest):
 
 class TestConversionDocumentViewset(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, create_conversion, get_response):
+    def common_subject(self, db, create_conversion, staff_client, get_response):
         return get_response
 
     @pytest.fixture
-    def create_conversion(self, client):
+    def create_conversion(self, staff_client):
         # add a converter for "Товар для разукомплектации" ("кор." -> "г")
-        result = client.post(
+        result = staff_client.post(
             url_for("products:targets-list", product_id=3, unit_id=4),
             data={
                 "source_unit": 3,
@@ -382,7 +378,7 @@ class TestConversionDocumentViewset(ViewSetTest):
 
 class TestMoveDocumentViewset(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, get_response):
+    def common_subject(self, db, staff_client, get_response):
         return get_response
 
     list_url = lambda_fixture(lambda: url_for("internal_api:movedocument-list"))
@@ -423,7 +419,7 @@ class TestMoveDocumentViewset(ViewSetTest):
 
 class TestSaleDocumentViewset(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, get_response):
+    def common_subject(self, db, authenticated_client, get_response):
         return get_response
 
     list_url = lambda_fixture(lambda: url_for("internal_api:saledocument-list"))
@@ -450,13 +446,28 @@ class TestSaleDocumentViewset(ViewSetTest):
             }
         )
 
+        def test_implied_author(self, json):
+            # authenticated user ID
+            assert json["author"] == 3
+
         def test_record_list(self, json, client):
             """Test sale records created."""
             document_id = json["id"]
             record_list_url = url_for(
-                "internal_api:conversionrecord-list",
+                "internal_api:salerecord-list",
                 document_id,
             )
             result = client.get(record_list_url)
             assert result.status_code == status.HTTP_200_OK
             assert len(result.json()["results"]) == 2
+
+    class TestCreateWithAuthor(UsesPostMethod, UsesListEndpoint, Returns201):
+        @pytest.fixture
+        def common_subject(self, db, admin_client, get_response):
+            return get_response
+
+        data = static_fixture({"shop": 1, "author": 3, "warehouse_records": []})
+
+        def test_author(self, json):
+            #  directly provided user ID
+            assert json["author"] == 3

@@ -1,10 +1,10 @@
 from django.db.models import F, Sum
 from django_filters import rest_framework as df_filters
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
+from utils import permissions as perms
 from utils.views_utils import (
     BulkChangeArchiveStatusViewSetMixin,
     BulkUpdateViewSetMixin,
@@ -22,7 +22,9 @@ class WarehouseOrderViewSet(
 ):
     filter_backends = (df_filters.DjangoFilterBackend,)
     filterset_class = filters.WarehouseOrderFilter
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(read=perms.allow_staff, write=perms.allow_staff),
+    )
     serializer_class = serializers.WarehouseOrderSerializer
     lookup_field = "id"
     queryset = models.WarehouseOrder.objects
@@ -65,7 +67,14 @@ class SupplierViewSet(
 ):
     filter_backends = (df_filters.DjangoFilterBackend,)
     filterset_class = filters.SupplierFilter
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(
+            read=perms.allow_staff,
+            write=perms.allow_staff,
+            change_archive_status=perms.allow_staff,
+            bulk_update=perms.allow_staff,
+        ),
+    )
     serializer_class = serializers.SupplierSerializer
     lookup_field = "id"
     queryset = models.Supplier.objects.all()
@@ -81,7 +90,13 @@ class SupplierViewSet(
 
 
 class SupplyContractViewSet(BulkChangeArchiveStatusViewSetMixin, ModelViewSet):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(
+            read=perms.allow_staff,
+            write=perms.allow_staff,
+            change_archive_status=perms.allow_staff,
+        ),
+    )
     serializer_class = serializers.SupplyContractsSerializer
     lookup_field = "id"
     queryset = models.SupplyContract.objects.all()
@@ -104,7 +119,7 @@ class SupplyContractViewSet(BulkChangeArchiveStatusViewSetMixin, ModelViewSet):
 
 
 class LegalEntityViewSet(ReadOnlyModelViewSet):
-    permission_classes = (AllowAny,)
+    permission_classes = (perms.ReadWritePermission(read=perms.allow_staff),)
     serializer_class = serializers.LegalEntitySerializer
     lookup_field = "registration_id"
     queryset = models.LegalEntities.objects.filter(active="+")

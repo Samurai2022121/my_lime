@@ -18,21 +18,17 @@ from utils.views_utils import ViewSetTest
 
 
 @pytest.fixture(scope="module")
-def django_db_setup(request, django_db_setup, django_db_blocker):
-    with django_db_blocker.unblock():
-        call_command(
-            "loaddata",
-            Path(request.fspath).parent / "fixtures" / "users.json",
-            Path(request.fspath).parent / "fixtures" / "shops.json",
-            Path(request.fspath).parent / "fixtures" / "personnel.json",
-        )
-        yield
-        call_command("flush", "--no-input")
+def django_db_setup(request, django_db_setup):
+    call_command(
+        "loaddata",
+        Path(request.fspath).parent / "fixtures" / "shops.json",
+        Path(request.fspath).parent / "fixtures" / "personnel.json",
+    )
 
 
 class TestPositionViewSet(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, get_response):
+    def common_subject(self, db, staff_client, get_response):
         return get_response
 
     list_url = lambda_fixture(lambda: url_for("personnel:position-list"))
@@ -55,7 +51,7 @@ class TestPositionViewSet(ViewSetTest):
 
 class TestPersonnelViewSet(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, get_response):
+    def common_subject(self, db, staff_client, get_response):
         return get_response
 
     list_url = lambda_fixture(lambda: url_for("personnel:personnel-list"))
@@ -87,7 +83,7 @@ class TestPersonnelViewSet(ViewSetTest):
 
 class TestPassportViewSet(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, get_response):
+    def common_subject(self, db, staff_client, get_response):
         return get_response
 
     list_url = lambda_fixture(
@@ -145,7 +141,7 @@ class TestPassportViewSet(ViewSetTest):
 
 class TestPersonnelDocumentViewSet(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, get_response):
+    def common_subject(self, db, staff_client, get_response):
         return get_response
 
     list_url = lambda_fixture(

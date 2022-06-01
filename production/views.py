@@ -7,9 +7,9 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from utils import permissions as perms
 from utils.views_utils import BulkChangeArchiveStatusViewSetMixin
 
 from .filters import DailyMenuPlanLayoutFilter, TechCardFilter
@@ -22,7 +22,14 @@ from .serializers import (
 
 
 class TechCardViewSet(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(
+            read=perms.allow_staff,
+            write=perms.allow_staff,
+            change_archive_status=perms.allow_staff,
+            render_docx=perms.allow_staff,
+        ),
+    )
     serializer_class = TechCardSerializer
     lookup_field = "id"
     filter_backends = (filters.DjangoFilterBackend,)
@@ -53,7 +60,13 @@ class TechCardViewSet(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet
 
 
 class DailyMenuViewSet(viewsets.ModelViewSet):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(
+            read=perms.allow_staff,
+            write=perms.allow_staff,
+            layout=perms.allow_staff,
+        ),
+    )
     serializer_class = DailyMenuSerializer
     filter_backends = (filters.DjangoFilterBackend,)
     lookup_field = "id"

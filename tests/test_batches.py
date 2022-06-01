@@ -18,24 +18,21 @@ from utils.views_utils import ViewSetTest
 
 
 @pytest.fixture(scope="module")
-def django_db_setup(request, django_db_setup, django_db_blocker):
+def django_db_setup(request, django_db_setup):
     # load a fixture from current directory
-    with django_db_blocker.unblock():
-        call_command(
-            "loaddata",
-            Path(request.fspath).parent / "fixtures" / "shops.json",
-            Path(request.fspath).parent / "fixtures" / "units.json",
-            Path(request.fspath).parent / "fixtures" / "warehouses.json",
-            Path(request.fspath).parent / "fixtures" / "suppliers.json",
-            Path(request.fspath).parent / "fixtures" / "batches.json",
-        )
-        yield
-        call_command("flush", "--no-input")
+    call_command(
+        "loaddata",
+        Path(request.fspath).parent / "fixtures" / "shops.json",
+        Path(request.fspath).parent / "fixtures" / "units.json",
+        Path(request.fspath).parent / "fixtures" / "warehouses.json",
+        Path(request.fspath).parent / "fixtures" / "suppliers.json",
+        Path(request.fspath).parent / "fixtures" / "batches.json",
+    )
 
 
 class TestBatchesViewset(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, get_response):
+    def common_subject(self, db, staff_client, get_response):
         return get_response
 
     list_url = lambda_fixture(lambda: url_for("internal_api:batch-list"))

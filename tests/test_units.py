@@ -20,13 +20,8 @@ from pytest_lambda import lambda_fixture, static_fixture
 
 
 @pytest.fixture(scope="module")
-def django_db_setup(request, django_db_setup, django_db_blocker):
-    with django_db_blocker.unblock():
-        call_command(
-            "loaddata", Path(request.fspath).parent / "fixtures" / "units.json"
-        )
-        yield
-        call_command("flush", "--no-input")
+def django_db_setup(request, django_db_setup):
+    call_command("loaddata", Path(request.fspath).parent / "fixtures" / "units.json")
 
 
 class TestMeasurementUnitViewset(ViewSetTest):
@@ -66,6 +61,10 @@ class TestMeasurementUnitViewset(ViewSetTest):
         UsesListEndpoint,
         Returns201,
     ):
+        @pytest.fixture
+        def client(self, staff_client):
+            return staff_client
+
         data = static_fixture({"name": "NewUnit"})
 
     class TestUpdate(
@@ -73,6 +72,10 @@ class TestMeasurementUnitViewset(ViewSetTest):
         UsesDetailEndpoint,
         Returns200,
     ):
+        @pytest.fixture
+        def client(self, staff_client):
+            return staff_client
+
         unit_id = static_fixture(3)
         data = static_fixture({"name": "AnotherUnitName"})
 
@@ -81,6 +84,10 @@ class TestMeasurementUnitViewset(ViewSetTest):
         UsesDetailEndpoint,
         Returns204,
     ):
+        @pytest.fixture
+        def client(self, staff_client):
+            return staff_client
+
         unit_id = static_fixture(3)
 
 
@@ -117,6 +124,10 @@ class TestProductUnitViewset(ViewSetTest):
         UsesListEndpoint,
         Returns201,
     ):
+        @pytest.fixture
+        def client(self, staff_client):
+            return staff_client
+
         product_id = static_fixture(1)
         data = static_fixture({"unit": "Кор."})
 
@@ -125,6 +136,10 @@ class TestProductUnitViewset(ViewSetTest):
         UsesDetailEndpoint,
         Returns200,
     ):
+        @pytest.fixture
+        def client(self, staff_client):
+            return staff_client
+
         product_id = static_fixture(2)
         id = static_fixture(2)
         data = static_fixture({"for_resale": True})

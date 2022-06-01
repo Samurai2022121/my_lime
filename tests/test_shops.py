@@ -19,21 +19,18 @@ from utils.views_utils import ViewSetTest
 
 
 @pytest.fixture(scope="module")
-def django_db_setup(request, django_db_setup, django_db_blocker):
+def django_db_setup(request, django_db_setup):
     # load a fixture from current directory
-    with django_db_blocker.unblock():
-        call_command(
-            "loaddata",
-            Path(request.fspath).parent / "fixtures" / "shops.json",
-        )
-        yield
-        call_command("flush", "--no-input")
+    call_command(
+        "loaddata",
+        Path(request.fspath).parent / "fixtures" / "shops.json",
+    )
 
 
 class TestShopViewset(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, get_response):
-        # this test set is going to use database
+    def common_subject(self, db, staff_client, get_response):
+        # use database, run as staff
         return get_response
 
     list_url = lambda_fixture(lambda: url_for("internal_api:shop-list"))
@@ -69,12 +66,11 @@ class TestShopViewset(ViewSetTest):
 
 class TestWarehouseViewset(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, django_db_blocker, request, get_response):
-        with django_db_blocker.unblock():
-            call_command(
-                "loaddata",
-                Path(request.fspath).parent / "fixtures" / "units.json",
-            )
+    def common_subject(self, db, request, staff_client, get_response):
+        call_command(
+            "loaddata",
+            Path(request.fspath).parent / "fixtures" / "units.json",
+        )
         return get_response
 
     list_url = lambda_fixture(
@@ -103,13 +99,12 @@ class TestWarehouseViewset(ViewSetTest):
 
     class TestOrderBy(UsesGetMethod, UsesListEndpoint, Returns200):
         @pytest.fixture
-        def common_subject(self, db, django_db_blocker, request, get_response):
-            with django_db_blocker.unblock():
-                call_command(
-                    "loaddata",
-                    Path(request.fspath).parent / "fixtures" / "units.json",
-                    Path(request.fspath).parent / "fixtures" / "warehouses.json",
-                )
+        def common_subject(self, db, request, staff_client, get_response):
+            call_command(
+                "loaddata",
+                Path(request.fspath).parent / "fixtures" / "units.json",
+                Path(request.fspath).parent / "fixtures" / "warehouses.json",
+            )
             return get_response
 
         @pytest.fixture
@@ -131,13 +126,12 @@ class TestWarehouseViewset(ViewSetTest):
 
 class TestWarehouseRecordViewset(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, django_db_blocker, request, get_response):
-        with django_db_blocker.unblock():
-            call_command(
-                "loaddata",
-                Path(request.fspath).parent / "fixtures" / "units.json",
-                Path(request.fspath).parent / "fixtures" / "warehouses.json",
-            )
+    def common_subject(self, db, request, staff_client, get_response):
+        call_command(
+            "loaddata",
+            Path(request.fspath).parent / "fixtures" / "units.json",
+            Path(request.fspath).parent / "fixtures" / "warehouses.json",
+        )
         return get_response
 
     list_url = lambda_fixture(

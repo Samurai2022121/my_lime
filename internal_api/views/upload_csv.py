@@ -2,18 +2,18 @@ from decimal import Decimal
 
 import pandas as pd
 from rest_framework.generics import GenericAPIView
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.status import HTTP_202_ACCEPTED
 
 from products.models import Product
 from products.serializers import ProductListSerializer
+from utils import permissions as perms
 
 from .. import serializers
 
 
 class UploadCSVGenericView(GenericAPIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (perms.ReadWritePermission(write=perms.allow_staff),)
     serializer_class = serializers.UploadCSVSerializer
     queryset = Product.objects.all()
 

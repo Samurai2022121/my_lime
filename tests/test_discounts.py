@@ -20,18 +20,14 @@ from utils.views_utils import ViewSetTest
 
 
 @pytest.fixture(scope="module")
-def django_db_setup(request, django_db_setup, django_db_blocker):
-    with django_db_blocker.unblock():
-        call_command(
-            "loaddata",
-            Path(request.fspath).parent / "fixtures" / "users.json",
-            Path(request.fspath).parent / "fixtures" / "products.json",
-            Path(request.fspath).parent / "fixtures" / "shops.json",
-            Path(request.fspath).parent / "fixtures" / "units.json",
-            Path(request.fspath).parent / "fixtures" / "discounts.json",
-        )
-        yield
-        call_command("flush", "--no-input")
+def django_db_setup(request, django_db_setup):
+    call_command(
+        "loaddata",
+        Path(request.fspath).parent / "fixtures" / "products.json",
+        Path(request.fspath).parent / "fixtures" / "shops.json",
+        Path(request.fspath).parent / "fixtures" / "units.json",
+        Path(request.fspath).parent / "fixtures" / "discounts.json",
+    )
 
 
 class TestRangesViewSet(ViewSetTest):
@@ -50,6 +46,10 @@ class TestRangesViewSet(ViewSetTest):
         id = static_fixture(1)
 
     class TestCreate(UsesPostMethod, UsesListEndpoint, Returns201):
+        @pytest.fixture
+        def common_subject(self, staff_client, get_response):
+            return get_response
+
         data = static_fixture(
             {
                 "name": "Test create range",
@@ -83,10 +83,18 @@ class TestOffersViewSet(ViewSetTest):
         id = static_fixture(1)
 
     class TestUpdate(UsesPatchMethod, UsesDetailEndpoint, Returns200):
+        @pytest.fixture
+        def common_subject(self, staff_client, get_response):
+            return get_response
+
         id = static_fixture(1)
         data = static_fixture({"condition": {"range": 4}})
 
     class TestCreate(UsesPostMethod, UsesListEndpoint, Returns201):
+        @pytest.fixture
+        def common_subject(self, staff_client, get_response):
+            return get_response
+
         data = static_fixture(
             {
                 "condition": {"type": "value", "value": "50.00", "range": 4},
@@ -97,33 +105,43 @@ class TestOffersViewSet(ViewSetTest):
         )
 
     class TestApplySiteOffer(UsesPostMethod, UsesDetailEndpoint, Returns200):
+        @pytest.fixture
+        def common_subject(self, staff_client, get_response):
+            return get_response
+
         detail_url = lambda_fixture(lambda id: url_for("discounts:offer-apply", id=id))
         id = static_fixture(1)
 
     class TestApplyBuyerOffer(UsesPostMethod, UsesDetailEndpoint, Returns200):
+        @pytest.fixture
+        def common_subject(self, staff_client, get_response):
+            return get_response
+
         detail_url = lambda_fixture(lambda id: url_for("discounts:offer-apply", id=id))
         id = static_fixture(5)
         data = static_fixture({"phone_number": "79010060000"})
 
-        def test_buyer_count(self, client, json):
+        def test_buyer_count(self, authenticated_client, json):
             offer_id = json["id"]
             buyer_count_list_url = url_for(
                 "discounts:buyercount-list", offer_id=offer_id
             )
-            buyer_count_list_url += "?buyer=2"
-
-            result = client.get(buyer_count_list_url)
+            result = authenticated_client.get(buyer_count_list_url)
             assert result.status_code == status.HTTP_200_OK
             assert len(result.json()["results"]) == 1
 
     class TestApplyWrongOffer(UsesPostMethod, UsesListEndpoint, Returns400):
+        @pytest.fixture
+        def common_subject(self, staff_client, get_response):
+            return get_response
+
         detail_url = lambda_fixture(lambda id: url_for("discounts:offer-apply", id=id))
         id = static_fixture(3)
 
 
 class TestVouchersViewSet(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, get_response):
+    def common_subject(self, db, staff_client, get_response):
         return get_response
 
     list_url = lambda_fixture(lambda: url_for("discounts:voucher-list"))
@@ -171,7 +189,7 @@ class TestVouchersViewSet(ViewSetTest):
 
 class TestLoyaltyCardsViewSet(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, get_response):
+    def common_subject(self, db, authenticated_client, get_response):
         return get_response
 
     list_url = lambda_fixture(lambda: url_for("discounts:loyaltycard-list"))
@@ -184,15 +202,27 @@ class TestLoyaltyCardsViewSet(ViewSetTest):
         pass
 
     class TestCreate(UsesPostMethod, UsesListEndpoint, Returns201):
+        @pytest.fixture
+        def common_subject(self, staff_client, get_response):
+            return get_response
+
         data = static_fixture({"buyer": 2, "offer": 4})
 
     class TestCreateWrongOffer(UsesPostMethod, UsesListEndpoint, Returns400):
+        @pytest.fixture
+        def common_subject(self, staff_client, get_response):
+            return get_response
+
         data = static_fixture({"buyer": 1, "offer": 1})
 
     class TestDetail(UsesGetMethod, UsesDetailEndpoint, Returns200):
         id = static_fixture("69e0a2a6-cacc-4b39-a7b3-02a2759160ac")
 
     class TestApply(UsesPostMethod, UsesDetailEndpoint, Returns200):
+        @pytest.fixture
+        def common_subject(self, staff_client, get_response):
+            return get_response
+
         detail_url = lambda_fixture(
             lambda id: url_for("discounts:loyaltycard-apply", id=id)
         )

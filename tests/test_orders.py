@@ -5,7 +5,6 @@ from django.core.management import call_command
 from pytest_drf import (
     Returns200,
     Returns201,
-    UsesDetailEndpoint,
     UsesGetMethod,
     UsesListEndpoint,
     UsesPostMethod,
@@ -17,56 +16,33 @@ from utils.views_utils import ViewSetTest
 
 
 @pytest.fixture(scope="module")
-def django_db_setup(request, django_db_setup, django_db_blocker):
+def django_db_setup(request, django_db_setup):
     # load a fixture from current directory
-    with django_db_blocker.unblock():
-        call_command(
-            "loaddata",
-            Path(request.fspath).parent / "fixtures" / "shops.json",
-            Path(request.fspath).parent / "fixtures" / "units.json",
-        )
-        yield
-        call_command("flush", "--no-input")
+    call_command(
+        "loaddata",
+        Path(request.fspath).parent / "fixtures" / "products.json",
+    )
 
 
-class TestWarehouseOrderViewset(ViewSetTest):
+class TestOrdersViewSet(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, get_response):
+    def common_subject(self, db, authenticated_client, get_response):
         return get_response
 
-    list_url = lambda_fixture(lambda: url_for("internal_api:warehouseorder-list"))
+    list_url = lambda_fixture(lambda: url_for("orders:order-list"))
 
-    detail_url = lambda_fixture(
-        lambda id: url_for("internal_api:warehouseorder-detail", id=id)
-    )
-
-    data = static_fixture(
-        {
-            "shop": 1,
-            "status": "approving",
-            "order_positions": [
-                {
-                    "product_unit": 1,
-                },
-                {
-                    "product_unit": 3,
-                },
-            ],
-        }
-    )
-
-    class TestList(UsesGetMethod, UsesListEndpoint, Returns200):
+    class TestList(UsesListEndpoint, UsesGetMethod, Returns200):
         pass
 
-    class TestCreate(UsesPostMethod, UsesListEndpoint, Returns201):
-        pass
+    class TestCreate(UsesListEndpoint, UsesPostMethod, Returns201):
+        data = static_fixture(
+            {
+                "payment_method": "cash",
+                "payment_status": "ok",
+                "products": [1],
+                "sum_total": 0.0,
+            }
+        )
 
-    class TestDetail(UsesGetMethod, UsesDetailEndpoint, Returns200):
-        @pytest.fixture
-        def id(self, client, list_url, data):
-            result = client.post(list_url, data, format="json")
-            return result.json()["id"]
-
-        def test_order_record_created(self, json):
-            # two order positions made it from data fixture to database
-            assert len(json["order_positions"]) == 2
+        def test_customer(self, json):
+            assert json["customer"] == 3

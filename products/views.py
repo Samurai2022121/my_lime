@@ -2,10 +2,10 @@ from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_nested.viewsets import NestedViewSetMixin
 
+from utils import permissions as perms
 from utils.views_utils import (
     BulkChangeArchiveStatusViewSetMixin,
     BulkUpdateViewSetMixin,
@@ -26,7 +26,9 @@ from .models import (
 
 
 class MeasurementUnitViewset(viewsets.ModelViewSet):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(read=perms.allow_all, write=perms.allow_staff),
+    )
     queryset = MeasurementUnit.objects.order_by("name")
     serializer_class = serializers.MeasurementUnitSerializer
 
@@ -38,7 +40,14 @@ class ProductAdminViewset(
     OrderingModelViewsetMixin,
     viewsets.ModelViewSet,
 ):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(
+            read=perms.allow_all,
+            write=perms.allow_staff,
+            bulk_update=perms.allow_staff,
+            change_archive_status=perms.allow_staff,
+        ),
+    )
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ProductFilter
     serializer_class = serializers.ProductAdminSerializer
@@ -82,7 +91,9 @@ class ProductAdminViewset(
 
 
 class ProductUnitViewset(NestedViewSetMixin, viewsets.ModelViewSet):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(read=perms.allow_all, write=perms.allow_staff),
+    )
     serializer_class = serializers.ProductUnitSerializer
     queryset = ProductUnit.objects.all()
     filter_backends = (DjangoFilterBackend,)
@@ -95,7 +106,9 @@ class ProductUnitViewset(NestedViewSetMixin, viewsets.ModelViewSet):
 
 
 class ConversionSourceViewset(NestedViewSetMixin, viewsets.ModelViewSet):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(read=perms.allow_all, write=perms.allow_staff),
+    )
     serializer_class = serializers.ConversionSourceSerializer
     queryset = ProductUnitConversion.objects.order_by("target_unit__unit__name")
     lookup_field = "id"
@@ -109,7 +122,9 @@ class ConversionSourceViewset(NestedViewSetMixin, viewsets.ModelViewSet):
 
 
 class ConversionTargetViewset(NestedViewSetMixin, viewsets.ModelViewSet):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(read=perms.allow_all, write=perms.allow_staff),
+    )
     serializer_class = serializers.ConversionTargetSerializer
     queryset = ProductUnitConversion.objects.order_by("source_unit__unit__name")
     lookup_field = "id"
@@ -126,7 +141,7 @@ class ProductViewset(
     OrderingModelViewsetMixin,
     viewsets.ReadOnlyModelViewSet,
 ):
-    permission_classes = (AllowAny,)
+    permission_classes = (perms.ReadWritePermission(read=perms.allow_all),)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ProductFilter
     serializer_class = serializers.ProductSerializer
@@ -155,7 +170,13 @@ class ProductViewset(
 
 
 class CategoryViewset(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(
+            read=perms.allow_all,
+            write=perms.allow_staff,
+            change_archive_status=perms.allow_staff,
+        ),
+    )
     pagination_class = None
     serializer_class = serializers.CategorySerializer
     lookup_field = "id"
@@ -183,11 +204,15 @@ class CategoryViewset(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet
         return qs
 
 
-class EditProductImagesViewset(
-    mixins.ListModelMixin,
-    viewsets.GenericViewSet,
-):
-    permission_classes = (AllowAny,)
+class EditProductImagesViewset(mixins.ListModelMixin, viewsets.GenericViewSet):
+    permission_classes = (
+        perms.ActionPermission(
+            list=perms.allow_all,
+            create=perms.allow_staff,
+            bulk_update=perms.allow_staff,
+            bulk_delete=perms.allow_staff,
+        ),
+    )
     pagination_class = None
     serializer_class = serializers.EditProductImagesSerializer
     queryset = ProductImages.objects.all()

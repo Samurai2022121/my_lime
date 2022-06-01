@@ -6,12 +6,13 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from products.models import ProductUnit
+from utils.serializers_utils import AuthorMixin
 
 from .. import models
 from .shops import WarehouseRecordSerializer
 
 
-class ProductionDocumentSerializer(serializers.ModelSerializer):
+class ProductionDocumentSerializer(AuthorMixin, serializers.ModelSerializer):
     """
     Related production records are created in the view. You only need to pass
     a proper `daily_menu_plan` into this serializer.
@@ -193,7 +194,9 @@ class InventoryRecordSerializer(
         return super().create(validated_data)
 
 
-class InventoryDocumentSerializer(NestedCreateMixin, serializers.ModelSerializer):
+class InventoryDocumentSerializer(
+    AuthorMixin, NestedCreateMixin, serializers.ModelSerializer
+):
     shop = serializers.PrimaryKeyRelatedField(
         queryset=models.Shop.objects,
         allow_null=True,
@@ -288,7 +291,9 @@ class ReceiptRecordSerializer(
         ) + NewOrExistingBatchMixin.FIELDS
 
 
-class ReceiptDocumentSerializer(NestedCreateMixin, serializers.ModelSerializer):
+class ReceiptDocumentSerializer(
+    AuthorMixin, NestedCreateMixin, serializers.ModelSerializer
+):
     warehouse_records = ReceiptRecordSerializer(many=True, write_only=True)
     warehouse_records_on_read = serializers.HyperlinkedIdentityField(
         read_only=True,
@@ -350,7 +355,9 @@ class WriteOffRecordSerializer(ExistingBatchMixin, serializers.ModelSerializer):
         return super().create(validated_data)
 
 
-class WriteOffDocumentSerializer(NestedCreateMixin, serializers.ModelSerializer):
+class WriteOffDocumentSerializer(
+    AuthorMixin, NestedCreateMixin, serializers.ModelSerializer
+):
     """
     Nothing special is going on here. Each write-off line may be created by
     stating `warehouse` Id and `quantity`.
@@ -388,7 +395,9 @@ class ReturnRecordSerializer(ExistingBatchMixin, serializers.ModelSerializer):
         return super().create(validated_data)
 
 
-class ReturnDocumentSerializer(NestedCreateMixin, serializers.ModelSerializer):
+class ReturnDocumentSerializer(
+    AuthorMixin, NestedCreateMixin, serializers.ModelSerializer
+):
     """
     This serializer is basically a copy of `WriteOffDocumentSerializer`.
     """
@@ -425,7 +434,9 @@ class SaleRecordSerializer(ExistingBatchMixin, serializers.ModelSerializer):
         return super().create(validated_data)
 
 
-class SaleDocumentSerializer(NestedCreateMixin, serializers.ModelSerializer):
+class SaleDocumentSerializer(
+    AuthorMixin, NestedCreateMixin, serializers.ModelSerializer
+):
     warehouse_records = SaleRecordSerializer(many=True, write_only=True)
     warehouse_records_on_read = serializers.HyperlinkedIdentityField(
         read_only=True,
@@ -468,7 +479,7 @@ class ConversionRecordSerializer(serializers.ModelSerializer):
         )
 
 
-class ConversionDocumentSerializer(serializers.ModelSerializer):
+class ConversionDocumentSerializer(AuthorMixin, serializers.ModelSerializer):
     warehouse_records = ConversionRecordSerializer(many=True, write_only=True)
     warehouse_records_on_read = serializers.HyperlinkedIdentityField(
         read_only=True,
@@ -551,7 +562,7 @@ class MoveRecordSerializer(ExistingBatchMixin, serializers.ModelSerializer):
         fields = ("warehouse", "quantity", "cost") + ExistingBatchMixin.FIELDS
 
 
-class MoveDocumentSerializer(serializers.ModelSerializer):
+class MoveDocumentSerializer(AuthorMixin, serializers.ModelSerializer):
     """
     Doubles the `WarehouseRecord` lines while negating their quantities
     similar to `ConversionDocumentSerializer`, but targets another shop.
@@ -614,7 +625,7 @@ class MoveDocumentSerializer(serializers.ModelSerializer):
         return document
 
 
-class CancelDocumentSerializer(serializers.ModelSerializer):
+class CancelDocumentSerializer(AuthorMixin, serializers.ModelSerializer):
     warehouse_records = serializers.HyperlinkedIdentityField(
         read_only=True,
         view_name="internal_api:cancelrecord-list",

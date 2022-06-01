@@ -3,6 +3,7 @@ from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework import serializers
 
 from reviews.models import Star
+from utils.serializers_utils import AuthorMixin
 
 from .models import News, NewsParagraphs, NewsParagraphsImages, Section
 
@@ -61,15 +62,20 @@ class NewsSerializer(WritableNestedModelSerializer, serializers.ModelSerializer)
         return {"id": obj.author.id, "name": obj.author.name}
 
 
-class NewsAdminSerializer(serializers.ModelSerializer):
-    author = serializers.SerializerMethodField()
+class NewsAdminSerializer(AuthorMixin, serializers.ModelSerializer):
+    author_on_read = serializers.SerializerMethodField(source="author", read_only=True)
     news_paragraphs = NewsParagraphsSerializer(many=True)
 
     class Meta:
         model = News
         fields = "__all__"
 
-    def get_author(self, obj):
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["author"] = data.pop("author_on_read", None)
+        return data
+
+    def get_author_on_read(self, obj):
         return {"id": obj.author.id, "name": obj.author.name}
 
 

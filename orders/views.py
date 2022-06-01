@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from rest_framework.permissions import AllowAny
 
+from utils import permissions as perms
 from utils.views_utils import (
     BulkChangeArchiveStatusViewSetMixin,
     OrderingModelViewsetMixin,
@@ -17,16 +17,25 @@ class OrderViewset(
     viewsets.ModelViewSet,
 ):
     filterset_class = OrderFilter
-    permission_classes = (AllowAny,)
+    # web store client is allowed to create order, not to screw it afterwards
+    permission_classes = (
+        perms.ReadWritePermission(
+            read=perms.allow_authenticated,
+            create=perms.allow_authenticated,
+            write=perms.allow_staff,
+            change_archive_status=perms.allow_staff,
+        ),
+    )
     serializer_class = OrdersSerializer
     lookup_field = "id"
     queryset = Order.objects.all()
 
-    def get_object(self):
-        return self.queryset.get(id=self.kwargs["id"])
-
     def get_queryset(self):
         qs = self.queryset
+        user = self.request.user
+
+        if not (user.is_superuser or user.is_staff):
+            qs = qs.filter(customer=user)
 
         if "is_archive" not in self.request.query_params:
             qs = qs.filter(is_archive=False)

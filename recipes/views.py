@@ -1,7 +1,7 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
-from rest_framework.permissions import AllowAny
 
+from utils import permissions as perms
 from utils.views_utils import (
     BulkChangeArchiveStatusViewSetMixin,
     BulkUpdateViewSetMixin,
@@ -19,11 +19,10 @@ from .serializers import (
 )
 
 
-class RecipeViewset(
-    OrderingModelViewsetMixin,
-    viewsets.ModelViewSet,
-):
-    permission_classes = (AllowAny,)
+class RecipeViewset(OrderingModelViewsetMixin, viewsets.ModelViewSet):
+    permission_classes = (
+        perms.ReadWritePermission(read=perms.allow_all, write=perms.allow_staff),
+    )
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
     serializer_class = RecipeSerializer
@@ -62,7 +61,14 @@ class RecipeAdminViewset(
     OrderingModelViewsetMixin,
     viewsets.ModelViewSet,
 ):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(
+            read=perms.allow_all,
+            write=perms.allow_staff,
+            bulk_update=perms.allow_staff,
+            change_archive_status=perms.allow_staff,
+        ),
+    )
     serializer_class = RecipeAdminSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
@@ -96,7 +102,13 @@ class RecipeAdminViewset(
 
 
 class RecipeCategoryViewset(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet):
-    permission_classes = (AllowAny,)
+    permission_classes = (
+        perms.ReadWritePermission(
+            read=perms.allow_all,
+            write=perms.allow_staff,
+            change_archive_status=perms.allow_staff,
+        ),
+    )
     pagination_class = None
     serializer_class = RecipeCategorySerializer
     lookup_field = "id"

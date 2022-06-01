@@ -20,12 +20,11 @@ CATEGORY_ID = 2
 
 class TestProductViewset(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, request, db, django_db_blocker, get_response):
-        with django_db_blocker.unblock():
-            call_command(
-                "loaddata",
-                Path(request.fspath).parent / "fixtures" / "products.json",
-            )
+    def common_subject(self, request, db, get_response):
+        call_command(
+            "loaddata",
+            Path(request.fspath).parent / "fixtures" / "products.json",
+        )
         return get_response
 
     list_url = lambda_fixture(lambda: url_for("internal_api:product-list"))
@@ -88,6 +87,10 @@ class TestProductViewset(ViewSetTest):
         UsesListEndpoint,
         Returns201,
     ):
+        @pytest.fixture
+        def client(self, staff_client):
+            return staff_client
+
         data = static_fixture(
             {
                 "name": "Test product",
@@ -101,22 +104,25 @@ class TestProductViewset(ViewSetTest):
 
 class TestProductCategoryViewSet(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, request, db, django_db_blocker, get_response):
-        with django_db_blocker.unblock():
-            call_command(
-                "loaddata",
-                Path(request.fspath).parent / "fixtures" / "products.json",
-            )
+    def common_subject(self, request, db, get_response):
+        call_command(
+            "loaddata",
+            Path(request.fspath).parent / "fixtures" / "products.json",
+        )
         return get_response
 
     list_url = lambda_fixture(lambda: url_for("products:category-list"))
 
     detail_url = lambda_fixture(lambda id: url_for("products:category-detail", id=id))
 
-    class TestView(UsesGetMethod, UsesListEndpoint, Returns200):
+    class TestList(UsesGetMethod, UsesListEndpoint, Returns200):
         pass
 
     class TestCreate(UsesPostMethod, UsesListEndpoint, Returns201):
+        @pytest.fixture
+        def client(self, staff_client):
+            return staff_client
+
         format = static_fixture(None)
 
         @pytest.fixture

@@ -1,25 +1,19 @@
-from pathlib import Path
-
 import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
-from django.core.management import call_command
-from pytest_drf import Returns200, Returns403, UsesListEndpoint, UsesPostMethod
+from pytest_drf import (
+    Returns200,
+    Returns403,
+    UsesDetailEndpoint,
+    UsesGetMethod,
+    UsesListEndpoint,
+    UsesPostMethod,
+)
 from pytest_drf.util import url_for
 from pytest_lambda import lambda_fixture, static_fixture
 from rest_framework.authtoken.models import Token
 
 from utils.views_utils import APIViewTest
-
-
-@pytest.fixture(scope="module")
-def django_db_setup(request, django_db_setup, django_db_blocker):
-    with django_db_blocker.unblock():
-        call_command(
-            "loaddata", Path(request.fspath).parent / "fixtures" / "users.json"
-        )
-        yield
-        call_command("flush", "--no-input")
 
 
 class TestObtainPlainTokenForSuperuser(
@@ -107,3 +101,26 @@ class TestObtainPlainTokenForAuthorizedUserser(
             "password": "plain_user_password",
         }
     )
+
+
+class TestUserViewSet(APIViewTest):
+    @pytest.fixture
+    def common_subject(self, db, staff_client, get_response):
+        return get_response
+
+    list_url = lambda_fixture(lambda: url_for("users:user-list"))
+
+    detail_url = lambda_fixture(lambda id: url_for("users:user-detail", id=id))
+
+    class TestList(UsesGetMethod, UsesListEndpoint, Returns200):
+        pass
+
+    class TestDetail(UsesGetMethod, UsesDetailEndpoint, Returns200):
+        id = static_fixture(3)
+
+    class TestGetCurrendUser(UsesGetMethod, Returns200):
+        @pytest.fixture
+        def common_subject(self, authenticated_client, get_response):
+            return get_response
+
+        url = lambda_fixture(lambda: url_for("users:user-get-current-user"))
