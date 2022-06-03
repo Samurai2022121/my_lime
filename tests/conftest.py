@@ -1,8 +1,11 @@
 from pathlib import Path
 
 import pytest
+from django.apps import apps
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
+from django.db import connection
+from django.db.utils import ProgrammingError
 
 
 @pytest.fixture(scope="module")
@@ -20,6 +23,13 @@ def pepe(request):
 @pytest.fixture(scope="module", autouse=True)
 def django_db_setup(request, django_db_setup, django_db_blocker):
     with django_db_blocker.unblock():
+        # create a foreign model to enable Haystack indexing
+        legal_entity_model = apps.get_model("internal_api", "LegalEntities")
+        with connection.schema_editor() as se:
+            try:
+                se.create_model(legal_entity_model)
+            except ProgrammingError:
+                pass
         # make user database available for all tests
         call_command(
             "loaddata",

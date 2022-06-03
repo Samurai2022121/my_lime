@@ -23,6 +23,8 @@ def django_db_setup(request, django_db_setup):
         "loaddata",
         Path(request.fspath).parent / "fixtures" / "suppliers.json",
     )
+    # build Haystack index
+    call_command("rebuild_index", "--noinput")
 
 
 class TestSupplierViewSet(ViewSetTest):
