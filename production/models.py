@@ -211,6 +211,9 @@ class DailyMenuPlan(Timestampable, models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
     )
+    # temporary solution for time management
+    preparation_date = models.DateField("дата приготовления", null=True, blank=True)
+    is_prepared = models.BooleanField("приготовлено", default=False)
 
     objects = models.Manager()
     layout = DailyMenuPlanLayoutManager()
