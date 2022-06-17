@@ -360,7 +360,7 @@ class SimpleProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        exclude = ("is_archive", "is_sorted")
+        exclude = ("is_archive",)
 
 
 class SimpleProductUnitSerializer(serializers.ModelSerializer):

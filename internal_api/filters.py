@@ -81,10 +81,13 @@ class WarehouseFilter(django_filters.FilterSet):
         field_name="product_unit__product__is_archive",
         label="показывать архивные запасы",
     )
+    is_sorted = django_filters.BooleanFilter(
+        field_name="product_unit__product__is_sorted",
+        label="показывать неревизованные запасы",
+    )
     remaining = django_filters.RangeFilter(
         label="отобрать по количеству на складе",
     )
-
     category = django_filters.CharFilter(
         method="in_category_filter",
         label="входит в категорию или её подкатегории (Id категории)",
