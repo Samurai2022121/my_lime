@@ -94,6 +94,8 @@ class DailyMenuSerializer(
             "menu_dishes",
             "created_at",
             "updated_at",
+            "preparation_date",
+            "is_prepared",
         ]
 
     def to_representation(self, instance):
