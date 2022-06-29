@@ -29,6 +29,8 @@ Available settings are:
 | RF_AUTH_CLASSES                 | list | A list of [DRF's authentication classes](https://www.django-rest-framework.org/api-guide/authentication/) |
 | CELERY_BROKER_URL               | str  | Celery broker URL (only Redis is supported)                                                               |
 | CELERY_TASK_ALWAYS_EAGER        | bool | Synchronous mode switch. May be useful in debugging                                                       |
+| THUMBNAIL_DEBUG                 | bool | Log debugging info on thumbnail caching & searching (equals DEBUG by default)                             |
+| THUMBNAIL_REDIS_URL             | str  | Redis database connection string for thumbnail K/V engine (only Redis is supported)                       |
 | PRODUCT_IMAGE_PRESERVE_ORIGINAL | bool | Setting this to `False` (default) saves disk space on product images                                      |
 
 ## Development
