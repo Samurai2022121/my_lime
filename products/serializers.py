@@ -7,12 +7,13 @@ from rest_framework_nested.serializers import NestedHyperlinkedIdentityField
 
 from reviews.models import Favourite, Star
 from utils.models_utils import Round
+from utils.serializers_utils import HyperlinkedSorlImageField
 
 from .models import (
     Category,
     MeasurementUnit,
     Product,
-    ProductImages,
+    ProductImage,
     ProductUnit,
     ProductUnitConversion,
 )
@@ -68,31 +69,33 @@ class CategorySerializer(serializers.ModelSerializer):
         return instance
 
 
-class EditProductImagesSerializer(serializers.ModelSerializer):
-    image_1000 = Base64ImageField(required=True)
+class EditProductImageSerializer(serializers.ModelSerializer):
+    image_1000 = Base64ImageField(source="image", required=True)
 
     class Meta:
-        model = ProductImages
+        model = ProductImage
         fields = ("id", "image_1000", "main", "description", "product")
 
 
-class BulkEditProductImagesSerializer(serializers.Serializer):
-    images = EditProductImagesSerializer(many=True)
+class BulkEditProductImageSerializer(serializers.Serializer):
+    images = EditProductImageSerializer(many=True)
 
     class Meta:
         fields = ("images",)
 
 
-class BulkUpdateProductImagesSerializer(serializers.Serializer):
+class BulkUpdateProductImageSerializer(serializers.Serializer):
     instances = serializers.ListField(child=serializers.JSONField(), required=True)
     product = serializers.IntegerField(required=True)
 
 
-class ProductImagesSerializer(serializers.ModelSerializer):
-    image_1000 = Base64ImageField()
+class ProductImageSerializer(serializers.ModelSerializer):
+    image_1000 = Base64ImageField(source="image")
+    image_500 = HyperlinkedSorlImageField("500x500", source="image", read_only=True)
+    image_150 = HyperlinkedSorlImageField("150x150", source="image", read_only=True)
 
     class Meta:
-        model = ProductImages
+        model = ProductImage
         fields = ("id", "image_1000", "image_500", "image_150", "main", "description")
 
 
@@ -172,7 +175,7 @@ class ConversionTargetSerializer(serializers.ModelSerializer):
 class ProductListAdminSerializer(serializers.ModelSerializer):
     units = ProductUnitSerializer(many=True)
     category = CategorySerializer()
-    images = ProductImagesSerializer(many=True, required=False)
+    images = ProductImageSerializer(many=True, required=False)
 
     class Meta:
         model = Product
@@ -191,7 +194,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     favourite_count = serializers.SerializerMethodField()
     discounted_price = serializers.SerializerMethodField()
     category = CategorySerializer()
-    images = ProductImagesSerializer(many=True, required=False)
+    images = ProductImageSerializer(many=True, required=False)
 
     class Meta:
         model = Product
@@ -235,9 +238,8 @@ class ProductListSerializer(serializers.ModelSerializer):
         )
 
     def get_discounted_price(self, obj):
-        return (
-            round((obj.price * (1 - obj.discount / 100)), 2) if obj.discount else None
-        )
+        # TODO: catalog models have nothing to do with prices
+        return None
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -253,7 +255,7 @@ class ProductSerializer(serializers.ModelSerializer):
     reviews = serializers.SerializerMethodField()
     discounted_price = serializers.SerializerMethodField()
     category_read = CategorySerializer(read_only=True, source="category")
-    images = ProductImagesSerializer(many=True, required=False)
+    images = ProductImageSerializer(many=True, required=False)
 
     class Meta:
         model = Product
@@ -302,15 +304,13 @@ class ProductSerializer(serializers.ModelSerializer):
         )
 
     def get_discounted_price(self, obj):
-        return (
-            round((obj.price * (1 - obj.discount / 100)), 2) if obj.discount else None
-        )
+        return None
 
 
 class ProductAdminSerializer(serializers.ModelSerializer):
     units = ProductUnitSerializer(many=True, read_only=True)
     category_read = CategorySerializer(read_only=True, source="category")
-    images = ProductImagesSerializer(many=True, required=False)
+    images = ProductImageSerializer(many=True, required=False)
 
     class Meta:
         model = Product
@@ -326,7 +326,7 @@ class ProductAdminSerializer(serializers.ModelSerializer):
         product = Product.objects.create(**validated_data)
 
         for image in images_data:
-            ProductImages.objects.create(product=product, **image)
+            ProductImage.objects.create(product=product, **image)
         return product
 
     def update(self, instance, validated_data):
@@ -335,9 +335,9 @@ class ProductAdminSerializer(serializers.ModelSerializer):
         for image_obj in images_data:
             image_id = image_obj.get("id", "")
             if image_id:
-                ProductImages.objects.filter(id=image_id).update(**image_obj)
+                ProductImage.objects.filter(id=image_id).update(**image_obj)
             else:
-                ProductImages.objects.create(product=instance, **image_obj)
+                ProductImage.objects.create(product=instance, **image_obj)
         super().update(instance, validated_data)
         return instance
 

@@ -1,6 +1,7 @@
 from typing import Type
 
 from rest_framework import serializers
+from sorl.thumbnail import get_thumbnail
 
 from news.models import News
 from products.models import Product
@@ -15,6 +16,30 @@ class BulkUpdateSerializer(serializers.Serializer):
 
 class BulkActionSerializer(serializers.Serializer):
     instances = serializers.ListField(child=serializers.IntegerField(), required=True)
+
+
+class HyperlinkedSorlImageField(serializers.ImageField):
+    """
+    https://github.com/dessibelle/sorl-thumbnail-serializer-field/
+    """
+
+    def __init__(self, geometry_string, options=None, **kwargs):
+        if options is None:
+            options = {}
+        self.geometry_string = geometry_string
+        self.options = options
+        super().__init__(**kwargs)
+
+    def to_representation(self, value):
+        if not value:
+            return None
+
+        image = get_thumbnail(value, self.geometry_string, **self.options)
+        request = self.context.get("request", None)
+        if request is None:
+            return super().to_representation(image)
+        else:
+            return request.build_absolute_uri(image.url)
 
 
 def exclude_field(

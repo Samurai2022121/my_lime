@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "django_extensions",
     "haystack",
+    "sorl.thumbnail",
     "news",
     "orders",
     "personnel",
@@ -175,6 +176,14 @@ STATIC_URL = "/staticfiles/"
 STATIC_ROOT = BASE_DIR.parent / "staticfiles"
 MEDIA_URL = "/mediafiles/"
 MEDIA_ROOT = BASE_DIR.parent / "mediafiles"
+
+THUMBNAIL_DEBUG = env.bool("THUMBNAIL_DEBUG", DEBUG)
+THUMBNAIL_KVSTORE = "sorl.thumbnail.kvstores.redis_kvstore.KVStore"
+THUMBNAIL_BACKEND = "utils.thumbnail.ThumbnailBackend"
+THUMBNAIL_FORMAT = "PNG"
+THUMBNAIL_REDIS_URL = env("THUMBNAIL_REDIS_URL")
+
+PRODUCT_IMAGE_PRESERVE_ORIGINAL = env.bool("PRODUCT_IMAGE_PRESERVE_ORIGINAL", False)
 
 HAYSTACK_CONNECTIONS = {
     "default": {

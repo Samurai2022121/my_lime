@@ -47,7 +47,7 @@ deprecated==1.2.13
     # via redis
 distlib==0.3.4
     # via virtualenv
-django==4.0.1
+django==4.0.5
     # via
     #   -r requirements.in
     #   django-cors-headers
@@ -137,6 +137,8 @@ kombu==5.2.3
     # via celery
 lazy-object-proxy==1.7.1
     # via pytest-common-subject
+loguru==0.6.0
+    # via -r requirements.in
 lxml==4.8.0
     # via
     #   docxcompose
@@ -163,7 +165,7 @@ pandas==1.4.0
     # via -r requirements.in
 pathspec==0.9.0
     # via black
-pillow==9.0.1
+pillow==9.1.1
     # via
     #   -r requirements.in
     #   pngquant
@@ -251,6 +253,8 @@ six==1.16.0
     #   docxtpl
     #   python-dateutil
     #   virtualenv
+sorl-thumbnail==12.8.0
+    # via -r requirements.in
 sqlparse==0.4.2
     # via
     #   django

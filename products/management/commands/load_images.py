@@ -27,5 +27,5 @@ class Command(BaseCommand):
                 for image in images.glob(f"{barcode}*.png"):
                     with open(image, "rb") as image_file:
                         product.images.create(
-                            image_1000=ImageFile(image_file, name=image.name),
+                            image=ImageFile(image_file, name=image.name),
                         )
