@@ -23,10 +23,10 @@ class Category(MPTTModel):
         verbose_name="Родительская категория",
     )
     description = models.TextField(blank=True, null=True, verbose_name="Описание")
-    image = models.FileField(
+    image = ImageField(
         blank=True,
         null=True,
-        verbose_name="Изображение категории",
+        verbose_name="изображение категории",
         upload_to="products/categories/",
         validators=[FileExtensionValidator(["svg", "png", "jpg"])],
     )
