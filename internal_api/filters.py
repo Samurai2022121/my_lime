@@ -3,7 +3,7 @@ from django.db.models import Q
 from haystack.inputs import Clean, Exact
 from haystack.query import SearchQuerySet
 
-from products.models import Category
+from products.models import Category, ProductUnit
 
 from . import models
 
@@ -73,6 +73,15 @@ class ShopFilter(django_filters.FilterSet):
         fields = {"is_archive": ["exact"]}
 
 
+def warehouse_product_unit_qs(request):
+    if request is None:
+        return ProductUnit.objects.none()
+    qs = ProductUnit.objects.filter(
+        warehouses__shop_id=request.query_params.get("shop")
+    )
+    return qs
+
+
 class WarehouseFilter(django_filters.FilterSet):
     s = WarehouseFullTextFilter(
         label="поиск по наименованию продукта, штрихкоду продукта, id продукта",
@@ -92,7 +101,10 @@ class WarehouseFilter(django_filters.FilterSet):
         method="in_category_filter",
         label="входит в категорию или её подкатегории (Id категории)",
     )
-
+    product_unit = django_filters.ModelMultipleChoiceFilter(
+        queryset=warehouse_product_unit_qs,
+        label="единицы хранения",
+    )
     order_by = django_filters.OrderingFilter(
         fields=(
             ("id", "id"),

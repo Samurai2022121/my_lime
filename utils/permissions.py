@@ -47,7 +47,7 @@ class ActionPermission(BasePermission):
     def has_permission(self, request, view):
         return getattr(
             self,
-            f"perm_{view.action}",
+            f"perm_{getattr(view, 'action', '')}",
             self.perm_default,
         )(request, view)
 
