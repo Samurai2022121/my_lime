@@ -42,6 +42,7 @@ urlpatterns = [
         "production/",
         include(("production.urls", "production"), namespace="production"),
     ),
+    path("basket/", include(("basket.urls", "basket"), namespace="basket")),
     path(
         "docs/",
         schema_view.with_ui("swagger", cache_timeout=0),

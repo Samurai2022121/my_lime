@@ -111,3 +111,6 @@ dmypy.json
 
 # Microsoft Office/OpenOffice/LibreOffice
 .~lock.*
+
+# intellij idea
+/.idea

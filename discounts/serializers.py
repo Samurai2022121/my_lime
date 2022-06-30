@@ -1,5 +1,7 @@
+from datetime import datetime, timedelta
 from typing import Sequence
 
+from croniter import croniter
 from django.contrib.auth import get_user_model
 from drf_writable_nested.serializers import WritableNestedModelSerializer
 from rest_framework import serializers
@@ -60,6 +62,25 @@ class BenefitSerializer(serializers.ModelSerializer):
         return data
 
 
+def crontab_string(value):
+    if not croniter.is_valid(value):
+        raise ValidationError(f"“{value}” is not a valid crontab expression.")
+
+
+def datetime_range(value):
+    started_at = value.get("started_at", datetime.min)
+    ended_at = value.get("ended_at", datetime.max)
+    if started_at >= ended_at:
+        raise ValidationError(f"Invalid {started_at}:{ended_at} range.")
+
+
+def schedule_duration(value):
+    if value.get("schedule") and value.get("duration", timedelta()) < timedelta(
+        seconds=1
+    ):
+        raise ValidationError("Duration is too short.")
+
+
 class OfferSerializer(WritableNestedModelSerializer):
     condition = ConditionSerializer()
     benefit = BenefitSerializer()
@@ -67,6 +88,15 @@ class OfferSerializer(WritableNestedModelSerializer):
     class Meta:
         model = Offer
         fields = "__all__"
+        extra_kwargs = {
+            "schedule": {
+                "validators": [crontab_string],
+            },
+        }
+        validators = [datetime_range, schedule_duration]
+
+    def is_valid(self, raise_exception=False):
+        return super().is_valid(raise_exception)
 
 
 class BuyerCountSerializer(serializers.ModelSerializer):

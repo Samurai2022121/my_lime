@@ -1,11 +1,16 @@
+import datetime
 import uuid
 from datetime import timedelta
 from decimal import Decimal
 
+from croniter import croniter
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from model_utils.choices import Choices
+
+from lime import app
 
 
 class Range(models.Model):
@@ -118,6 +123,19 @@ def in_a_month():
     return timezone.now() + timedelta(days=30)
 
 
+def tz_min():
+    return timezone.make_aware(datetime.datetime.min)
+
+
+def tz_max():
+    return timezone.make_aware(datetime.datetime.max)
+
+
+def crontab_string(val):
+    # no need to properly initialize `croniter` to validate cron expression
+    return croniter.is_valid(val)
+
+
 class Offer(models.Model):
     TYPES = Choices(
         ("site", "доступно для всех"),
@@ -144,8 +162,16 @@ class Offer(models.Model):
     is_public = models.BooleanField("открыто", default=True)
     is_active = models.BooleanField("активно", default=True)
     type = models.CharField("тип", choices=TYPES, default=TYPES.site, max_length=16)
-    started_at = models.DateTimeField("доступно с", default=timezone.now)
-    ended_at = models.DateTimeField("доступно до", default=in_a_month)
+    started_at = models.DateTimeField("доступно с", default=tz_min)
+    ended_at = models.DateTimeField("доступно до", default=tz_max)
+    schedule = models.CharField(
+        "расписание",
+        max_length=255,
+        validators=[crontab_string],
+        null=True,
+        blank=True,
+    )
+    duration = models.DurationField("срок действия", default=timedelta)
     order_limit = models.PositiveBigIntegerField(
         "использовать в одной продаже не более, раз", default=0
     )
@@ -162,6 +188,18 @@ class Offer(models.Model):
 
     def __str__(self):
         return self.name
+
+    def clean(self):
+        if self.schedule and self.duration < timedelta(seconds=1):
+            raise ValidationError("Duration is too short.")
+        if self.started_at >= self.ended_at:
+            raise ValidationError(f"Invalid {self.started_at}:{self.ended_at} range.")
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # reschedule now
+        app.send_task("discounts.tasks.reschedule_offer", args=(self.id,))
 
 
 class BuyerCount(models.Model):
@@ -206,7 +244,7 @@ class LoyaltyCard(models.Model):
         default_related_name = "loyalty_cards"
 
     def __str__(self):
-        return self.id
+        return str(self.id)
 
 
 class Voucher(models.Model):
@@ -225,4 +263,4 @@ class Voucher(models.Model):
         verbose_name_plural = "ваучеры"
 
     def __str__(self):
-        return self.id
+        return str(self.id)
