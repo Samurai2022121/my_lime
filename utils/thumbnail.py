@@ -25,8 +25,9 @@ class ThumbnailBackend(BaseBackend):
 
     def _create_thumbnail(self, source_image, geometry_string, options, thumbnail):
         super()._create_thumbnail(source_image, geometry_string, options, thumbnail)
-        thumbnail_path = settings.MEDIA_ROOT / thumbnail.name
-        try:
-            pngquant.quant_image(thumbnail_path)
-        except Exception as e:
-            logger.warning(f"Could not quantize {thumbnail_path}: {e}")
+        if options["format"] == "PNG":
+            thumbnail_path = settings.MEDIA_ROOT / thumbnail.name
+            try:
+                pngquant.quant_image(thumbnail_path)
+            except Exception as e:
+                logger.warning(f"Could not optimize {thumbnail_path}: {e}")
