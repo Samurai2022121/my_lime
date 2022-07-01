@@ -1,9 +1,16 @@
+import logging
 from datetime import timedelta
 from pathlib import Path
 
 import environ
 import sentry_sdk
+from loguru import logger
 from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.logging import (
+    BreadcrumbHandler,
+    EventHandler,
+    LoggingIntegration,
+)
 
 root = environ.Path(__file__) - 2
 env = environ.Env()
@@ -14,6 +21,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 DEBUG = env.bool("DJANGO_DEBUG", default=False)
+
+LOGURU_DIAGNOSE = env.bool("LOGURU_DIAGNOSE", default=False)
 
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[])
 
@@ -48,6 +57,7 @@ INSTALLED_APPS = [
     "users",
     "production",
     "discounts",
+    "basket",
 ]
 
 MIDDLEWARE = [
@@ -212,6 +222,22 @@ if SENTRY_KEY and SENTRY_PROJECT:
         dsn="https://{key}@sentry.thefresh.by/{project}".format(
             key=SENTRY_KEY, project=SENTRY_PROJECT
         ),
-        integrations=[DjangoIntegration()],
+        integrations=[
+            DjangoIntegration(),
+            # disable logging integration
+            LoggingIntegration(event_level=None, level=None),
+        ],
         environment=ENVIRONMENT,
+    )
+    # add loguru instead of standard logging
+    # https://github.com/getsentry/sentry-python/issues/653#issuecomment-788854865
+    logger.add(
+        BreadcrumbHandler(level=logging.DEBUG),
+        diagnose=LOGURU_DIAGNOSE,
+        level=logging.DEBUG,
+    )
+    logger.add(
+        EventHandler(level=logging.ERROR),
+        diagnose=LOGURU_DIAGNOSE,
+        level=logging.ERROR,
     )

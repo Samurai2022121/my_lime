@@ -1,7 +1,9 @@
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import pytest
 from django.core.management import call_command
+from django.utils.timezone import get_current_timezone
 from pytest_drf import (
     Returns200,
     Returns201,
@@ -16,7 +18,7 @@ from pytest_drf.util import url_for
 from pytest_lambda import lambda_fixture, static_fixture
 from rest_framework import status
 
-from utils.views_utils import ViewSetTest
+from utils.views_utils import APIViewTest, ViewSetTest
 
 
 @pytest.fixture(scope="module")
@@ -99,6 +101,53 @@ class TestOffersViewSet(ViewSetTest):
             {
                 "condition": {"type": "value", "value": "50.00", "range": 4},
                 "benefit": {"type": "percentage", "value": "5.00", "range": 3},
+                "name": "Проверка создания предложения",
+                "type": "site",
+            }
+        )
+
+    class TestCreateWrongStartEndRange(UsesPostMethod, UsesListEndpoint, Returns400):
+        @pytest.fixture
+        def common_subject(self, staff_client, get_response):
+            return get_response
+
+        data = static_fixture(
+            {
+                "condition": {"type": "value", "value": "50.00", "range": 4},
+                "benefit": {"type": "percentage", "value": "5.00", "range": 3},
+                "started_at": datetime.now(tz=get_current_timezone()),
+                "ended_at": datetime.now(tz=get_current_timezone())
+                - timedelta(hours=1),
+                "name": "Проверка создания предложения",
+                "type": "site",
+            }
+        )
+
+    class TestCreateWrongSchedule(UsesPostMethod, UsesListEndpoint, Returns400):
+        @pytest.fixture
+        def common_subject(self, staff_client, get_response):
+            return get_response
+
+        data = static_fixture(
+            {
+                "condition": {"type": "value", "value": "50.00", "range": 4},
+                "benefit": {"type": "percentage", "value": "5.00", "range": 3},
+                "schedule": "this is not a valid crontab string",
+                "name": "Проверка создания предложения",
+                "type": "site",
+            }
+        )
+
+    class TestCreateWrongDuration(UsesPostMethod, UsesListEndpoint, Returns400):
+        @pytest.fixture
+        def common_subject(self, staff_client, get_response):
+            return get_response
+
+        data = static_fixture(
+            {
+                "condition": {"type": "value", "value": "50.00", "range": 4},
+                "benefit": {"type": "percentage", "value": "5.00", "range": 3},
+                "schedule": "0 0 1 * *",
                 "name": "Проверка создания предложения",
                 "type": "site",
             }
@@ -227,3 +276,26 @@ class TestLoyaltyCardsViewSet(ViewSetTest):
             lambda id: url_for("discounts:loyaltycard-apply", id=id)
         )
         id = static_fixture("69e0a2a6-cacc-4b39-a7b3-02a2759160ac")
+
+
+class TestApplyDiscountToBasket(APIViewTest, UsesPostMethod, Returns200):
+
+    url = lambda_fixture(lambda shop_id: url_for("basket:offers", shop_id=shop_id))
+
+    shop_id = static_fixture(1)
+
+    data = static_fixture(
+        {
+            "lines": [
+                {"product_unit": 1, "quantity": 2},
+                {"product_unit": 2, "quantity": 4},
+                {"product_unit": 3, "quantity": 5},
+                {"product_unit": 4, "quantity": 7},
+            ],
+            "card": "69e0a2a6-cacc-4b39-a7b3-02a2759160ac",
+            "vouchers": [
+                "4cd6fbd4-2597-4751-b555-d653b4640410",
+                "6bb5544d-9248-47ad-a4a0-7f34bdbdd4fc",
+            ],
+        }
+    )
