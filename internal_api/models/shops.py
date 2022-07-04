@@ -89,6 +89,10 @@ class Warehouse(models.Model):
                 check=models.Q(price__gte=0.01) & models.Q(price__lte=9999.99),
                 name="price_range",
             ),
+            models.UniqueConstraint(
+                fields=("shop", "product_unit"),
+                name="unique_product_unit_and_shop",
+            ),
         )
 
     def __str__(self):
