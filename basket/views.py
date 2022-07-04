@@ -15,9 +15,9 @@ from discounts.models import Benefit, Condition, Offer
 from internal_api.models import Warehouse
 from products.models import ProductUnit
 from utils import permissions as perms
+from utils.models_utils import build_offer_subquery
 
 from .serializers import BasketSerializer
-from .utils import build_offer_subquery
 
 
 class ApplicableOffersView(APIView):

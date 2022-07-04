@@ -9,8 +9,7 @@ from rest_framework_nested.serializers import NestedHyperlinkedRelatedField
 from discounts.models import LoyaltyCard, Offer, Voucher
 from internal_api.models import Warehouse
 from products.models import ProductUnit
-
-from .utils import build_offer_subquery
+from utils.models_utils import build_offer_subquery
 
 
 class BasketOfferSerializer(serializers.Serializer):

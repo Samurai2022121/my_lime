@@ -70,6 +70,7 @@ class TestWarehouseViewset(ViewSetTest):
         call_command(
             "loaddata",
             Path(request.fspath).parent / "fixtures" / "units.json",
+            Path(request.fspath).parent / "fixtures" / "warehouses.json",
         )
         return get_response
 
@@ -85,28 +86,12 @@ class TestWarehouseViewset(ViewSetTest):
         )
     )
 
-    data = static_fixture(
-        {
-            "product_unit": 1,
-            "price": Decimal("20.22"),
-        }
-    )
-
     shop_id = static_fixture(1)
 
     class TestList(UsesGetMethod, UsesListEndpoint, Returns200):
         pass
 
     class TestOrderBy(UsesGetMethod, UsesListEndpoint, Returns200):
-        @pytest.fixture
-        def common_subject(self, db, request, staff_client, get_response):
-            call_command(
-                "loaddata",
-                Path(request.fspath).parent / "fixtures" / "units.json",
-                Path(request.fspath).parent / "fixtures" / "warehouses.json",
-            )
-            return get_response
-
         @pytest.fixture
         def list_url(self, list_url):
             return list_url + "?order_by=product_name"
@@ -115,13 +100,15 @@ class TestWarehouseViewset(ViewSetTest):
             assert json[0]["product_unit"]["product"]["name"] == "Тестовое сырьё"
 
     class TestCreate(UsesPostMethod, UsesListEndpoint, Returns201):
-        pass
+        data = static_fixture(
+            {
+                "product_unit": 1,
+                "price": Decimal("20.22"),
+            }
+        )
 
     class TestDetail(UsesGetMethod, UsesDetailEndpoint, Returns200):
-        @pytest.fixture
-        def id(self, client, list_url, data):
-            result = client.post(list_url, data)
-            return result.json()["id"]
+        id = static_fixture(1)
 
 
 class TestWarehouseRecordViewset(ViewSetTest):
