@@ -1,12 +1,35 @@
+import django_filters
 from django.db.models import Q
 from django_filters import rest_framework as filters
+from haystack.inputs import Clean
+from haystack.query import SearchQuerySet
 
 from .models import Personnel
 
 
+class FullTextFilter(django_filters.CharFilter):
+    QUERY_MIN_LENGTH = 2
+
+    def get_search_queryset(self, queryset):
+        return SearchQuerySet().models(queryset.model)
+
+    def filter(self, qs, value):
+        if len(value) >= FullTextFilter.QUERY_MIN_LENGTH:
+            sqs = self.get_search_queryset(qs)
+            for term in value.split():
+                sqs = sqs.filter(content=Clean(term))
+            qs = qs.filter(pk__in=sqs.values_list("pk", flat=True))
+        return qs
+
+
+class PersonnelFullTextFilter(FullTextFilter):
+    def get_search_queryset(self, queryset):
+        sqs = super().get_search_queryset(queryset)
+        return sqs
+
+
 class PersonnelFilter(filters.FilterSet):
-    s = filters.CharFilter(
-        method="search",
+    s = PersonnelFullTextFilter(
         label="поиск по телефону, имени, фамилии",
     )
     is_archived = filters.BooleanFilter(
@@ -17,18 +40,6 @@ class PersonnelFilter(filters.FilterSet):
     class Meta:
         model = Personnel
         fields = ("s", "is_archived")
-
-    def search(self, qs, name, value):
-        return qs.filter(
-            Q(phone_number__icontains=value)
-            | Q(local_passports__first_name__icontains=value)
-            | Q(local_passports__patronymic__icontains=value)
-            | Q(local_passports__last_name__icontains=value)
-            | Q(user__phone_number__icontains=value)
-            | Q(user__first_name__icontains=value)
-            | Q(user__fathers_name__icontains=value)
-            | Q(user__last_name__icontains=value)
-        )
 
     def show_archived(self, qs, name, value):
         if value:

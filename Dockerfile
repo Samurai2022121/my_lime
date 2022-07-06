@@ -14,7 +14,7 @@ ENV DJANGO_DEBUG 1
 ENV V Docerfile
 
 
-RUN apt-get update && apt-get -y install uuid-dev python3-xapian python3-dev graphviz libgraphviz-dev pkg-config
+RUN apt-get update && apt-get -y install uuid-dev python3-xapian python3-dev graphviz libgraphviz-dev pkg-config apt-xapian-index
 
 RUN curl -O https://oligarchy.co.uk/xapian/1.4.19/xapian-core-1.4.19.tar.xz \
     && tar -xvf xapian-core-1.4.19.tar.xz \
