@@ -1,5 +1,6 @@
 from django.db.models import F
 from django_filters import rest_framework as df_filters
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework_nested.viewsets import NestedViewSetMixin
@@ -48,9 +49,21 @@ class ShopViewSet(
         return qs.order_by("name")
 
 
+def allow_all_for_e_shop(perm, request, view):
+    """
+    Allow access to ecommerce warehouses for all. Limit access to other
+    warehouses to staff.
+    """
+    shop = get_object_or_404(
+        models.Shop.objects.all(),
+        id=request.query_params.get("shop"),
+    )
+    return shop.e_shop_base or perms.allow_staff(perm, request, view)
+
+
 class WarehouseViewSet(NestedViewSetMixin, ModelViewSet):
     permission_classes = (
-        perms.ReadWritePermission(read=perms.allow_staff, write=perms.allow_staff),
+        perms.ReadWritePermission(read=allow_all_for_e_shop, write=perms.allow_staff),
     )
     serializer_class = serializers.WarehouseSerializer
     filter_backends = (df_filters.DjangoFilterBackend,)

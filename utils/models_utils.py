@@ -1,10 +1,21 @@
 import sys
 from io import BytesIO
 from random import randint
+from typing import Literal
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.validators import RegexValidator
-from django.db import models
+from django.db.models import (
+    CharField,
+    DateTimeField,
+    Func,
+    JSONField,
+    Model,
+    OuterRef,
+    Q,
+    QuerySet,
+    Subquery,
+)
 from PIL import Image
 
 phone_regex = RegexValidator(
@@ -14,15 +25,15 @@ phone_regex = RegexValidator(
 )
 
 
-class Timestampable(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True, editable=False)
-    updated_at = models.DateTimeField(auto_now=True, editable=False)
+class Timestampable(Model):
+    created_at = DateTimeField(auto_now_add=True, editable=False)
+    updated_at = DateTimeField(auto_now=True, editable=False)
 
     class Meta:
         abstract = True
 
 
-class Enumerable(models.Model):
+class Enumerable(Model):
     """
     If a document number is not provided, generate one.
     """
@@ -30,7 +41,7 @@ class Enumerable(models.Model):
     NUMBER_PREFIX = ""
     NUMBER_DIGITS = 8
 
-    number = models.CharField("номер", max_length=255, unique=True, blank=True)
+    number = CharField("номер", max_length=255, unique=True, blank=True)
 
     def save(self, *args, **kwargs):
         if self.pk is None and not self.number:
@@ -64,7 +75,7 @@ class ListDisplayAllModelFieldsAdminMixin(object):
         super(ListDisplayAllModelFieldsAdminMixin, self).__init__(model, admin_site)
 
 
-class Round(models.Func):
+class Round(Func):
     function = "ROUND"
     template = "%(function)s(%(expressions)s, 2)"
 
@@ -102,3 +113,50 @@ def generate_new_password():
 class classproperty(property):
     def __get__(self, cls, owner):
         return self.fget.__get__(None, owner)()
+
+
+def build_offer_subquery(
+    sqs: QuerySet,
+    by: Literal["condition", "benefit"],
+    outer: str = "pk",
+) -> QuerySet:
+    by += "__range__"
+    return (
+        sqs.filter(
+            Q(**{f"{by}includes_all": True})
+            | Q(**{f"{by}include_product_units": OuterRef(outer)})
+            | Q(**{f"{by}include_products__units": OuterRef(outer)})
+            | Q(**{f"{by}include_categories__products__units": OuterRef(outer)})
+        )
+        .exclude(
+            Q(**{f"{by}exclude_product_units": OuterRef(outer)})
+            | Q(**{f"{by}exclude_products__units": OuterRef(outer)})
+            | Q(**{f"{by}exclude_categories__products__units": OuterRef(outer)})
+        )
+        .order_by("pk")
+        .distinct("pk")
+    )
+
+
+class LiteralJSONField(JSONField):
+    """Returns list or dict instead of bytes."""
+
+    def from_db_value(self, value, expression, connection):
+        return value
+
+
+class ArrayJSONSubquery(Subquery):
+    """Allows a subquery to return an array of rows instead of array of values."""
+
+    template = (
+        "(SELECT array_to_json(coalesce(array_agg(row_to_json(_subquery)),"
+        " array[]::json[])) FROM (%(subquery)s) _subquery)"
+    )
+    output_field = LiteralJSONField()
+
+
+class JSONSubquery(Subquery):
+    """Allows a subquery to return a whole row instead of one value."""
+
+    template = "(SELECT row_to_json(_subquery) FROM (%(subquery)s) _subquery)"
+    output_field = LiteralJSONField()

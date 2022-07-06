@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from pytest_drf import (
     Returns200,
+    Returns202,
     Returns403,
     UsesDetailEndpoint,
     UsesGetMethod,
@@ -13,7 +14,7 @@ from pytest_drf.util import url_for
 from pytest_lambda import lambda_fixture, static_fixture
 from rest_framework.authtoken.models import Token
 
-from utils.views_utils import APIViewTest
+from utils.views_utils import APIViewTest, ViewSetTest
 
 
 class TestObtainPlainTokenForSuperuser(
@@ -103,7 +104,7 @@ class TestObtainPlainTokenForAuthorizedUserser(
     )
 
 
-class TestUserViewSet(APIViewTest):
+class TestUserViewSet(ViewSetTest):
     @pytest.fixture
     def common_subject(self, db, staff_client, get_response):
         return get_response
@@ -124,3 +125,18 @@ class TestUserViewSet(APIViewTest):
             return get_response
 
         url = lambda_fixture(lambda: url_for("users:user-get-current-user"))
+
+
+class TestUserChangePassword(APIViewTest, UsesPostMethod, Returns202):
+    @pytest.fixture
+    def common_subject(self, db, authenticated_client, get_response):
+        return get_response
+
+    url = lambda_fixture(lambda: url_for("users:change-user-password"))
+
+    data = static_fixture(
+        {
+            "new_password": "v3ry53cur3p455w0rd",
+            "new_password_confirm": "v3ry53cur3p455w0rd",
+        }
+    )

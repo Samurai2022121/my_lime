@@ -1,12 +1,19 @@
 from decimal import Decimal
 
+from django.contrib.postgres.expressions import ArrayField
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models.functions import Coalesce
 from rest_framework.exceptions import ValidationError
 
+from discounts.models import Offer
 from products.models import ProductUnit
-from utils.models_utils import Timestampable
+from utils.models_utils import (
+    ArrayJSONSubquery,
+    LiteralJSONField,
+    Timestampable,
+    build_offer_subquery,
+)
 
 
 class Shop(models.Model):
@@ -31,6 +38,7 @@ class WarehouseManager(models.Manager):
 
     def get_queryset(self):
         qs = super().get_queryset()
+        offer_qs = Offer.objects.filter(is_active=True, type=Offer.TYPES.site)
         return qs.annotate(
             recommended_price=(
                 (models.F("margin") + Decimal(100))
@@ -44,6 +52,30 @@ class WarehouseManager(models.Manager):
                 models.Sum("warehouse_records__quantity"),
                 Decimal(0),
                 output_field=models.DecimalField(max_digits=7, decimal_places=2),
+            ),
+            offers=ArrayJSONSubquery(
+                build_offer_subquery(
+                    build_offer_subquery(offer_qs, "benefit", "product_unit_id"),
+                    "condition",
+                    "product_unit_id",
+                )
+                .annotate(
+                    condition_type=models.F("condition__type"),
+                    condition_value=models.F("condition__value"),
+                    benefit_type=models.F("benefit__type"),
+                    benefit_value=models.F("benefit__value"),
+                )
+                .values(
+                    "pk",
+                    "condition_type",
+                    "condition_value",
+                    "benefit_type",
+                    "benefit_value",
+                ),
+                output_field=ArrayField(
+                    LiteralJSONField(),
+                    verbose_name="скидки (упрощённый режим)",
+                ),
             ),
         )
 
@@ -88,6 +120,10 @@ class Warehouse(models.Model):
             models.CheckConstraint(
                 check=models.Q(price__gte=0.01) & models.Q(price__lte=9999.99),
                 name="price_range",
+            ),
+            models.UniqueConstraint(
+                fields=("shop", "product_unit"),
+                name="unique_product_unit_and_shop",
             ),
         )
 

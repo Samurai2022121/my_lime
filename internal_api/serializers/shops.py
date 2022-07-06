@@ -1,6 +1,9 @@
+from decimal import Decimal
+
 from rest_framework import serializers
 from rest_framework_nested.serializers import NestedHyperlinkedIdentityField
 
+from discounts.models import Benefit, Condition
 from products.models import ProductUnit
 from products.serializers import SimpleProductUnitSerializer
 
@@ -72,31 +75,37 @@ class WarehouseRecordSerializer(serializers.ModelSerializer):
 
 class WarehouseSerializer(serializers.ModelSerializer):
     product_unit_on_read = SimpleProductUnitSerializer(
+        label="единица хранения",
         read_only=True,
         source="product_unit",
     )
     product_unit = serializers.PrimaryKeyRelatedField(
+        label="единица хранения",
         write_only=True,
         queryset=ProductUnit.objects,
     )
     remaining = serializers.DecimalField(
+        label="остаток на складе",
         read_only=True,
         max_digits=9,
         decimal_places=4,
     )
     recommended_price = serializers.DecimalField(
+        label="рекомендованная цена",
         read_only=True,
         allow_null=True,
         max_digits=7,
         decimal_places=2,
     )
-    supplier = SupplierSerializer(allow_null=True, required=False)
+    supplier = SupplierSerializer(allow_null=True, required=False, label="поставщик")
     warehouse_records = NestedHyperlinkedIdentityField(
         read_only=True,
         view_name="internal_api:warehouserecord-list",
         lookup_url_kwarg="warehouse_id",
         parent_lookup_kwargs={"shop_id": "shop__id"},
+        label="складские записи",
     )
+    discounted_price = serializers.SerializerMethodField(label="цена со скидкой")
 
     class Meta:
         model = models.Warehouse
@@ -106,6 +115,42 @@ class WarehouseSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         data["product_unit"] = data.pop("product_unit_on_read")
         return data
+
+    def get_discounted_price(self, obj):
+        """
+        This is a simplified version of `basket.views.ApplicableOffersView.post()`.
+        All discounts are applied to each of the positions separately, and only if the
+        offer itself is applicable to a virtual one-position basket, no user data, no
+        cards, no vouchers.
+        """
+        discounted_price = obj.price
+
+        # the instance may be missing annotated fields just after its creation
+        for offer in getattr(obj, "offers", []):
+            condition_value = Decimal(offer["condition_value"])
+            match offer["condition_type"]:
+                case Condition.TYPES.count | Condition.TYPES.coverage:
+                    if condition_value > 1:
+                        continue
+                case Condition.TYPES.value:
+                    if condition_value > obj.price:
+                        continue
+                case _:
+                    continue
+
+            benefit_value = Decimal(offer["benefit_value"])
+            match offer["benefit_type"]:
+                case Benefit.TYPES.percentage:
+                    discounted_price -= discounted_price * benefit_value / 100
+                case Benefit.TYPES.absolute | Benefit.TYPES.multibuy:
+                    discounted_price -= benefit_value
+                case Benefit.TYPES.fixed_price:
+                    discounted_price = benefit_value
+                    break
+                case _:
+                    continue
+
+        return round(discounted_price, 2)
 
 
 class SimpleWarehouseSerializer(serializers.ModelSerializer):

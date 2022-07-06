@@ -35,7 +35,7 @@ class CategorySerializer(serializers.ModelSerializer):
     parent = serializers.SerializerMethodField()
     parent_id = serializers.CharField(write_only=True, required=False)
     image = serializers.FileField(
-        write_only=True,
+        label="изображение категории",
         validators=[FileExtensionValidator(["svg", "png", "jpg"])],
         required=False,
     )
@@ -357,6 +357,7 @@ class ProductAdminSerializer(serializers.ModelSerializer):
 
 class SimpleProductSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
+    images = ProductImageSerializer(many=True, required=False)
 
     class Meta:
         model = Product

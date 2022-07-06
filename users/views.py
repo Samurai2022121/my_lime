@@ -221,7 +221,7 @@ class ChangeUserPasswordAPIView(views.APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = self.request.user
-        user.set_password(raw_password=serializer.data["new_password"])
+        user.set_password(raw_password=serializer.validated_data["new_password"])
         user.save()
         return Response(
             status=status.HTTP_202_ACCEPTED, data={"message": "Пароль успешно изменен."}

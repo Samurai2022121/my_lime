@@ -105,6 +105,10 @@ class WarehouseFilter(django_filters.FilterSet):
         queryset=warehouse_product_unit_qs,
         label="единицы хранения",
     )
+    date = django_filters.DateFromToRangeFilter(
+                field_name="product_unit__product__created_at",
+                label="дата создания продукта",
+    )
     order_by = django_filters.OrderingFilter(
         fields=(
             ("id", "id"),
@@ -114,6 +118,7 @@ class WarehouseFilter(django_filters.FilterSet):
             ("auto_order", "auto_order"),
             ("price", "price"),
             ("margin", "margin"),
+            ("product_unit__product__created_at", "created_at"),
         ),
         field_labels={
             "id": "Warehouse entry id",
@@ -123,6 +128,7 @@ class WarehouseFilter(django_filters.FilterSet):
             "auto_order": "Product auto order status",
             "price": "Price",
             "margin": "Margin",
+            "product_unit__product__created_at": "Product creation date",
         },
     )
 
