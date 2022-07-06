@@ -10,6 +10,7 @@ from rest_framework_nested.serializers import NestedHyperlinkedRelatedField
 
 from products.models import Category, Product, ProductUnit
 from utils.models_utils import phone_regex
+from utils.representation import RepresentationModelSerializer
 
 from .models import Benefit, BuyerCount, Condition, LoyaltyCard, Offer, Range, Voucher
 
@@ -38,7 +39,7 @@ class ConditionSerializer(serializers.ModelSerializer):
         return data
 
 
-class BenefitSerializer(serializers.ModelSerializer):
+class BenefitSerializer(RepresentationModelSerializer):
     range_on_read = serializers.HyperlinkedRelatedField(
         label="диапазоны товаров",
         lookup_field="id",
@@ -56,10 +57,10 @@ class BenefitSerializer(serializers.ModelSerializer):
         model = Benefit
         exclude = ("id",)
 
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data["range"] = data.pop("range_on_read")
-        return data
+    # def to_representation(self, instance):
+    #    data = super().to_representation(instance)
+    #    data["range"] = data.pop("range_on_read")
+    #    return data
 
 
 def crontab_string(value):
