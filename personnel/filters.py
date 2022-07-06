@@ -1,12 +1,19 @@
 from django.db.models import Q
 from django_filters import rest_framework as filters
 
+from utils.filters import FullTextFilter
+
 from .models import Personnel
 
 
+class PersonnelFullTextFilter(FullTextFilter):
+    def get_search_queryset(self, queryset):
+        sqs = super().get_search_queryset(queryset)
+        return sqs
+
+
 class PersonnelFilter(filters.FilterSet):
-    s = filters.CharFilter(
-        method="search",
+    s = PersonnelFullTextFilter(
         label="поиск по телефону, имени, фамилии",
     )
     is_archived = filters.BooleanFilter(
@@ -17,18 +24,6 @@ class PersonnelFilter(filters.FilterSet):
     class Meta:
         model = Personnel
         fields = ("s", "is_archived")
-
-    def search(self, qs, name, value):
-        return qs.filter(
-            Q(phone_number__icontains=value)
-            | Q(local_passports__first_name__icontains=value)
-            | Q(local_passports__patronymic__icontains=value)
-            | Q(local_passports__last_name__icontains=value)
-            | Q(user__phone_number__icontains=value)
-            | Q(user__first_name__icontains=value)
-            | Q(user__fathers_name__icontains=value)
-            | Q(user__last_name__icontains=value)
-        )
 
     def show_archived(self, qs, name, value):
         if value:

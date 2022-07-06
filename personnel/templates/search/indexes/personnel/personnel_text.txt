@@ -1,0 +1,14 @@
+{{object.phone_number}}
+{{object.user.name}}
+{{object.user.surname}}
+{{object.user.fathers_name}}
+{{object.user.phone_number}}
+{{object.user.date_of_birth}}
+{{object.user.registration_date}}
+{{object.delivery.address}}
+{% for delivery_address in object.user.delivery_address.all %}
+  {{ delivery_address.locality }}
+{% endfor %}
+{% for delivery_address in object.user.delivery_address.all %}
+  {{ delivery_address.street }}
+{% endfor %}
