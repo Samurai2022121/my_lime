@@ -19,7 +19,7 @@ from .models import (
     Category,
     MeasurementUnit,
     Product,
-    ProductImages,
+    ProductImage,
     ProductUnit,
     ProductUnitConversion,
 )
@@ -214,11 +214,11 @@ class EditProductImagesViewset(mixins.ListModelMixin, viewsets.GenericViewSet):
         ),
     )
     pagination_class = None
-    serializer_class = serializers.EditProductImagesSerializer
-    queryset = ProductImages.objects.all()
+    serializer_class = serializers.EditProductImageSerializer
+    queryset = ProductImage.objects.all()
     serializer_action_classes = {
-        "bulk_update": serializers.BulkUpdateProductImagesSerializer,
-        "create": serializers.BulkEditProductImagesSerializer,
+        "bulk_update": serializers.BulkUpdateProductImageSerializer,
+        "create": serializers.BulkEditProductImageSerializer,
         "bulk_delete": serializers.BulkActionProductImageSerializer,
     }
 
@@ -232,13 +232,13 @@ class EditProductImagesViewset(mixins.ListModelMixin, viewsets.GenericViewSet):
         return self.queryset.filter(product=product_id)
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer_class()
-        serialized_data = serializer(data=request.data)
-        serialized_data.is_valid(raise_exception=True)
-        for image in serialized_data.data["images"]:
-            product = Product.objects.get(id=image.pop("product"))
-            ProductImages.objects.create(**image, product=product)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        for image in data["images"]:
+            ProductImage.objects.create(**image)
+        return Response(serializer_class(data).data, status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=["post"], url_path="bulk_update")
     def bulk_update(self, request, **kwargs):
@@ -252,7 +252,7 @@ class EditProductImagesViewset(mixins.ListModelMixin, viewsets.GenericViewSet):
             if image:
                 image.update(**instance)
             else:
-                ProductImages.objects.create(**instance, product=product)
+                ProductImage.objects.create(**instance, product=product)
         return Response(status=status.HTTP_202_ACCEPTED)
 
     @action(detail=False, methods=["post"], url_path="bulk-delete")
@@ -261,5 +261,5 @@ class EditProductImagesViewset(mixins.ListModelMixin, viewsets.GenericViewSet):
         serialized_data = serializer(data=request.data)
         serialized_data.is_valid(raise_exception=True)
         image_ids = serialized_data.data["image_ids"]
-        ProductImages.objects.filter(id__in=image_ids).delete()
+        ProductImage.objects.filter(id__in=image_ids).delete()
         return Response(status=status.HTTP_200_OK)

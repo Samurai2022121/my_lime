@@ -1,10 +1,15 @@
+from pathlib import Path
+
+from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.db.models.constraints import UniqueConstraint
 from mptt.models import MPTTModel, TreeForeignKey
-from rest_framework.exceptions import ValidationError
+from sorl.thumbnail.fields import ImageField
 
 from utils.models_utils import Timestampable
+from utils.thumbnail import resize_image
 
 
 class Category(MPTTModel):
@@ -18,10 +23,10 @@ class Category(MPTTModel):
         verbose_name="Родительская категория",
     )
     description = models.TextField(blank=True, null=True, verbose_name="Описание")
-    image = models.FileField(
+    image = ImageField(
         blank=True,
         null=True,
-        verbose_name="Изображение категории",
+        verbose_name="изображение категории",
         upload_to="products/categories/",
         validators=[FileExtensionValidator(["svg", "png", "jpg"])],
     )
@@ -222,34 +227,38 @@ class ProductUnitConversion(models.Model):
         )
 
 
-class ProductImages(models.Model):
+class ProductImage(models.Model):
     product = models.ForeignKey(
-        Product, on_delete=models.CASCADE, related_name="images", verbose_name="Товар"
+        Product,
+        on_delete=models.CASCADE,
+        related_name="images",
+        verbose_name="Товар",
     )
     description = models.CharField(max_length=250, null=True, blank=True)
-    image_1000 = models.ImageField(
+    image = ImageField(
         null=True,
         blank=True,
         upload_to="products/image_1000/",
-        verbose_name="1000x1000, использовать для загрузки оригинала",
-    )
-    image_500 = models.ImageField(
-        null=True, blank=True, upload_to="products/image_500/", verbose_name="500x500"
-    )
-    image_150 = models.ImageField(
-        null=True, blank=True, upload_to="products/image_150/", verbose_name="150x150"
+        verbose_name="оригинал изображения",
     )
     main = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "Изображение товара"
         verbose_name_plural = "Изображения товара"
+        constraints = (
+            UniqueConstraint(
+                fields=("product", "main"),
+                name="one_main_image_per_product",
+                condition=models.Q(main=True),
+            ),
+        )
 
     def __str__(self):
-        return self.product.name
+        return Path(self.image.name).name
 
     def save(self, *args, **kwargs):
-        if self.main and not self.pk:
-            if ProductImages.objects.filter(product=self.product, main=True).exists():
-                raise ValidationError("У товара уже есть основное изображение.")
-        super(ProductImages, self).save()
+        is_created = not self.pk
+        super().save(*args, **kwargs)
+        if is_created and not settings.PRODUCT_IMAGE_PRESERVE_ORIGINAL:
+            resize_image(self.image.path)

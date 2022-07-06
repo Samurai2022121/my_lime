@@ -1,13 +1,12 @@
 from django.contrib import admin
 from mptt.admin import MPTTModelAdmin
-
-from utils.models_utils import ListDisplayAllModelFieldsAdminMixin
+from sorl.thumbnail.admin import AdminInlineImageMixin
 
 from .models import (
     Category,
     MeasurementUnit,
     Product,
-    ProductImages,
+    ProductImage,
     ProductUnit,
     ProductUnitConversion,
 )
@@ -41,12 +40,24 @@ class ProductUnitInline(admin.TabularInline):
         return formset
 
 
+class ProductImageInline(AdminInlineImageMixin, admin.TabularInline):
+    model = ProductImage
+    extra = 1
+
+
 @admin.register(Product)
-class ProductAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
-    inlines = (ProductUnitInline,)
+class ProductAdmin(admin.ModelAdmin):
+    list_display = (
+        "created_at",
+        "updated_at",
+        "name",
+        "short_name",
+        "category",
+        "own_production",
+        "is_archive",
+        "is_sorted",
+        "vat_rate",
+    )
+    list_filter = ("is_sorted", "is_archive", "own_production", "vat_rate")
+    inlines = (ProductUnitInline, ProductImageInline)
     search_fields = ("name", "short_name")
-
-
-@admin.register(ProductImages)
-class ProductImagesAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
-    readonly_fields = ["image_150", "image_500"]

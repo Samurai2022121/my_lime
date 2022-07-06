@@ -12,23 +12,26 @@ Add `.env` file to the base directory. It will be sourced by Django `settings` a
 
 Available settings are:
 
-| Name                     | Type | Meaning                                                                                                   |
-|--------------------------|------|-----------------------------------------------------------------------------------------------------------|
-| SECRET_KEY               | str  | Django secret key                                                                                         |
-| DEBUG                    | bool | Allow debugging                                                                                           |
-| LOGURU_DIAGNOSE          | bool | [Show values in stack trace](https://loguru.readthedocs.io/en/stable/api/logger.html)                     |
-| ALLOWED_HOSTS            | list | A list of hosts Django is allowed to serve                                                                |
-| SENTRY_KEY               | str  | [Sentry API key](https://sentry.thefresh.by/fresh/settings/projects/lime)                                 |
-| SENTRY_PROJECT           | str  | [Sentry project ID](https://sentry.thefresh.by/fresh/settings/projects/lime)                              |
-| ENVIRONMENT              | str  | Environment tag for Sentry (‘Production’, ‘Staging’, or ‘Testing’)                                        |
-| DB_NAME                  | str  | Default database name                                                                                     |
-| DB_USER                  | str  | Default database user's name                                                                              |
-| DB_PASSWORD              | str  | Default database user's password                                                                          |
-| DB_HOST                  | str  | Default database host                                                                                     |
-| DB_PORT                  | int  | Default database port                                                                                     |
-| RF_AUTH_CLASSES          | list | A list of [DRF's authentication classes](https://www.django-rest-framework.org/api-guide/authentication/) |
-| CELERY_BROKER_URL        | str  | Celery broker URL (only Redis is supported)                                                               |
-| CELERY_TASK_ALWAYS_EAGER | bool | Synchronous mode switch. May be useful in debugging.                                                      |
+| Name                            | Type | Meaning                                                                                                   |
+|---------------------------------|------|-----------------------------------------------------------------------------------------------------------|
+| SECRET_KEY                      | str  | Django secret key                                                                                         |
+| DEBUG                           | bool | Allow debugging                                                                                           |
+| LOGURU_DIAGNOSE                 | bool | [Show values in stack trace](https://loguru.readthedocs.io/en/stable/api/logger.html)                     |
+| ALLOWED_HOSTS                   | list | A list of hosts Django is allowed to serve                                                                |
+| SENTRY_KEY                      | str  | [Sentry API key](https://sentry.thefresh.by/fresh/settings/projects/lime)                                 |
+| SENTRY_PROJECT                  | str  | [Sentry project ID](https://sentry.thefresh.by/fresh/settings/projects/lime)                              |
+| ENVIRONMENT                     | str  | Environment tag for Sentry (‘Production’, ‘Staging’, or ‘Testing’)                                        |
+| DB_NAME                         | str  | Default database name                                                                                     |
+| DB_USER                         | str  | Default database user's name                                                                              |
+| DB_PASSWORD                     | str  | Default database user's password                                                                          |
+| DB_HOST                         | str  | Default database host                                                                                     |
+| DB_PORT                         | int  | Default database port                                                                                     |
+| RF_AUTH_CLASSES                 | list | A list of [DRF's authentication classes](https://www.django-rest-framework.org/api-guide/authentication/) |
+| CELERY_BROKER_URL               | str  | Celery broker URL (only Redis is supported)                                                               |
+| CELERY_TASK_ALWAYS_EAGER        | bool | Synchronous mode switch. May be useful in debugging                                                       |
+| THUMBNAIL_DEBUG                 | bool | Log debugging info on thumbnail caching & searching (equals DEBUG by default)                             |
+| THUMBNAIL_REDIS_URL             | str  | Redis database connection string for thumbnail K/V engine (only Redis is supported)                       |
+| PRODUCT_IMAGE_PRESERVE_ORIGINAL | bool | Setting this to `False` (default) saves disk space on product images                                      |
 
 ## Development
 
