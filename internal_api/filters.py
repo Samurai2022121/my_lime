@@ -1,28 +1,11 @@
 import django_filters
 from django.db.models import Q
-from haystack.inputs import Clean, Exact
-from haystack.query import SearchQuerySet
+from haystack.inputs import Exact
 
 from products.models import Category, ProductUnit
+from utils.filters import FullTextFilter
 
 from . import models
-
-
-class FullTextFilter(django_filters.CharFilter):
-    QUERY_MIN_LENGTH = 2
-
-    def get_search_queryset(self, queryset):
-        return SearchQuerySet().models(queryset.model)
-
-    def filter(self, qs, value):
-        # the shorter the search term, the longer the list of keys
-        if len(value) >= FullTextFilter.QUERY_MIN_LENGTH:
-            sqs = self.get_search_queryset(qs)
-            # search for all terms
-            for term in value.split():
-                sqs = sqs.filter(content=Clean(term))
-            qs = qs.filter(pk__in=sqs.values_list("pk", flat=True))
-        return qs
 
 
 class WarehouseFullTextFilter(FullTextFilter):
