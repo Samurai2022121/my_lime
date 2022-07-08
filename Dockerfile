@@ -11,6 +11,7 @@ ENV DB_HOST db
 ENV DB_PORT 5432
 ENV CELERY_BROKER_URL redis://localhost/
 ENV DJANGO_DEBUG 1
+ENV THUMBNAIL_REDIS_URL redis://localhost/
 
 
 RUN apt-get update && apt-get -y install uuid-dev python3-xapian python3-dev graphviz libgraphviz-dev pkg-config apt-xapian-index
