@@ -7,8 +7,7 @@ from .models import Order, OrderLine, OrderLineOffer
 class OrderLineOfferSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderLineOffer
-        # exclude = ("line",)
-        fields = "__all__"
+        exclude = ("line",)
 
 
 class OrderLineSerializer(serializers.ModelSerializer):

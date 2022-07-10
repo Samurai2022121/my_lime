@@ -85,6 +85,8 @@ django-model-utils==4.2.0
     # via -r requirements.in
 django-mptt==0.13.4
     # via -r requirements.in
+django-nested-admin==3.4.0
+    # via -r requirements.in
 django-sql-utils==0.6.1
     # via -r requirements.in
 djangorestframework==3.13.1
@@ -230,6 +232,8 @@ python-docx==0.8.11
     #   docxtpl
 python-environ==0.4.54
     # via -r requirements.in
+python-monkey-business==1.0.0
+    # via django-nested-admin
 pytz==2022.1
     # via
     #   celery
@@ -252,9 +256,11 @@ sentry-sdk==1.5.4
 six==1.16.0
     # via
     #   click-repl
+    #   django-nested-admin
     #   docxcompose
     #   docxtpl
     #   python-dateutil
+    #   python-monkey-business
     #   virtualenv
 sorl-thumbnail==12.8.0
     # via -r requirements.in

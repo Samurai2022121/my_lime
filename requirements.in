@@ -10,6 +10,7 @@ django-haystack==3.2.1
 django-js-asset==1.2.2
 django-model-utils==4.2.0
 django-mptt==0.13.4
+django-nested-admin==3.4.0
 django-sql-utils==0.6.1
 djangorestframework==3.13.1
 djangorestframework-simplejwt==5.0.0
