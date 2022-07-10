@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import models
 from model_utils.managers import InheritanceManager
 
-from utils.models_utils import Enumerable, classproperty
+from utils.models_utils import Enumerable, SuperclassMixin
 
 from .shops import WarehouseRecord
 
@@ -72,7 +72,7 @@ class MoveDocumentManager(models.Manager):
         return qs
 
 
-class PrimaryDocument(Enumerable):
+class PrimaryDocument(SuperclassMixin, Enumerable):
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -91,30 +91,6 @@ class PrimaryDocument(Enumerable):
 
     def __str__(self):
         return f"{self.number} от {self.created_at}"
-
-    @classproperty
-    @classmethod
-    def SUBCLASS_OBJECT_CHOICES(cls):
-        """All known subclasses, keyed by a unique name per class."""
-        return {
-            rel.name: rel.related_model
-            for rel in cls._meta.related_objects
-            if rel.parent_link
-        }
-
-    @classproperty
-    @classmethod
-    def SUBCLASS_CHOICES(cls):
-        """Available subclass choices, with nice names."""
-        return [
-            (name, model._meta.verbose_name)
-            for name, model in cls.SUBCLASS_OBJECT_CHOICES.items()
-        ]
-
-    @classmethod
-    def SUBCLASS(cls, name):
-        """Given a subclass name, return the subclass."""
-        return cls.SUBCLASS_OBJECT_CHOICES.get(name, cls)
 
 
 class ProductionDocument(PrimaryDocument):

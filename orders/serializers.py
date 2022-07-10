@@ -1,15 +1,35 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from .models import Order
+from .models import Order, OrderLine, OrderLineOffer
+
+
+class OrderLineOfferSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderLineOffer
+        # exclude = ("line",)
+        fields = "__all__"
+
+
+class OrderLineSerializer(serializers.ModelSerializer):
+    offers = OrderLineOfferSerializer(many=True)
+
+    class Meta:
+        model = OrderLine
+        exclude = ("document",)
+
+    def to_representation(self, instance):
+        instance = instance.order_line
+        return super().to_representation(instance)
 
 
 class OrdersSerializer(serializers.ModelSerializer):
-    customer = serializers.PrimaryKeyRelatedField(
+    buyer = serializers.PrimaryKeyRelatedField(
         label="покупатель",
         queryset=get_user_model().objects.all(),
         required=False,
     )
+    lines = OrderLineSerializer(many=True)
 
     class Meta:
         model = Order

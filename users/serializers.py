@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, get_user_model
 from django.utils import timezone
 from rest_framework import serializers
 
-from orders.serializers import OrdersSerializer
+# from orders.serializers import OrdersSerializer
 from users.models import CustomerDeliveryAddress, RefreshToken
 
 
@@ -155,7 +155,7 @@ class CustomerDeliveryAddressSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    orders = OrdersSerializer(many=True, read_only=True)
+    # orders = OrdersSerializer(many=True, read_only=True)
     delivery_address = CustomerDeliveryAddressSerializer(many=True, read_only=True)
 
     class Meta:

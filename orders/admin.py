@@ -1,10 +1,15 @@
 from django.contrib import admin
 
-from utils.models_utils import ListDisplayAllModelFieldsAdminMixin
+from .models import Order, OrderLine
 
-from .models import Order
+
+class OrderLineInline(admin.TabularInline):
+    model = OrderLine
+    autocomplete_fields = ("warehouse",)
+    extra = 1
 
 
 @admin.register(Order)
-class OrderAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
-    pass
+class OrderAdmin(admin.ModelAdmin):
+    autocomplete_fields = ("buyer",)
+    inlines = (OrderLineInline,)
