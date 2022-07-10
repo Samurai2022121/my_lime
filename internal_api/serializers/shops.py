@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.urls import reverse_lazy
 from rest_framework import serializers
 from rest_framework_nested.serializers import NestedHyperlinkedIdentityField
 
@@ -83,6 +84,14 @@ class WarehouseSerializer(serializers.ModelSerializer):
         label="единица хранения",
         write_only=True,
         queryset=ProductUnit.objects,
+        style={
+            "base_template": "autocomplete.html",
+            "make_autocomplete": True,
+            "autocomplete_url": reverse_lazy("internal_api:autocomplete"),
+            "app_label": "products",
+            "model_name": "ProductUnit",
+            "filter_string": "unit__name__istartswith",
+        },
     )
     remaining = serializers.DecimalField(
         label="остаток на складе",

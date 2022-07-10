@@ -111,6 +111,7 @@ urlpatterns = [
     path("primary-documents/", include(cancel_records_router.urls)),
     path("primary-documents/", include(return_records_router.urls)),
     path("upload-csv/", views.UploadCSVGenericView.as_view(), name="csv-upload"),
+    path("autocomplete/", views.Autocomplete.as_view(), name="autocomplete"),
 ]
 
 urlpatterns += router.urls

@@ -1,0 +1,34 @@
+{% extends "rest_framework/base.html" %}
+
+{% block head %}
+    {{ block.super }}
+    {{ form.media.js }}
+{% endblock %}
+{% block script %}
+    {{ block.super }}
+    {{ form.media }}
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function(){
+
+            for (const el of document.getElementsByClassName("select-autocomplete")) {
+                el.style.width = "100%";
+                $(`#${el.id}`).select2({
+                  ajax: {
+                    url: `${el.attributes["data-autocomplete-light-url"].value}?app_label=${el.attributes.app_label.value}&model_name=${el.attributes.model_name.value}&filter_string=${el.attributes.filter_string.value}`,
+                    dataType: 'json'
+                  }
+                });
+            }
+        });
+    </script>
+    <style>
+        .select-autocomplete {
+            width: 100%;
+        }
+    </style>
+{% endblock %}
