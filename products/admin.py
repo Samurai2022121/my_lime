@@ -21,6 +21,7 @@ class ProductUnitConversionAdmin(admin.ModelAdmin):
 class CategoryAdmin(MPTTModelAdmin):
     fields = ("name", "parent", "description", "image", "is_excisable")
     search_fields = ("name", "description")
+    list_filter = ("is_excisable",)
 
 
 @admin.register(MeasurementUnit)
