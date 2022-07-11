@@ -36,6 +36,8 @@ from utils.views_utils import (
 from .filters import UserFilter
 from .serializers import AuthTokenSerializer
 
+SMS_TIMEOUT = 60
+
 
 class ObtainAuthTokenIfPermitted(ObtainAuthToken):
 
@@ -130,7 +132,11 @@ class GenerateLoginCodeAPIView(views.APIView):
             "phone": f"+{phone_number}",
             "alphaname_id": settings.SMS_ALPHA_NAME,
         }
-        sms = requests.get("https://app.sms.by/api/v1/sendQuickSMS", params=sms_params)
+        sms = requests.get(
+            "https://app.sms.by/api/v1/sendQuickSMS",
+            params=sms_params,
+            timeout=SMS_TIMEOUT,
+        )
         if sms.status_code == 200 and "error" not in json.loads(sms.content):
             return Response(
                 status=200,
