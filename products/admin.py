@@ -19,7 +19,7 @@ class ProductUnitConversionAdmin(admin.ModelAdmin):
 
 @admin.register(Category)
 class CategoryAdmin(MPTTModelAdmin):
-    fields = ("name", "parent", "description", "image")
+    fields = ("name", "parent", "description", "image", "is_excisable")
     search_fields = ("name", "description")
 
 

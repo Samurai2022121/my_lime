@@ -89,8 +89,8 @@ class WarehouseFilter(django_filters.FilterSet):
         label="единицы хранения",
     )
     date = django_filters.DateFromToRangeFilter(
-                field_name="product_unit__product__created_at",
-                label="дата создания продукта",
+        field_name="product_unit__product__created_at",
+        label="дата создания продукта",
     )
     order_by = django_filters.OrderingFilter(
         fields=(
@@ -113,6 +113,10 @@ class WarehouseFilter(django_filters.FilterSet):
             "margin": "Margin",
             "product_unit__product__created_at": "Product creation date",
         },
+    )
+    is_excisable = django_filters.BooleanFilter(
+        field_name="product_unit__product__category__is_excisable",
+        label="подакцизный",
     )
 
     class Meta:

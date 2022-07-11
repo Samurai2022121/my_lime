@@ -31,6 +31,7 @@ class Category(MPTTModel):
         validators=[FileExtensionValidator(["svg", "png", "jpg"])],
     )
     is_archive = models.BooleanField(default=False)
+    is_excisable = models.BooleanField(default=False, verbose_name="Подакцизный")
 
     class MPTTMeta:
         order_insertion_by = ["name"]
