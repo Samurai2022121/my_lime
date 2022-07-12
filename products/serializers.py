@@ -24,7 +24,7 @@ class CategoryListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ["id", "name", "description", "children", "image"]
+        fields = ["id", "name", "description", "children", "image", "is_excisable"]
 
     def get_children(self, obj):
         serializer = CategoryListSerializer(instance=obj.get_children(), many=True)

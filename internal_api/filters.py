@@ -127,6 +127,10 @@ class WarehouseFilter(django_filters.FilterSet):
             "product_unit__product__created_at": "Product creation date",
         },
     )
+    is_excisable = django_filters.BooleanFilter(
+        field_name="product_unit__product__category__is_excisable",
+        label="подакцизный",
+    )
 
     class Meta:
         model = models.Warehouse
