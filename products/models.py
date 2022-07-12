@@ -30,7 +30,15 @@ class Category(MPTTModel):
         upload_to="products/categories/",
         validators=[FileExtensionValidator(["svg", "png", "jpg"])],
     )
+    image_svg = ImageField(
+        blank=True,
+        null=True,
+        verbose_name="изображение категории для мобильных",
+        upload_to="products/categories/",
+        validators=[FileExtensionValidator(["svg"])],
+    )
     is_archive = models.BooleanField(default=False)
+    is_excisable = models.BooleanField(default=False, verbose_name="Подакцизный")
 
     class MPTTMeta:
         order_insertion_by = ["name"]

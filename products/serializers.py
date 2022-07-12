@@ -24,7 +24,15 @@ class CategoryListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ["id", "name", "description", "children", "image"]
+        fields = [
+            "id",
+            "name",
+            "description",
+            "children",
+            "image",
+            "image_svg",
+            "is_excisable",
+        ]
 
     def get_children(self, obj):
         serializer = CategoryListSerializer(instance=obj.get_children(), many=True)
@@ -39,10 +47,15 @@ class CategorySerializer(serializers.ModelSerializer):
         validators=[FileExtensionValidator(["svg", "png", "jpg"])],
         required=False,
     )
+    image_svg = serializers.FileField(
+        label="изображение категории для мобильного",
+        validators=[FileExtensionValidator(["svg"])],
+        required=False,
+    )
 
     class Meta:
         model = Category
-        fields = ["id", "name", "parent", "parent_id", "image"]
+        fields = ["id", "name", "parent", "parent_id", "image", "image_svg"]
 
     def get_parent(self, obj):
         # do not show empty root parent

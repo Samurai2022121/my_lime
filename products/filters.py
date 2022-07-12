@@ -34,6 +34,10 @@ class ProductFilter(filters.FilterSet):
         method="barcode_filter",
         label="штрихкод",
     )
+    is_excisable = filters.BooleanFilter(
+        field_name="category__is_excisable",
+        label="подакцизный",
+    )
 
     class Meta:
         model = Product
@@ -83,3 +87,9 @@ class ProductUnitFilter(filters.FilterSet):
     class Meta:
         model = ProductUnit
         fields = ("for_resale", "for_scales", "barcode")
+
+
+class CategoryFilter(filters.FilterSet):
+    class Meta:
+        model = Category
+        fields = ("is_excisable",)

@@ -5,6 +5,7 @@ from datetime import timedelta
 import requests
 from django.conf import settings
 from django.utils import timezone
+from loguru import logger
 from rest_framework import status, views, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -34,6 +35,8 @@ from utils.views_utils import (
 
 from .filters import UserFilter
 from .serializers import AuthTokenSerializer
+
+SMS_TIMEOUT = 60
 
 
 class ObtainAuthTokenIfPermitted(ObtainAuthToken):
@@ -129,14 +132,22 @@ class GenerateLoginCodeAPIView(views.APIView):
             "phone": f"+{phone_number}",
             "alphaname_id": settings.SMS_ALPHA_NAME,
         }
-        sms = requests.get("https://app.sms.by/api/v1/sendQuickSMS", params=sms_params)
+        sms = requests.get(
+            "https://app.sms.by/api/v1/sendQuickSMS",
+            params=sms_params,
+            timeout=SMS_TIMEOUT,
+        )
         if sms.status_code == 200 and "error" not in json.loads(sms.content):
             return Response(
                 status=200,
                 data={"message": "Пароль отправлен на указанный мобильный номер."},
             )
         else:
-            print(sms.json())
+            logger.error(
+                f"""Error authenticating user via SMS:
+                request was {sms_params}
+                answer was {sms.status_code}: {sms.content}"""
+            )
             return Response(
                 status=405, data={"message": "Произошла ошибка, попробуйте позже."}
             )

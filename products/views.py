@@ -14,7 +14,7 @@ from utils.views_utils import (
 )
 
 from . import serializers
-from .filters import ProductFilter, ProductUnitFilter
+from .filters import CategoryFilter, ProductFilter, ProductUnitFilter
 from .models import (
     Category,
     MeasurementUnit,
@@ -182,6 +182,8 @@ class CategoryViewset(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet
     lookup_field = "id"
     serializer_action_classes = {"list": serializers.CategoryListSerializer}
     queryset = Category.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = CategoryFilter
 
     def get_serializer_class(self):
         return self.serializer_action_classes.get(

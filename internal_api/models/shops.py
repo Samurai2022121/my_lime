@@ -40,14 +40,12 @@ class WarehouseManager(models.Manager):
         qs = super().get_queryset()
         offer_qs = Offer.objects.filter(is_active=True, type=Offer.TYPES.site)
         return qs.annotate(
-            recommended_price=(
-                (models.F("margin") + Decimal(100))
-                * models.Max(
-                    "warehouse_records__cost",
-                    filter=models.Q(warehouse_records__quantity__gt=Decimal(0)),
-                )
-                / Decimal(100)
+            cost=models.Max(
+                "warehouse_records__cost",
+                filter=models.Q(warehouse_records__quantity__gt=Decimal(0)),
             ),
+            margin_value=models.F("margin") * models.F("cost") / Decimal(100),
+            recommended_price=models.F("cost") + models.F("margin_value"),
             remaining=Coalesce(
                 models.Sum("warehouse_records__quantity"),
                 Decimal(0),
