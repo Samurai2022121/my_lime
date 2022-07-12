@@ -84,6 +84,7 @@ class WarehouseSerializer(serializers.ModelSerializer):
         label="единица хранения",
         write_only=True,
         queryset=ProductUnit.objects,
+        html_cutoff=1,
         style={
             "base_template": "autocomplete.html",
             "make_autocomplete": True,
