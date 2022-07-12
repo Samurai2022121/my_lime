@@ -58,6 +58,8 @@ INSTALLED_APPS = [
     "production",
     "discounts",
     "basket",
+    "dal",
+    "dal_select2",
 ]
 
 MIDDLEWARE = [
@@ -85,7 +87,7 @@ ROOT_URLCONF = "lime.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

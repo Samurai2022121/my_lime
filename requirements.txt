@@ -65,6 +65,8 @@ django==4.0.5
     #   drf-nested-routers
     #   drf-yasg
     #   xapian-haystack
+django-autocomplete-light==3.9.4
+    # via -r requirements.in
 django-cors-headers==3.11.0
     # via -r requirements.in
 django-debug-toolbar==3.2.4
@@ -252,6 +254,7 @@ sentry-sdk==1.5.4
 six==1.16.0
     # via
     #   click-repl
+    #   django-autocomplete-light
     #   docxcompose
     #   docxtpl
     #   python-dateutil

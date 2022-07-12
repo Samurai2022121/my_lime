@@ -1,5 +1,7 @@
 import django_filters
+from dal import autocomplete
 from django.db.models import Q
+from django.urls import reverse_lazy
 from haystack.inputs import Exact
 
 from products.models import Category, ProductUnit
@@ -87,10 +89,21 @@ class WarehouseFilter(django_filters.FilterSet):
     product_unit = django_filters.ModelMultipleChoiceFilter(
         queryset=warehouse_product_unit_qs,
         label="единицы хранения",
+        widget=autocomplete.ModelSelect2Multiple(
+            url=reverse_lazy("internal_api:autocomplete"),
+            attrs={
+                "data-placeholder": "Select product unit",
+                "data-container-css-class": "select-autocomplete",
+                "class": "select-autocomplete",
+                "app_label": "products",
+                "model_name": "ProductUnit",
+                "filter_string": "unit__name__istartswith",
+            },
+        ),
     )
     date = django_filters.DateFromToRangeFilter(
-                field_name="product_unit__product__created_at",
-                label="дата создания продукта",
+        field_name="product_unit__product__created_at",
+        label="дата создания продукта",
     )
     order_by = django_filters.OrderingFilter(
         fields=(
