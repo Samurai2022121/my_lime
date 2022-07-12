@@ -1,4 +1,6 @@
+from django import forms
 from django.contrib import admin
+from django_svg_image_form_field import SvgAndImageFormField
 from mptt.admin import MPTTModelAdmin
 from sorl.thumbnail.admin import AdminInlineImageMixin
 
@@ -17,11 +19,21 @@ class ProductUnitConversionAdmin(admin.ModelAdmin):
     list_display = ("__str__",)
 
 
+class CategoryForm(forms.ModelForm):
+    class Meta:
+        model = Category
+        exclude = []
+        field_classes = {
+            "image_svg": SvgAndImageFormField,
+        }
+
+
 @admin.register(Category)
 class CategoryAdmin(MPTTModelAdmin):
-    fields = ("name", "parent", "description", "image", "is_excisable")
+    fields = ("name", "parent", "description", "image", "image_svg", "is_excisable")
     search_fields = ("name", "description")
     list_filter = ("is_excisable",)
+    form = CategoryForm
 
 
 @admin.register(MeasurementUnit)
