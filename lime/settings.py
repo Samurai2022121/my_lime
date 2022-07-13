@@ -31,6 +31,7 @@ ENVIRONMENT = env("ENVIRONMENT", default="production")
 CORS_ORIGIN_ALLOW_ALL = True
 
 INSTALLED_APPS = [
+    "channels",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -243,3 +244,5 @@ if SENTRY_KEY and SENTRY_PROJECT:
         diagnose=LOGURU_DIAGNOSE,
         level=logging.ERROR,
     )
+
+ASGI_APPLICATION = "lime.asgi.application"

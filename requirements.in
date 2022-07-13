@@ -43,3 +43,4 @@ xapian-bindings==0.1.0
 xapian-haystack==3.0.1
 django-autocomplete-light==3.9.4
 django-svg-image-form-field==1.0.1
+channels==3.0.5
