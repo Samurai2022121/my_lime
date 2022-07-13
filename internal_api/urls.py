@@ -15,6 +15,7 @@ router.register("supplier", views.SupplierViewSet)
 router.register("supply-contracts", views.SupplyContractViewSet)
 router.register("legal-entities", views.LegalEntityViewSet)
 router.register("batches", views.BatchViewSet)
+router.register("order-pay", views.OrderPayView)
 
 warehouse_router = NestedSimpleRouter(router, "outlets", lookup="shop")
 warehouse_router.register("warehouses", views.WarehouseViewSet)
@@ -112,6 +113,9 @@ urlpatterns = [
     path("primary-documents/", include(return_records_router.urls)),
     path("upload-csv/", views.UploadCSVGenericView.as_view(), name="csv-upload"),
     path("autocomplete/", views.Autocomplete.as_view(), name="autocomplete"),
+    path(
+        "alfa-callback/<int:id>", views.AlfaCallBackView.as_view(), name="alfa-callback"
+    ),
 ]
 
 urlpatterns += router.urls

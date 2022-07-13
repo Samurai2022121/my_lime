@@ -38,4 +38,4 @@ class Order(Timestampable, models.Model):
         verbose_name_plural = "Заказы"
 
     def __str__(self):
-        return self.pk
+        return str(self.pk)
