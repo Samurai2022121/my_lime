@@ -21,15 +21,21 @@ def django_db_setup(request, django_db_setup):
     call_command(
         "loaddata",
         Path(request.fspath).parent / "fixtures" / "products.json",
+        Path(request.fspath).parent / "fixtures" / "shops.json",
+        Path(request.fspath).parent / "fixtures" / "units.json",
     )
 
 
 class TestOrdersViewSet(ViewSetTest):
     @pytest.fixture
-    def common_subject(self, db, authenticated_client, get_response):
+    def common_subject(self, db, staff_client, get_response):
         return get_response
 
-    list_url = lambda_fixture(lambda: url_for("orders:order-list"))
+    shop_id = static_fixture(1)
+
+    list_url = lambda_fixture(
+        lambda shop_id: url_for("orders:order-list", shop_id=shop_id)
+    )
 
     class TestList(UsesListEndpoint, UsesGetMethod, Returns200):
         pass
@@ -37,12 +43,11 @@ class TestOrdersViewSet(ViewSetTest):
     class TestCreate(UsesListEndpoint, UsesPostMethod, Returns201):
         data = static_fixture(
             {
+                "buyer": 3,
                 "payment_method": "cash",
-                "payment_status": "ok",
-                "products": [1],
-                "sum_total": 0.0,
+                "lines": [],
             }
         )
 
         def test_customer(self, json):
-            assert json["customer"] == 3
+            assert json["buyer"] == 3
