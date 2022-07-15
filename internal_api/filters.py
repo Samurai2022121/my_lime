@@ -193,3 +193,14 @@ class PrimaryDocumentFilter(django_filters.FilterSet):
     class Meta:
         model = models.PrimaryDocument
         fields = ("created", "number")
+
+
+class AnaliticsFilter(django_filters.FilterSet):
+    created = django_filters.DateFromToRangeFilter(
+        field_name="created_at",
+        label="период времени",
+    )
+
+    class Meta:
+        model = models.PrimaryDocument
+        fields = ("created",)

@@ -254,3 +254,10 @@ class BatchAdmin(admin.ModelAdmin):
         return batch.created_at
 
     created_at.short_description = "дата создания"
+
+
+@admin.register(models.SaleDocument)
+class SaleDocumentAdmin(admin.ModelAdmin):
+    list_display = [
+        "primary_document",
+    ]
