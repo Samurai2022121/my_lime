@@ -8,8 +8,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.db.models import BigAutoField, DecimalField, OuterRef, Subquery
 from django.utils.functional import cached_property
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
-from rest_framework.generics import get_object_or_404
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -23,6 +22,20 @@ from .serializers import BasketSerializer
 
 
 class OfferMixin:
+    """
+    Container for business logic related to finding and applying offers (discounts).
+    """
+
+    @staticmethod
+    def check_outlet(shop_id: int) -> Shop:
+        try:
+            shop = Shop.objects.filter(is_archive=False, e_shop_base=True).get(
+                pk=shop_id
+            )
+        except Shop.DoesNotExist:
+            raise NotFound(detail=f"{shop_id} is not a valid e-store Id.")
+        return shop
+
     @cached_property
     def basket_data(self) -> Dict:
         # input data contains verified model objects
@@ -79,20 +92,7 @@ class OfferMixin:
 
         return qs
 
-
-class ApplicableOffersView(OfferMixin, APIView):
-    """Suggest discounts for a given basket object."""
-
-    serializer_class = BasketSerializer
-    permission_classes = (perms.ActionPermission(default=perms.allow_all),)
-
-    def post(self, request, shop_id, *args, **kwargs):
-        # check if this outlet is allowed to sell online
-        get_object_or_404(
-            Shop.objects.filter(is_archive=False, e_shop_base=True),
-            id=shop_id,
-        )
-
+    def apply_offers(self, shop_id: int) -> Dict:
         lines = self.basket_data["lines"]
 
         # accelerate product unit lookup
@@ -287,13 +287,23 @@ class ApplicableOffersView(OfferMixin, APIView):
                     )
 
         # build output data with applied offers and discount prices
-        output_data = {
+        return {
             "buyer": self.basket_data.get("buyer"),
             "card": self.basket_data.get("card"),
             "vouchers": self.basket_data.get("vouchers", []),
             "lines": lines,
         }
 
+
+class ApplicableOffersView(OfferMixin, APIView):
+    """Suggest discounts for a given basket object."""
+
+    serializer_class = BasketSerializer
+    permission_classes = (perms.ActionPermission(default=perms.allow_all),)
+
+    def post(self, request, shop_id, *args, **kwargs):
+        self.check_outlet(shop_id)
+        output_data = self.apply_offers(shop_id)
         return Response(
             data=BasketSerializer(
                 output_data,
