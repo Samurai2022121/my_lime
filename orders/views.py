@@ -7,12 +7,63 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from rest_framework_nested.viewsets import NestedViewSetMixin
 
 from basket.views import OfferMixin
 from utils import permissions as perms
 
-from .models import Order
-from .serializers import OrderFromBasketSerializer, OrdersSerializer
+from .models import Order, OrderLine, OrderLineOffer
+from .serializers import (
+    NestedOrderLineSerializer,
+    NestedOrderSerializer,
+    OrderFromBasketSerializer,
+    OrderLineOfferSerializer,
+    OrderSerializer,
+)
+
+
+class OrderLineOfferViewset(NestedViewSetMixin, ModelViewSet):
+    permission_classes = (
+        perms.ReadWritePermission(
+            read=perms.allow_authenticated,
+            write=perms.allow_staff,
+        ),
+    )
+    serializer_class = OrderLineOfferSerializer
+    lookup_field = "id"
+    queryset = OrderLineOffer.objects.all()
+    parent_lookup_kwargs = {
+        "line_id": "line__id",
+    }
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        user = self.request.user
+        if not (user.is_superuser or user.is_staff):
+            qs = qs.filter(buyer=user)
+        return qs
+
+
+class OrderLineViewset(NestedViewSetMixin, ModelViewSet):
+    permission_classes = (
+        perms.ReadWritePermission(
+            read=perms.allow_authenticated,
+            write=perms.allow_staff,
+        ),
+    )
+    serializer_class = NestedOrderLineSerializer
+    lookup_field = "id"
+    queryset = OrderLine.objects.all()
+    parent_lookup_kwargs = {
+        "order_id": "document__id",
+    }
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        user = self.request.user
+        if not (user.is_superuser or user.is_staff):
+            qs = qs.filter(buyer=user)
+        return qs
 
 
 class OrderViewset(OfferMixin, ModelViewSet):
@@ -25,13 +76,9 @@ class OrderViewset(OfferMixin, ModelViewSet):
             from_basket=perms.allow_authenticated,
         ),
     )
-    serializer_class = OrdersSerializer
+    serializer_class = NestedOrderSerializer
     lookup_field = "id"
     queryset = Order.objects.all()
-
-    def get_permissions(self):
-        permissions = super().get_permissions()
-        return permissions
 
     @cached_property
     def basket_data(self) -> Dict:
@@ -71,7 +118,7 @@ class OrderViewset(OfferMixin, ModelViewSet):
         order_data["payment_method"] = self.basket_data.get("payment_method")
 
         # save order data as an order
-        serializer = self.get_serializer(
+        serializer = OrderSerializer(
             data=order_data,
             context=self.get_serializer_context(),
         )

@@ -40,6 +40,27 @@ class PrimaryDocument(SuperclassMixin, Enumerable):
         return f"{self.number} от {self.created_at}"
 
 
+class SingleShopDocumentManager(models.Manager):
+    """Annotate a document with the shop fk, if applicable (or null)."""
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        qs = qs.annotate(
+            shop_count=models.Count(
+                "lines__warehouse__shop",
+                distinct=True,
+            ),
+            shop=models.Case(
+                models.When(
+                    shop_count=1,
+                    then=models.F("lines__warehouse__shop"),
+                ),
+                default=None,
+            ),
+        )
+        return qs
+
+
 class Order(PrimaryDocument):
     NUMBER_PREFIX = "OR"
     STATUSES = Choices(
@@ -75,6 +96,8 @@ class Order(PrimaryDocument):
     )
     buyer_comment = models.TextField("примечание покупателя", null=True, blank=True)
     staff_comment = models.TextField("примечание исполнителя", null=True, blank=True)
+
+    objects = SingleShopDocumentManager()
 
     class Meta:
         verbose_name = "заказ"

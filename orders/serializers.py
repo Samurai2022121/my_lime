@@ -1,19 +1,63 @@
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from rest_framework import serializers
+from rest_framework_nested.serializers import NestedHyperlinkedIdentityField
 
 from basket.serializers import BasketSerializer
+from discounts.models import Offer
+from discounts.serializers import OfferSerializer
 
 from .models import Order, OrderLine, OrderLineOffer
 
 
 class OrderLineOfferSerializer(serializers.ModelSerializer):
+    """Universal grandchild serializer."""
+
+    offer = serializers.PrimaryKeyRelatedField(
+        label="предложение",
+        write_only=True,
+        queryset=Offer.objects.all(),
+    )
+    offer_on_read = OfferSerializer(source="offer", label="предложение", read_only=True)
+
     class Meta:
         model = OrderLineOffer
         exclude = ("line",)
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["offer"] = data["offer_on_read"]
+        return data
+
+
+class NestedOrderLineSerializer(serializers.ModelSerializer):
+    """
+    Child serializer for a nested endpoint set, **without** nested write capability.
+    """
+
+    offers = NestedHyperlinkedIdentityField(
+        read_only=True,
+        view_name="orders:orderlineoffer-list",
+        lookup_url_kwarg="line_id",
+        parent_lookup_kwargs={
+            "shop_id": "warehouse__shop__id",
+            "order_id": "document__id",
+        },
+    )
+
+    class Meta:
+        model = OrderLine
+        exclude = ("document",)
+
+    def to_representation(self, instance):
+        # small fix for a weird model layout
+        instance = instance.order_line
+        return super().to_representation(instance)
+
 
 class OrderLineSerializer(serializers.ModelSerializer):
+    """Nested child serializer, with nested create capability."""
+
     offers = OrderLineOfferSerializer(many=True)
 
     class Meta:
@@ -21,6 +65,7 @@ class OrderLineSerializer(serializers.ModelSerializer):
         exclude = ("document",)
 
     def to_representation(self, instance):
+        # small fix for a weird model layout
         instance = instance.order_line
         return super().to_representation(instance)
 
@@ -34,7 +79,34 @@ class OrderLineSerializer(serializers.ModelSerializer):
         return instance
 
 
-class OrdersSerializer(serializers.ModelSerializer):
+class NestedOrderSerializer(serializers.ModelSerializer):
+    """
+    Root serializer for a nested endpoints, **without** nested write capability.
+    """
+
+    buyer = serializers.PrimaryKeyRelatedField(
+        label="покупатель",
+        queryset=get_user_model().objects.all(),
+        required=False,
+    )
+    lines = NestedHyperlinkedIdentityField(
+        label="позиции",
+        read_only=True,
+        view_name="orders:orderline-list",
+        lookup_url_kwarg="order_id",
+        parent_lookup_kwargs={
+            "shop_id": "shop",
+        },
+    )
+
+    class Meta:
+        model = Order
+        fields = "__all__"
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    """Nested create-capable serializer."""
+
     buyer = serializers.PrimaryKeyRelatedField(
         label="покупатель",
         queryset=get_user_model().objects.all(),
@@ -58,6 +130,8 @@ class OrdersSerializer(serializers.ModelSerializer):
 
 
 class OrderFromBasketSerializer(BasketSerializer):
+    """Basket-to-order (ProductUnit-to-Warehouse) source serializer."""
+
     buyer = serializers.PrimaryKeyRelatedField(
         label="покупатель",
         read_only=True,
