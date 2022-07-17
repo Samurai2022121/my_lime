@@ -1,7 +1,7 @@
 import django_filters.rest_framework as filters
 from django.db.models import Q
 
-from .models import BuyerCount, Offer
+from .models import BuyerCount, Offer, Voucher
 
 
 class OfferFilterSet(filters.FilterSet):
@@ -29,3 +29,9 @@ class BuyerCountFilter(filters.FilterSet):
     class Meta:
         model = BuyerCount
         fields = ("buyer",)
+
+
+class VoucherFilter(filters.FilterSet):
+    class Meta:
+        model = Voucher
+        fields = ("offer",)

@@ -1,0 +1,15 @@
+[
+    {
+        "model": "internal_api.warehouseorder",
+        "pk": 1,
+        "fields": {
+            "status": "delivered",
+            "supplier": null,
+            "shop": 1,
+            "number": "AO00000001",
+            "is_archive": false,
+            "created_at": "2022-02-26T02:53:28.947Z",
+            "updated_at": "2022-02-26T02:53:28.947Z"
+        }
+    }
+]

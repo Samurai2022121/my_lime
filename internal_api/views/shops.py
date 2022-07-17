@@ -1,7 +1,9 @@
+from django.db import DatabaseError
 from django.db.models import F
 from django.http import HttpResponse
 from django.views.generic import View
 from django_filters import rest_framework as df_filters
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
@@ -91,7 +93,10 @@ class WarehouseViewSet(NestedViewSetMixin, ModelViewSet):
         return serializer_class
 
     def perform_create(self, serializer):
-        serializer.save(shop_id=self.kwargs.get("shop_id", None))
+        try:
+            serializer.save(shop_id=self.kwargs.get("shop_id", None))
+        except DatabaseError as e:
+            raise ValidationError(str(e))
 
 
 class WarehouseRecordViewSet(NestedViewSetMixin, ModelViewSet):

@@ -100,6 +100,7 @@ class WarehouseFilter(django_filters.FilterSet):
                 "filter_string": "unit__name__istartswith",
             },
         ),
+        distinct=False,
     )
     date = django_filters.DateFromToRangeFilter(
         field_name="product_unit__product__created_at",

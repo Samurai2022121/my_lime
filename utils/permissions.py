@@ -45,11 +45,10 @@ class ActionPermission(BasePermission):
         return False
 
     def has_permission(self, request, view):
-        return getattr(
-            self,
-            f"perm_{getattr(view, 'action', '')}",
-            self.perm_default,
-        )(request, view)
+        action = getattr(view, "action", "default")
+        if action is None:  # for browsable API
+            return True
+        return getattr(self, f"perm_{action}", self.perm_default)(request, view)
 
 
 class ReadWritePermission(ActionPermission):
