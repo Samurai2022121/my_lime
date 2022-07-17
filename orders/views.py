@@ -80,6 +80,12 @@ class OrderViewset(OfferMixin, ModelViewSet):
     lookup_field = "id"
     queryset = Order.objects.all()
 
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        # just created `Order` instance lacks annotated fields,
+        # but `Order.shop` annotation is necessary at this point
+        serializer.instance.shop = self.kwargs["shop_id"]
+
     @cached_property
     def basket_data(self) -> Dict:
         # input data contains verified model objects
@@ -124,4 +130,4 @@ class OrderViewset(OfferMixin, ModelViewSet):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

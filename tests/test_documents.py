@@ -144,7 +144,7 @@ class TestReceiptDocumentViewset(ViewSetTest):
         # load order
         call_command(
             "loaddata",
-            Path(request.fspath).parent / "fixtures" / "orders.json",
+            Path(request.fspath).parent / "fixtures" / "warehouse_orders.json",
         )
 
     list_url = lambda_fixture(lambda: url_for("internal_api:receiptdocument-list"))

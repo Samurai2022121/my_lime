@@ -20,13 +20,20 @@ class OrderLineOfferSerializer(serializers.ModelSerializer):
     )
     offer_on_read = OfferSerializer(source="offer", label="предложение", read_only=True)
 
+    def create(self, validated_data):
+        # line is either provided as an instance from the parent serializer `create()`
+        # method, or as an object ID from the view parameters
+        if line_id := self.context["view"].kwargs.get("line_id"):
+            validated_data["line_id"] = line_id
+        return super().create(validated_data)
+
     class Meta:
         model = OrderLineOffer
         exclude = ("line",)
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data["offer"] = data["offer_on_read"]
+        data["offer"] = data.pop("offer_on_read")
         return data
 
 
@@ -48,6 +55,10 @@ class NestedOrderLineSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderLine
         exclude = ("document",)
+
+    def create(self, validated_data):
+        validated_data["document_id"] = self.context["view"].kwargs["order_id"]
+        return super().create(validated_data)
 
     def to_representation(self, instance):
         # small fix for a weird model layout
