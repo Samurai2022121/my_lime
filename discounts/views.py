@@ -11,7 +11,7 @@ from rest_framework_nested.viewsets import NestedViewSetMixin
 
 from utils import permissions as perms
 
-from .filters import BuyerCountFilter, OfferFilterSet
+from .filters import BuyerCountFilter, OfferFilterSet, VoucherFilter
 from .models import BuyerCount, LoyaltyCard, Offer, Range, Voucher
 from .serializers import (
     BuyerCountSerializer,
@@ -120,6 +120,9 @@ class RangeViewSet(ModelViewSet):
 class VoucherViewSet(ModelViewSet):
     serializer_class = VoucherSerializer
     queryset = Voucher.objects.order_by("-created_at")
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = VoucherFilter
+
     lookup_field = "id"
     permission_classes = (
         perms.ReadWritePermission(
