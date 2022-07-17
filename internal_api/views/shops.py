@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework_nested.viewsets import NestedViewSetMixin
 
-from orders.models import Order
+from orders.models import Order, PaymentResult
 from products.models import Category
 from utils import permissions as perms
 from utils.merchant import merchant
@@ -183,8 +183,18 @@ class BatchViewSet(ModelViewSet):
 class AlfaCallBackView(View):
     def get(self, *args, **kwargs):
         print(self.kwargs)
-        order = Order.objects.get(pk=kwargs.get("id"))
+        payment_result = PaymentResult.objects.get(order_id=kwargs.get("id"))
+        status = merchant.get_status(
+            payment_result.bank_order_id, payment_result.order.pk
+        )
 
-        status = merchant.get_status(order.payment_status, order.pk)
+        print(status)
+
+        payment_result.payment_status = status.get("orderStatus")
+        payment_result.result = status
+        payment_result.save()
+
         if status.get("orderStatus") == 2:
             return HttpResponse("Congratulations", content_type="text/plain")
+        else:
+            return HttpResponse("You have a problem", content_type="text/plain")

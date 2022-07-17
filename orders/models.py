@@ -203,3 +203,24 @@ class OrderLineOffer(models.Model):
     class Meta:
         verbose_name = "применённая скидка"
         verbose_name_plural = "применённые скидки"
+
+
+class PaymentResult(models.Model):
+    order = models.ForeignKey(
+        Order, on_delete=models.PROTECT, related_name="payment_result"
+    )
+    bank_order_id = models.CharField(unique=True, max_length=255)
+    amount = models.DecimalField(
+        "общая сумма",
+        null=True,
+        blank=True,
+        max_digits=7,
+        decimal_places=2,
+    )
+    result = models.JSONField(default=dict, editable=False)
+    payment_status = models.SmallIntegerField()
+
+    class Meta:
+        db_table = "payment_results"
+        verbose_name = "Результат платежа"
+        verbose_name_plural = "Результаты платежей"

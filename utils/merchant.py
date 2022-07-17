@@ -8,9 +8,10 @@ from django.urls import reverse_lazy
 class Merchant:
     def registration_order(self, order):
         return_url = f"{settings.DOMAIN}{reverse_lazy('internal_api:alfa-callback', kwargs={'id': order.pk,})}"
-
         params = {
-            "amount": int(order.sum_total),
+            "amount": int(
+                sum([line.order_line.full_price for line in order.lines.all()]) * 100
+            ),
             "currency": 933,
             "language": "ru",
             "orderNumber": order.pk,
