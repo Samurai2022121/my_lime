@@ -134,7 +134,7 @@ class OfferMixin:
                         f"Unknown condition type: {unknown}"  # noqa: F821
                     )
             try:
-                apply_times = in_basket // offer.condition.value
+                apply_times = int(in_basket // offer.condition.value)
             except (DecimalException, ZeroDivisionError):
                 # `offer.condition.value` should not be 0
                 apply_times = 0
