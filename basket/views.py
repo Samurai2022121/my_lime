@@ -2,17 +2,18 @@ from decimal import Decimal, DecimalException
 from itertools import chain
 from typing import Dict
 
+from django.contrib.auth import get_user_model
 from django.contrib.postgres.expressions import ArraySubquery
 from django.contrib.postgres.fields import ArrayField
 from django.db.models import BigAutoField, DecimalField, OuterRef, Subquery
 from django.utils.functional import cached_property
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from discounts.models import Benefit, Condition, Offer
-from internal_api.models import Warehouse
+from discounts.models import Benefit, Condition, LoyaltyCard, Offer, Voucher
+from internal_api.models import Shop, Warehouse
 from products.models import ProductUnit
 from utils import permissions as perms
 from utils.models_utils import build_offer_subquery
@@ -20,21 +21,79 @@ from utils.models_utils import build_offer_subquery
 from .serializers import BasketSerializer
 
 
-class ApplicableOffersView(APIView):
-    """Suggest discounts for a given basket object."""
+class OfferMixin:
+    """
+    Container for business logic related to finding and applying offers (discounts).
+    """
 
-    serializer_class = BasketSerializer
-    permission_classes = (perms.ActionPermission(default=perms.allow_all),)
+    @staticmethod
+    def check_outlet(shop_id: int) -> Shop:
+        try:
+            shop = Shop.objects.filter(is_archive=False, e_shop_base=True).get(
+                pk=shop_id
+            )
+        except Shop.DoesNotExist:
+            raise NotFound(detail=f"{shop_id} is not a valid e-store Id.")
+        return shop
 
     @cached_property
-    def validated_data(self) -> Dict:
+    def basket_data(self) -> Dict:
         # input data contains verified model objects
-        serializer = self.get_serializer(data=self.request.data)
+        serializer = self.get_serializer(
+            data=self.request.data,
+            context=self.get_serializer_context(),
+        )
         serializer.is_valid(raise_exception=True)
         return serializer.validated_data
 
-    def post(self, request, shop_id, *args, **kwargs):
-        lines = self.validated_data["lines"]
+    @cached_property
+    def buyer(self):
+        buyer = self.request.user
+        # anonymous is not an identity
+        if buyer.is_anonymous:
+            buyer = None
+        # only staff is allowed to provide the user identity, or lack thereof
+        elif buyer.is_superuser or buyer.is_staff:
+            buyer = (
+                get_user_model()
+                .objects.filter(pk=self.request.data.get("buyer"))
+                .first()
+            )
+        return buyer
+
+    @cached_property
+    def card(self):
+        card = LoyaltyCard.objects.filter(pk=self.request.data.get("card")).first()
+        # it's not allowed to use a card that don't match the identity
+        # (or should we use the card owner's identity at this point?)
+        if self.buyer and card and card.buyer != self.buyer:
+            card = None
+        return card
+
+    @cached_property
+    def offer_queryset(self):
+        qs = Offer.objects.filter(is_active=True, type=Offer.TYPES.site)
+
+        if self.buyer is not None:
+            qs |= Offer.objects.filter(is_active=True, type=Offer.TYPES.buyer)
+        if self.card is not None:
+            qs |= Offer.objects.filter(is_active=True, pk=self.card.offer.pk)
+
+        voucher_pks = self.request.data.get("vouchers")
+        if voucher_pks:
+            voucher_subquery = Voucher.objects.filter(
+                pk__in=voucher_pks,
+                is_active=True,
+            )
+            qs |= Offer.objects.filter(
+                is_active=True,
+                pk__in=Subquery(voucher_subquery.values("offer_id")),
+            )
+
+        return qs
+
+    def apply_offers(self, shop_id: int) -> Dict:
+        lines = self.basket_data["lines"]
 
         # accelerate product unit lookup
         unit_dict = {x["product_unit"].pk: x for x in lines}
@@ -201,6 +260,11 @@ class ApplicableOffersView(APIView):
                         f"Unknown benefit type: {unknown}"  # noqa: F821
                     )
 
+        # align the decimal point
+        for line in lines:
+            if line["discounted_price"] is not None:
+                line["discounted_price"] = round(line["discounted_price"], 2)
+
         # prepare warehouse data
         warehouse_qs = Warehouse.objects.filter(
             shop_id=shop_id,
@@ -223,13 +287,23 @@ class ApplicableOffersView(APIView):
                     )
 
         # build output data with applied offers and discount prices
-        output_data = {
-            "buyer": self.validated_data.get("buyer"),
-            "card": self.validated_data.get("card"),
-            "vouchers": self.validated_data.get("vouchers", []),
+        return {
+            "buyer": self.basket_data.get("buyer"),
+            "card": self.basket_data.get("card"),
+            "vouchers": self.basket_data.get("vouchers", []),
             "lines": lines,
         }
 
+
+class ApplicableOffersView(OfferMixin, APIView):
+    """Suggest discounts for a given basket object."""
+
+    serializer_class = BasketSerializer
+    permission_classes = (perms.ActionPermission(default=perms.allow_all),)
+
+    def post(self, request, shop_id, *args, **kwargs):
+        self.check_outlet(shop_id)
+        output_data = self.apply_offers(shop_id)
         return Response(
             data=BasketSerializer(
                 output_data,

@@ -183,5 +183,18 @@
             "for_resale": false,
             "for_scales": false
         }
+    },
+    {
+        "model": "products.productunit",
+        "pk": 5,
+        "fields": {
+            "product": 2,
+            "unit": 1,
+            "weight": null,
+            "packing_weight": null,
+            "barcode": null,
+            "for_resale": false,
+            "for_scales": false
+        }
     }
 ]

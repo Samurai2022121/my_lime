@@ -6,7 +6,8 @@
             "address": "City Test",
             "name": "Test Shop",
             "date_added": "2022-02-12T05:06:59.607Z",
-            "is_archive": false
+            "is_archive": false,
+            "e_shop_base": true
         }
     },
     {
@@ -16,7 +17,8 @@
             "address": "City Test",
             "name": "Another Test Shop",
             "date_added": "2022-02-12T05:06:59.607Z",
-            "is_archive": false
+            "is_archive": false,
+            "e_shop_base": false
         }
     }
 ]

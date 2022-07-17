@@ -6,6 +6,7 @@ from django.core.management import call_command
 from pytest_drf import (
     Returns200,
     Returns201,
+    Returns400,
     Returns404,
     UsesDetailEndpoint,
     UsesGetMethod,
@@ -99,10 +100,18 @@ class TestWarehouseViewset(ViewSetTest):
         def test_first_result(self, json):
             assert json[0]["product_unit"]["product"]["name"] == "Тестовое сырьё"
 
-    class TestCreate(UsesPostMethod, UsesListEndpoint, Returns201):
+    class TestCreateDuplicate(UsesPostMethod, UsesListEndpoint, Returns400):
         data = static_fixture(
             {
                 "product_unit": 1,
+                "price": Decimal("20.22"),
+            }
+        )
+
+    class TestCreate(UsesPostMethod, UsesListEndpoint, Returns201):
+        data = static_fixture(
+            {
+                "product_unit": 5,
                 "price": Decimal("20.22"),
             }
         )

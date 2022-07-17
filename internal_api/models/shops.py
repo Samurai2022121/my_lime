@@ -182,6 +182,22 @@ class WarehouseRecordManager(models.Manager):
         )
 
 
+def validate_batch(rec: "WarehouseRecord"):
+    if rec.batch:
+        product_units = rec.batch.warehouse_records.values_list(
+            "warehouse__product_unit",
+            flat=True,
+        )
+        if product_units.count() > 1:
+            raise ValidationError(f"{rec.batch} is invalid")
+
+        if product_units and rec.warehouse.product_unit.id != product_units[0]:
+            raise ValidationError(
+                f"{rec.batch} represent only"
+                f" {rec.batch.warehouse_records.first().warehouse.product_unit}"
+            )
+
+
 class WarehouseRecord(Timestampable, models.Model):
     batch = models.ForeignKey(
         Batch,
@@ -224,18 +240,5 @@ class WarehouseRecord(Timestampable, models.Model):
         return f"Изменение {self.warehouse}"
 
     def save(self, *args, **kwargs):
-        if self.batch:
-            product_units = self.batch.warehouse_records.values_list(
-                "warehouse__product_unit",
-                flat=True,
-            )
-            if product_units.count() > 1:
-                raise ValidationError(f"{self.batch} is invalid")
-
-            if product_units and self.warehouse.product_unit.id != product_units[0]:
-                raise ValidationError(
-                    f"{self.batch} represent only"
-                    f" {self.batch.warehouse_records.first().warehouse.product_unit}"
-                )
-
+        validate_batch(self)
         super().save(*args, **kwargs)
