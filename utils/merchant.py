@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from urllib.parse import urlencode
 
 import requests
@@ -16,7 +17,9 @@ class Merchant:
             "orderNumber": order_id,
             "returnUrl": return_url,
             "jsonParams": {},
-            "expirationDate": "2022-09-08T14:14:00",
+            "expirationDate": (datetime.now() + timedelta(days=2)).strftime(
+                "%Y-%m-%dT%H:%M:%S"
+            ),
         }
         url = "https://web.rbsuat.com/ab_by/rest/register.do?password={}&userName={}&".format(
             settings.ALFA_AUTH_PASSWORD, settings.ALFA_AUTH_LOGIN
