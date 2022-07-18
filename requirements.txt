@@ -75,7 +75,7 @@ deprecated==1.2.13
     # via redis
 distlib==0.3.4
     # via virtualenv
-django==4.0.5
+django==4.0.6
     # via
     #   -r requirements.in
     #   channels
@@ -114,6 +114,8 @@ django-js-asset==1.2.2
 django-model-utils==4.2.0
     # via -r requirements.in
 django-mptt==0.13.4
+    # via -r requirements.in
+django-nested-admin==3.4.0
     # via -r requirements.in
 django-sql-utils==0.6.1
     # via -r requirements.in
@@ -282,6 +284,8 @@ python-docx==0.8.11
     #   docxtpl
 python-environ==0.4.54
     # via -r requirements.in
+python-monkey-business==1.0.0
+    # via django-nested-admin
 pytz==2022.1
     # via
     #   celery
@@ -308,9 +312,11 @@ six==1.16.0
     #   automat
     #   click-repl
     #   django-autocomplete-light
+    #   django-nested-admin
     #   docxcompose
     #   docxtpl
     #   python-dateutil
+    #   python-monkey-business
     #   service-identity
     #   virtualenv
 sorl-thumbnail==12.8.0

@@ -218,6 +218,7 @@ class BatchAdmin(admin.ModelAdmin):
         "production_date",
         "expiration_date",
     )
+    search_fields = ("warehouse_name",)
     autocomplete_fields = ("supplier",)
     readonly_fields = ("created_at", "warehouse_name")
 

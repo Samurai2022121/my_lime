@@ -3,9 +3,9 @@ from secrets import token_hex
 
 from django.conf import settings
 from django.db import models
-from model_utils.choices import Choices
 
 from internal_api.models import Shop
+from utils.choices import Choices
 from utils.models_utils import Timestampable, phone_regex
 
 

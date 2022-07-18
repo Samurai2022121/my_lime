@@ -160,3 +160,29 @@ class JSONSubquery(Subquery):
 
     template = "(SELECT row_to_json(_subquery) FROM (%(subquery)s) _subquery)"
     output_field = LiteralJSONField()
+
+
+class SuperclassMixin:
+    @classproperty
+    @classmethod
+    def SUBCLASS_OBJECT_CHOICES(cls):
+        """All known subclasses, keyed by a unique name per class."""
+        return {
+            rel.name: rel.related_model
+            for rel in cls._meta.related_objects
+            if rel.parent_link
+        }
+
+    @classproperty
+    @classmethod
+    def SUBCLASS_CHOICES(cls):
+        """Available subclass choices, with nice names."""
+        return [
+            (name, model._meta.verbose_name)
+            for name, model in cls.SUBCLASS_OBJECT_CHOICES.items()
+        ]
+
+    @classmethod
+    def SUBCLASS(cls, name):
+        """Given a subclass name, return the subclass."""
+        return cls.SUBCLASS_OBJECT_CHOICES.get(name, cls)

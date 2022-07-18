@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "django_extensions",
     "haystack",
     "sorl.thumbnail",
+    "nested_admin",
     "news",
     "orders",
     "personnel",
