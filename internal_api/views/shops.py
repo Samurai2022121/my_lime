@@ -1,7 +1,5 @@
 from django.db import DatabaseError
 from django.db.models import F
-from django.http import HttpResponse
-from django.views.generic import View
 from django_filters import rest_framework as df_filters
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
@@ -9,10 +7,8 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework_nested.viewsets import NestedViewSetMixin
 
-from orders.models import Order, PaymentResult
 from products.models import Category
 from utils import permissions as perms
-from utils.merchant import merchant
 from utils.serializers_utils import exclude_field
 from utils.views_utils import (
     BulkChangeArchiveStatusViewSetMixin,
@@ -178,23 +174,3 @@ class BatchViewSet(ModelViewSet):
     filter_backends = (df_filters.DjangoFilterBackend,)
     filterset_class = filters.BatchFilter
     queryset = models.Batch.objects.order_by("created_at")
-
-
-class AlfaCallBackView(View):
-    def get(self, *args, **kwargs):
-        print(self.kwargs)
-        payment_result = PaymentResult.objects.get(order_id=kwargs.get("id"))
-        status = merchant.get_status(
-            payment_result.bank_order_id, payment_result.order.pk
-        )
-
-        print(status)
-
-        payment_result.payment_status = status.get("orderStatus")
-        payment_result.result = status
-        payment_result.save()
-
-        if status.get("orderStatus") == 2:
-            return HttpResponse("Congratulations", content_type="text/plain")
-        else:
-            return HttpResponse("You have a problem", content_type="text/plain")

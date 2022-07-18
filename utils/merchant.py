@@ -6,29 +6,33 @@ from django.urls import reverse_lazy
 
 
 class Merchant:
-    def registration_order(self, order):
-        return_url = f"{settings.DOMAIN}{reverse_lazy('internal_api:alfa-callback', kwargs={'id': order.pk,})}"
+    @staticmethod
+    def registration_order(order_id, amount, currency=933, language="ru"):
+        return_url = f"{settings.DOMAIN}{reverse_lazy('orders:alfa-callback', kwargs={'id': order_id,})}"
         params = {
-            "amount": int(
-                sum([line.order_line.full_price for line in order.lines.all()]) * 100
-            ),
-            "currency": 933,
-            "language": "ru",
-            "orderNumber": order.pk,
+            "amount": amount,
+            "currency": currency,
+            "language": language,
+            "orderNumber": order_id,
             "returnUrl": return_url,
             "jsonParams": {},
             "expirationDate": "2022-09-08T14:14:00",
         }
-        url = "https://web.rbsuat.com/ab_by/rest/register.do?password=Gce7UBpe&userName=thefresh.by-api&"
+        url = "https://web.rbsuat.com/ab_by/rest/register.do?password={}&userName={}&".format(
+            settings.ALFA_AUTH_PASSWORD, settings.ALFA_AUTH_LOGIN
+        )
         r = requests.post("{}{}".format(url, urlencode(params)))
         return r.json()
 
-    def get_status(self, order_id, merchant_order_number):
+    @staticmethod
+    def get_status(order_id, merchant_order_number):
         params = {
             "orderId": order_id,
             "merchantOrderNumber": merchant_order_number,
         }
-        url = "https://web.rbsuat.com/ab_by/rest/getOrderStatusExtended.do?password=Gce7UBpe&userName=thefresh.by-api&"
+        url = "https://web.rbsuat.com/ab_by/rest/getOrderStatusExtended.do?password={}&userName={}&".format(
+            settings.ALFA_AUTH_PASSWORD, settings.ALFA_AUTH_LOGIN
+        )
         r = requests.post("{}{}".format(url, urlencode(params)))
         return r.json()
 

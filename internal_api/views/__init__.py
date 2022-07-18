@@ -1,5 +1,4 @@
 from .autocomplete import Autocomplete
-from .internet_equaring import OrderPayView
 from .primary_documents import (  # noqa
     CancelDocumentViewSet,
     ConversionDocumentViewSet,
@@ -13,7 +12,6 @@ from .primary_documents import (  # noqa
     WriteOffDocumentViewSet,
 )
 from .shops import (  # noqa
-    AlfaCallBackView,
     BatchViewSet,
     ShopViewSet,
     WarehouseForScalesListView,

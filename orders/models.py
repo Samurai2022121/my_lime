@@ -206,8 +206,20 @@ class OrderLineOffer(models.Model):
 
 
 class PaymentResult(models.Model):
+    class PaymentStatuses(models.IntegerChoices):
+        STATUS_0 = 0, "Заказ зарегистрирован, но не оплачен"
+        STATUS_1 = (
+            1,
+            "Предавторизованная сумма захолдирована (для двухстадийных платежей)",
+        )
+        STATUS_2 = 2, "Проведена полная авторизация суммы заказа"
+        STATUS_3 = 3, "Авторизация отменена"
+        STATUS_4 = 4, "По транзакции была проведена операция возврата"
+        STATUS_5 = 5, "Инициирована авторизация через ACS банка-эмитента"
+        STATUS_6 = 6, "Авторизация отклонена"
+
     order = models.ForeignKey(
-        Order, on_delete=models.PROTECT, related_name="payment_result"
+        Order, on_delete=models.PROTECT, related_name="payment_results"
     )
     bank_order_id = models.CharField(unique=True, max_length=255)
     amount = models.DecimalField(
@@ -218,7 +230,11 @@ class PaymentResult(models.Model):
         decimal_places=2,
     )
     result = models.JSONField(default=dict, editable=False)
-    payment_status = models.SmallIntegerField()
+    payment_status = models.PositiveIntegerField(
+        choices=PaymentStatuses.choices,
+        verbose_name="Статус платежа",
+        default=PaymentStatuses.STATUS_0,
+    )
 
     class Meta:
         db_table = "payment_results"
