@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.db import models
-from model_utils.choices import Choices
 from model_utils.managers import InheritanceManager, InheritanceManagerMixin
 
 from discounts.models import Offer
@@ -9,6 +8,7 @@ from internal_api.models.shops import (
     WarehouseRecordManager as BaseWarehouseRecordManager,
 )
 from internal_api.models.shops import validate_batch
+from utils.choices import Choices
 from utils.models_utils import Enumerable, SuperclassMixin, Timestampable
 
 
