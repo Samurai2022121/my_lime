@@ -146,7 +146,10 @@ class OrderPayView(ModelViewSet):
         instance = self.get_object()
         amount = (
             Order.objects.annotate(
-                amount=Sum("lines__discounted_price", output_field=DecimalField())
+                amount=Sum(
+                    "lines__discounted_price",
+                    output_field=DecimalField(max_digits=9, decimal_places=2),
+                )
             )
             .filter(id=instance.pk)
             .first()
