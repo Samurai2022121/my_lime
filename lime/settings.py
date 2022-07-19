@@ -108,6 +108,9 @@ DB_USER = env("DB_USER")
 DB_PASSWORD = env("DB_PASSWORD")
 DB_HOST = env("DB_HOST")
 DB_PORT = env.int("DB_PORT", default=5432)
+DOMAIN = env.int("DOMAIN", default="http://127.0.0.1:8000/")
+ALFA_AUTH_LOGIN = env("ALFA_AUTH_LOGIN")
+ALFA_AUTH_PASSWORD = env("ALFA_AUTH_PASSWORD")
 
 RF_AUTH_CLASSES = env.list(
     "RF_AUTH_CLASSES",
