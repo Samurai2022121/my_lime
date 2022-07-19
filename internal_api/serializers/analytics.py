@@ -1,4 +1,23 @@
 from rest_framework import serializers
+from django_restql.mixins import DynamicFieldsMixin
+
+from internal_api.models.primary_documents import SaleDocument
+from internal_api.serializers.shops import WarehouseRecordSerializer
+
+
+class SaleDocumentSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
+    goods_sold = serializers.SerializerMethodField()
+    warehouse_records = WarehouseRecordSerializer(many=True)
+
+    def get_goods_sold(self, obj):
+        print("<<<<<<<<<<<<<<<<<<<<<<<<<<< 1")
+        print(obj)
+        print("<<<<<<<<<<<<<<<<<<<<<<<<<<< 2")
+        return 0
+
+    class Meta:
+        model = SaleDocument
+        fields = "__all__"
 
 
 class ProductSerializer(serializers.Serializer):

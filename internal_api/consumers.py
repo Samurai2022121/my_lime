@@ -8,7 +8,7 @@ from rest_framework.renderers import JSONRenderer
 
 from internal_api.filters import AnaliticsFilter
 from internal_api.models.primary_documents import SaleDocument
-from internal_api.serializers.analytics import ProductSerializer
+from internal_api.serializers.analytics import ProductSerializer, SaleDocumentSerializer
 
 
 class AnalyticsConsumer(WebsocketConsumer):
@@ -21,6 +21,17 @@ class AnalyticsConsumer(WebsocketConsumer):
     def receive(self, text_data):
         str_io = StringIO(text_data)
         filters = json.load(str_io)
+        sale_documents = AnaliticsFilter(
+            data=filters.get("message"), queryset=SaleDocument.objects
+        ).qs
+        query = "{id,number,goods_sold,warehouse_records}"
+        print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
+        print(sale_documents)
+        print(SaleDocumentSerializer(sale_documents, many=True, query=None).data)
+        print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
+        self.send(text_data=json.dumps({"message": SaleDocumentSerializer(sale_documents, many=True, query=query).data}))
+
+
         result = {}
         for sale_document in AnaliticsFilter(
             data=filters.get("message"), queryset=SaleDocument.objects
@@ -68,4 +79,4 @@ class AnalyticsConsumer(WebsocketConsumer):
         stream = io.BytesIO(content)
         data = JSONParser().parse(stream)
 
-        self.send(text_data=json.dumps({"message": data}))
+        #self.send(text_data=json.dumps({"message": data}))
