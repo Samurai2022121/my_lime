@@ -1,4 +1,5 @@
 from django.contrib import admin
+from ordered_model.admin import OrderedModelAdmin
 
 from utils.models_utils import ListDisplayAllModelFieldsAdminMixin
 
@@ -16,7 +17,7 @@ class ArticleAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(ArticleParagraph)
-class ArticleParagraphAdmin(ListDisplayAllModelFieldsAdminMixin, admin.ModelAdmin):
+class ArticleParagraphAdmin(ListDisplayAllModelFieldsAdminMixin, OrderedModelAdmin):
     pass
 
 

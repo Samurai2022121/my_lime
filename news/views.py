@@ -2,6 +2,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 
 from utils import permissions as perms
+from utils.enums import Permissions
 from utils.views_utils import (
     BulkChangeArchiveStatusViewSetMixin,
     BulkUpdateViewSetMixin,
@@ -56,6 +57,13 @@ class NewsViewset(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = self.queryset
+        if self.request.user.is_authenticated:
+            user_permissions = [
+                Section.Permissions.FOR_ALL.value
+            ] + self.request.user.get_permission()
+            qs = qs.filter(section__permission__in=user_permissions)
+        else:
+            qs = qs.filter(section__permission=Permissions.FOR_ALL.value)
         if "is_archive" not in self.request.query_params:
             qs = qs.filter(is_archive=False)
         return qs

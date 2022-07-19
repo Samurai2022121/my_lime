@@ -1,17 +1,13 @@
 from django.core.validators import FileExtensionValidator
 from django.db import models
-from ordered_model.models import OrderedModel, OrderedModelQuerySet
+from ordered_model.models import OrderedModel
 
 from users.models import User
+from utils.enums import Permissions
 from utils.models_utils import Timestampable
 
 
 class Section(models.Model):
-    class Permissions(models.IntegerChoices):
-        FOR_ALL = 0, "Для всех"
-        FOR_ONLINE_USERS = 1, "Для онлайн пользователей"
-        FOR_OFFLINE_USERS = 2, "Для оффлайн пользователей"
-        FOR_EMPLOYEES = 3, "Для работников"
 
     name = models.CharField(max_length=50, unique=True, verbose_name="Новостной раздел")
     description = models.TextField(verbose_name="Описание")
@@ -58,12 +54,22 @@ class Article(Timestampable, models.Model):
         return self.headline
 
 
-class ArticleParagraph(models.Model):
+class ArticleParagraph(OrderedModel):
     news = models.ForeignKey(
         Article, related_name="news_paragraphs", on_delete=models.PROTECT
     )
     subheadline = models.CharField(max_length=255, null=True)
     text = models.TextField(verbose_name="Текст")
+    order = models.PositiveIntegerField(
+        db_index=True, verbose_name="List order", default=0
+    )
+
+    order_with_respect_to = "news"
+
+    class Meta:
+        ordering = ("order",)
+        verbose_name = "Параграф"
+        verbose_name_plural = "Параграфы"
 
 
 class ArticleParagraphImage(models.Model):
