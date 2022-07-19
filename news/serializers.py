@@ -5,44 +5,46 @@ from rest_framework import serializers
 from reviews.models import Star
 from utils.serializers_utils import AuthorMixin
 
-from .models import News, NewsParagraphs, NewsParagraphsImages, Section
+from .models import Article, ArticleParagraph, ArticleParagraphImage, Section
 
 
-class NewsParagraphsImagesSerializer(
+class ArticleParagraphImageSerializer(
     WritableNestedModelSerializer, serializers.ModelSerializer
 ):
     class Meta:
-        model = NewsParagraphsImages
+        model = ArticleParagraphImage
         fields = "__all__"
 
 
-class NewsParagraphsSerializer(
+class ArticleParagraphSerializer(
     WritableNestedModelSerializer, serializers.ModelSerializer
 ):
-    news_paragraps_images = NewsParagraphsImagesSerializer(many=True)
+    news_paragraphs_images = ArticleParagraphImageSerializer(many=True)
 
     class Meta:
-        model = NewsParagraphs
+        model = ArticleParagraph
         fields = "__all__"
 
 
-class NewsSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+class ArticleSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     stars_count = serializers.SerializerMethodField()
     stared = serializers.SerializerMethodField()
     author = serializers.SerializerMethodField()
-    news_paragraphs = NewsParagraphsSerializer(many=True)
+    news_paragraphs = ArticleParagraphSerializer(many=True)
 
     class Meta:
-        model = News
+        model = Article
         fields = "__all__"
 
     def create(self, validated_data):
         user = self.context["request"].user.id
         validated_data.update({"author_id": user})
-        recipe = News.objects.create(**validated_data)
+        recipe = Article.objects.create(**validated_data)
         return recipe
 
     def get_stars_count(self, obj):
+        print("get_stars_count")
+        print(ContentType.objects.get_for_model(obj))
         return Star.objects.filter(
             content_type=ContentType.objects.get_for_model(obj), object_id=obj.id
         ).count()
@@ -62,12 +64,12 @@ class NewsSerializer(WritableNestedModelSerializer, serializers.ModelSerializer)
         return {"id": obj.author.id, "name": obj.author.name}
 
 
-class NewsAdminSerializer(AuthorMixin, serializers.ModelSerializer):
+class ArticleAdminSerializer(AuthorMixin, serializers.ModelSerializer):
     author_on_read = serializers.SerializerMethodField(source="author", read_only=True)
-    news_paragraphs = NewsParagraphsSerializer(many=True)
+    news_paragraphs = ArticleParagraphSerializer(many=True)
 
     class Meta:
-        model = News
+        model = Article
         fields = "__all__"
 
     def to_representation(self, instance):

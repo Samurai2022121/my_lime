@@ -1,11 +1,18 @@
 from django.core.validators import FileExtensionValidator
 from django.db import models
+from ordered_model.models import OrderedModel, OrderedModelQuerySet
 
 from users.models import User
 from utils.models_utils import Timestampable
 
 
 class Section(models.Model):
+    class Permissions(models.IntegerChoices):
+        FOR_ALL = 0, "Для всех"
+        FOR_ONLINE_USERS = 1, "Для онлайн пользователей"
+        FOR_OFFLINE_USERS = 2, "Для оффлайн пользователей"
+        FOR_EMPLOYEES = 3, "Для работников"
+
     name = models.CharField(max_length=50, unique=True, verbose_name="Новостной раздел")
     description = models.TextField(verbose_name="Описание")
     image = models.FileField(
@@ -14,6 +21,11 @@ class Section(models.Model):
         verbose_name="Изображение",
         upload_to="news/",
         validators=[FileExtensionValidator(["svg", "png", "jpg"])],
+    )
+    permission = models.PositiveIntegerField(
+        choices=Permissions.choices,
+        verbose_name="permission",
+        default=Permissions.FOR_ALL,
     )
 
     class Meta:
@@ -24,7 +36,7 @@ class Section(models.Model):
         return self.name
 
 
-class News(Timestampable, models.Model):
+class Article(Timestampable, models.Model):
     headline = models.CharField(max_length=255, unique=True, verbose_name="Заголовок")
     section = models.ForeignKey(
         Section,
@@ -46,17 +58,19 @@ class News(Timestampable, models.Model):
         return self.headline
 
 
-class NewsParagraphs(models.Model):
+class ArticleParagraph(models.Model):
     news = models.ForeignKey(
-        News, related_name="news_paragraphs", on_delete=models.PROTECT
+        Article, related_name="news_paragraphs", on_delete=models.PROTECT
     )
     subheadline = models.CharField(max_length=255, null=True)
     text = models.TextField(verbose_name="Текст")
 
 
-class NewsParagraphsImages(models.Model):
+class ArticleParagraphImage(models.Model):
     news_paragraphs = models.ForeignKey(
-        NewsParagraphs, related_name="news_paragraphs_images", on_delete=models.PROTECT
+        ArticleParagraph,
+        related_name="news_paragraphs_images",
+        on_delete=models.PROTECT,
     )
     image = models.ImageField(
         null=True, blank=True, verbose_name="Изображение", upload_to="news/"

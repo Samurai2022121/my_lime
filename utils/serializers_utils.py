@@ -3,11 +3,11 @@ from typing import Type
 from rest_framework import serializers
 from sorl.thumbnail import get_thumbnail
 
-from news.models import News
+from news.models import Article
 from products.models import Product
 from recipes.models import Recipe
 
-CONTENT_TYPES = dict(PD=Product, RP=Recipe, NW=News)
+CONTENT_TYPES = dict(PD=Product, RP=Recipe, NW=Article)
 
 
 class BulkUpdateSerializer(serializers.Serializer):

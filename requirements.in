@@ -44,3 +44,4 @@ sorl-thumbnail==12.8.0
 python-dateutil==2.8.2
 xapian-bindings==0.1.0
 xapian-haystack==3.0.1
+django-ordered-model==3.5
