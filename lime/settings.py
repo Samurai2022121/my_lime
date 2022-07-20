@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "basket",
     "dal",
     "dal_select2",
+    "ordered_model",
 ]
 
 MIDDLEWARE = [

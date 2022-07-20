@@ -2,18 +2,19 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 
 from utils import permissions as perms
+from utils.enums import Permissions
 from utils.views_utils import (
     BulkChangeArchiveStatusViewSetMixin,
     BulkUpdateViewSetMixin,
 )
 
 from .filters import NewsFilter
-from .models import News, NewsParagraphs, NewsParagraphsImages, Section
+from .models import Article, ArticleParagraph, ArticleParagraphImage, Section
 from .serializers import (
-    NewsAdminSerializer,
-    NewsParagraphsImagesSerializer,
-    NewsParagraphsSerializer,
-    NewsSerializer,
+    ArticleAdminSerializer,
+    ArticleParagraphImageSerializer,
+    ArticleParagraphSerializer,
+    ArticleSerializer,
     SectionSerializer,
 )
 
@@ -33,9 +34,9 @@ class NewsAdminViewset(
             bulk_update=perms.allow_staff,
         ),
     )
-    serializer_class = NewsAdminSerializer
+    serializer_class = ArticleAdminSerializer
     lookup_field = "id"
-    queryset = News.objects.all()
+    queryset = Article.objects.all()
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -50,12 +51,19 @@ class NewsViewset(viewsets.ModelViewSet):
     permission_classes = (
         perms.ReadWritePermission(read=perms.allow_all, write=perms.allow_staff),
     )
-    serializer_class = NewsSerializer
+    serializer_class = ArticleSerializer
     lookup_field = "id"
-    queryset = News.objects.all()
+    queryset = Article.objects.all()
 
     def get_queryset(self):
         qs = self.queryset
+        if self.request.user.is_authenticated:
+            user_permissions = [
+                Section.Permissions.FOR_ALL.value
+            ] + self.request.user.get_permission()
+            qs = qs.filter(section__permission__in=user_permissions)
+        else:
+            qs = qs.filter(section__permission=Permissions.FOR_ALL.value)
         if "is_archive" not in self.request.query_params:
             qs = qs.filter(is_archive=False)
         return qs
@@ -78,8 +86,8 @@ class NewsParagraphsViewset(
         perms.ReadWritePermission(read=perms.allow_all, write=perms.allow_staff),
     )
     lookup_field = "id"
-    serializer_class = NewsParagraphsSerializer
-    queryset = NewsParagraphs.objects.all()
+    serializer_class = ArticleParagraphSerializer
+    queryset = ArticleParagraph.objects.all()
 
 
 class NewsParagraphsImagesViewset(
@@ -89,5 +97,5 @@ class NewsParagraphsImagesViewset(
         perms.ReadWritePermission(read=perms.allow_all, write=perms.allow_staff),
     )
     lookup_field = "id"
-    serializer_class = NewsParagraphsImagesSerializer
-    queryset = NewsParagraphsImages.objects.all()
+    serializer_class = ArticleParagraphImageSerializer
+    queryset = ArticleParagraphImage.objects.all()
