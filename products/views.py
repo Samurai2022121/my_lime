@@ -180,7 +180,10 @@ class CategoryViewset(BulkChangeArchiveStatusViewSetMixin, viewsets.ModelViewSet
     pagination_class = None
     serializer_class = serializers.CategorySerializer
     lookup_field = "id"
-    serializer_action_classes = {"list": serializers.CategoryListSerializer}
+    serializer_action_classes = {
+        "list": serializers.CategoryListSerializer,
+        "retrieve": serializers.CategoryListSerializer,
+    }
     queryset = Category.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = CategoryFilter
