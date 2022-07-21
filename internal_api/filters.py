@@ -201,6 +201,13 @@ class AnaliticsFilter(django_filters.FilterSet):
         field_name="created_at",
         label="период времени",
     )
+    shop = django_filters.CharFilter(method="shop_filter")
+
+    def shop_filter(self, queryset, name, value):
+        print("filter_shop", value, queryset)
+        if not value:
+            return queryset
+        return queryset.filter(warehouse_records__warehouse__shop_id=value)
 
     class Meta:
         model = models.PrimaryDocument
