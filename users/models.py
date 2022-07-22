@@ -9,6 +9,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from utils.enums import Permissions
 from utils.models_utils import compress_image, generate_new_password, phone_regex
 
 from .managers import CustomUserManager
@@ -84,6 +85,16 @@ class User(AbstractUser):
             "expires_in": expires_in,
             "phone": self.phone_number,
         }
+
+    def get_permission(self):
+        if self.personnel_set:
+            return [
+                Permissions.FOR_EMPLOYEES.value,
+            ]
+        else:
+            return [
+                Permissions.FOR_OFFLINE_USERS.value,
+            ]
 
 
 class RefreshToken(models.Model):

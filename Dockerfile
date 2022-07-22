@@ -32,4 +32,4 @@ COPY . /code
 RUN ls -la /code
 
 RUN pip install -U pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r requirements.in

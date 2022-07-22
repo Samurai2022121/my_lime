@@ -1,7 +1,9 @@
 from typing import AnyStr, Dict, Union
 
-from django.db.models import QuerySet
+from django.db.models import DecimalField, QuerySet, Sum
+from django.http import HttpResponse
 from django.utils.functional import cached_property
+from django.views.generic import View
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.request import Request
@@ -11,8 +13,9 @@ from rest_framework_nested.viewsets import NestedViewSetMixin
 
 from basket.views import OfferMixin
 from utils import permissions as perms
+from utils.merchant import merchant
 
-from .models import Order, OrderLine, OrderLineOffer
+from .models import Order, OrderLine, OrderLineOffer, PaymentResult
 from .serializers import (
     NestedOrderLineSerializer,
     NestedOrderSerializer,
@@ -131,3 +134,48 @@ class OrderViewset(OfferMixin, ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class OrderPayView(ModelViewSet):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    permission_classes = []
+    http_method_names = ["get", "head"]
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        amount = (
+            Order.objects.annotate(
+                amount=Sum(
+                    "lines__discounted_price",
+                    output_field=DecimalField(max_digits=9, decimal_places=2),
+                )
+            )
+            .filter(id=instance.pk)
+            .first()
+            .amount
+        )
+
+        res = merchant.registration_order(instance.pk, int(amount * 100))
+        bank_order_id = res.get("orderId")
+        PaymentResult.objects.create(
+            order=instance,
+            bank_order_id=bank_order_id,
+            payment_status=PaymentResult.PaymentStatuses.STATUS_0,
+            amount=amount,
+        )
+        return Response(res)
+
+
+class AlfaCallBackView(View):
+    def get(self, *args, **kwargs):
+        payment_result = PaymentResult.objects.get(order_id=kwargs.get("id"))
+        status = merchant.get_status(
+            payment_result.bank_order_id, payment_result.order.pk
+        )
+
+        payment_result.payment_status = status.get("orderStatus")
+        payment_result.result = status
+        payment_result.save()
+
+        return HttpResponse("Callback page", content_type="text/plain")

@@ -117,6 +117,8 @@ django-mptt==0.13.4
     # via -r requirements.in
 django-nested-admin==3.4.0
     # via -r requirements.in
+django-ordered-model==3.5
+    # via -r requirements.in
 django-sql-utils==0.6.1
     # via -r requirements.in
 django-svg-image-form-field==1.0.1

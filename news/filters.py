@@ -1,7 +1,7 @@
 import django_filters
 from django.db.models import Q
 
-from .models import News
+from .models import Article
 
 
 class NewsFilter(django_filters.FilterSet):
@@ -12,7 +12,7 @@ class NewsFilter(django_filters.FilterSet):
     )
 
     class Meta:
-        model = News
+        model = Article
         fields = {"is_archive": ["exact"]}
 
     def search(self, qs, name, value):

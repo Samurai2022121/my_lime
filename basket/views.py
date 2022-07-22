@@ -230,17 +230,16 @@ class OfferMixin:
                             discount / unit_line["quantity"]
                         )
                 case Benefit.TYPES.multibuy:
-                    cheapest = (
-                        offer_line["units"]
-                        .values()
-                        .sorted(key=lambda x: x["discounted_price"] * x["quantity"])[0]
-                    )
+                    cheapest = sorted(
+                        offer_line["units"].values(),
+                        key=lambda x: x["discounted_price"] * x["quantity"],
+                    )[0]
                     cheapest["discounted_price"] = Decimal("0.00")
                 case Benefit.TYPES.fixed_price:
-                    price_avail = offer_line["units"].benefit.value
+                    price_avail = offer_line["offer"].benefit.value
                     full_total = sum(
                         x["discounted_price"] * x["quantity"]
-                        for x in offer_line["units"]
+                        for x in offer_line["units"].values()
                     )
                     for unit_line in offer_line["units"].values():
                         price = (

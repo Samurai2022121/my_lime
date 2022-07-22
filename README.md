@@ -32,6 +32,8 @@ Available settings are:
 | THUMBNAIL_DEBUG                 | bool | Log debugging info on thumbnail caching & searching (equals DEBUG by default)                             |
 | THUMBNAIL_REDIS_URL             | str  | Redis database connection string for thumbnail K/V engine (only Redis is supported)                       |
 | PRODUCT_IMAGE_PRESERVE_ORIGINAL | bool | Setting this to `False` (default) saves disk space on product images                                      |
+| ALFA_AUTH_LOGIN                 | str  | Login to alfa pay api                                                                                     |
+| ALFA_AUTH_PASSWORD              | str  | Password to alfa pay api                                                                                     |
 
 ## Development
 
