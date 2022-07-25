@@ -51,11 +51,7 @@ class WarehouseRecordSerializer(DynamicFieldsMixin, serializers.ModelSerializer)
 
 
 class SaleDocumentSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
-    goods_sold = serializers.SerializerMethodField()
     warehouse_records = WarehouseRecordSerializer(many=True)
-
-    def get_goods_sold(self, obj):
-        return 0
 
     class Meta:
         model = SaleDocument
