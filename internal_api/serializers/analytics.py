@@ -5,7 +5,7 @@ from internal_api.models.primary_documents import SaleDocument
 from internal_api.models.shops import Batch, Warehouse, WarehouseRecord
 
 
-class WarehouseSerializer(serializers.ModelSerializer):
+class WarehouseSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
     shop_address = serializers.CharField(source="shop.address")
     product = serializers.CharField(source="product_unit.product.name")
 
@@ -14,7 +14,7 @@ class WarehouseSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class WarehouseRecordSerializer(serializers.ModelSerializer):
+class WarehouseRecordSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
     warehouse = WarehouseSerializer()
 
     batch_on_read = serializers.HyperlinkedRelatedField(
