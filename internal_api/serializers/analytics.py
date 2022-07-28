@@ -50,8 +50,75 @@ class WarehouseRecordSerializer(DynamicFieldsMixin, serializers.ModelSerializer)
         fields = "__all__"
 
 
+class AnalyticsSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    quantity = serializers.DecimalField(decimal_places=2, max_digits=6)
+    cost = serializers.DecimalField(decimal_places=2, max_digits=6)
+    percent = serializers.IntegerField()
+
+
 class SaleDocumentSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
     warehouse_records = WarehouseRecordSerializer(many=True)
+    analytics = serializers.SerializerMethodField()
+
+    def get_analytics(self, obj):
+        products = {}
+
+        for sale_document in self._args[0]:
+            warehouse_record = sale_document.warehouse_records.all().prefetch_related(
+                "warehouse"
+            )
+            for warehouse_record in warehouse_record:
+                product = products.get(
+                    warehouse_record.warehouse.product_unit.product.pk
+                )
+                if product:
+                    quantity = product.get("quantity") + warehouse_record.quantity
+                    cost = product.get("cost") + (
+                        warehouse_record.cost * warehouse_record.quantity
+                    )
+                    product.update(
+                        {
+                            "id": warehouse_record.warehouse.product_unit.product.pk,
+                            "name": warehouse_record.warehouse.product_unit.product.name,
+                            "quantity": quantity,
+                            "cost": cost,
+                        }
+                    )
+                else:
+                    products.update(
+                        {
+                            warehouse_record.warehouse.product_unit.product.pk: {
+                                "quantity": warehouse_record.quantity,
+                                "cost": warehouse_record.cost
+                                * warehouse_record.quantity,
+                                "id": warehouse_record.warehouse.product_unit.product.pk,
+                                "name": warehouse_record.warehouse.product_unit.product.name,
+                            }
+                        }
+                    )
+
+        total = sum(
+            [
+                (p_data.get("cost") / p_data.get("quantity"))
+                for p_id, p_data in products.items()
+            ]
+        )
+        one_percent = total / 100
+
+        for p_id, p_data in products.items():
+
+            p_data.update(
+                {
+                    "percent": round(
+                        (p_data.get("cost") / p_data.get("quantity")) / one_percent
+                    )
+                }
+            )
+            products.update({p_id: p_data})
+
+        return AnalyticsSerializer(list(products.values()), many=True).data
 
     class Meta:
         model = SaleDocument
