@@ -55,7 +55,7 @@ class AnalyticsSerializer(serializers.Serializer):
     name = serializers.CharField()
     quantity = serializers.DecimalField(decimal_places=2, max_digits=6)
     cost = serializers.DecimalField(decimal_places=2, max_digits=6)
-    percent = serializers.IntegerField()
+    popularity = serializers.IntegerField()
 
 
 class SaleDocumentSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
@@ -109,13 +109,7 @@ class SaleDocumentSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
 
         for p_id, p_data in products.items():
 
-            p_data.update(
-                {
-                    "percent": round(
-                        (p_data.get("cost") / p_data.get("quantity")) / one_percent
-                    )
-                }
-            )
+            p_data.update({"popularity": (p_data.get("cost") / p_data.get("quantity"))})
             products.update({p_id: p_data})
 
         return AnalyticsSerializer(list(products.values()), many=True).data
