@@ -229,6 +229,7 @@ class SaleDocument(PrimaryDocument):
         primary_key=True,
         related_name="sale_document",
     )
+    amount_time = models.IntegerField("Количество времени", default=0)
 
     objects = SingleShopDocumentManager()
 
