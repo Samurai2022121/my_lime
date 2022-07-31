@@ -58,8 +58,7 @@ class AnalyticsSerializer(serializers.Serializer):
     popularity = serializers.IntegerField()
 
 
-class SaleDocumentSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
-    warehouse_records = WarehouseRecordSerializer(many=True)
+class PopularitySerializer(serializers.Serializer):
     analytics = serializers.SerializerMethodField()
 
     def get_analytics(self, obj):
@@ -113,6 +112,10 @@ class SaleDocumentSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
             products.update({p_id: p_data})
 
         return AnalyticsSerializer(list(products.values()), many=True).data
+
+
+class SaleDocumentSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
+    warehouse_records = WarehouseRecordSerializer(many=True)
 
     class Meta:
         model = SaleDocument

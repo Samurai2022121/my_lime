@@ -7,7 +7,10 @@ from channels.generic.websocket import WebsocketConsumer
 
 from internal_api.filters import AnaliticsFilter
 from internal_api.models.primary_documents import SaleDocument
-from internal_api.serializers.analytics import SaleDocumentSerializer
+from internal_api.serializers.analytics import (
+    PopularitySerializer,
+    SaleDocumentSerializer,
+)
 
 
 def thread_function(socker, sale_documents, query, interval):
@@ -15,9 +18,12 @@ def thread_function(socker, sale_documents, query, interval):
         socker.send(
             text_data=json.dumps(
                 {
-                    "message": SaleDocumentSerializer(
-                        sale_documents, many=True, query=query
-                    ).data
+                    "analytics": {
+                        "sales": SaleDocumentSerializer(
+                            sale_documents, many=True, query=query
+                        ).data,
+                        "popularity": PopularitySerializer(sale_documents).data,
+                    }
                 }
             )
         )
