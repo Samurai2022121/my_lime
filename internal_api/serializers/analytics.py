@@ -2,7 +2,7 @@ from django_restql.mixins import DynamicFieldsMixin
 from rest_framework import serializers
 
 from internal_api.models.primary_documents import SaleDocument
-from internal_api.models.shops import Batch, Warehouse, WarehouseRecord
+from internal_api.models.shops import Batch, Shop, Warehouse, WarehouseRecord
 
 
 class WarehouseSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
@@ -104,7 +104,6 @@ class PopularitySerializer(serializers.Serializer):
                 for p_id, p_data in products.items()
             ]
         )
-        one_percent = total / 100
 
         for p_id, p_data in products.items():
 
@@ -116,6 +115,31 @@ class PopularitySerializer(serializers.Serializer):
 
 class SaleDocumentSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
     warehouse_records = WarehouseRecordSerializer(many=True)
+
+    class Meta:
+        model = SaleDocument
+        fields = "__all__"
+
+
+class CashiersSerializer(serializers.ModelSerializer):
+    author_name = serializers.SerializerMethodField()
+
+    shop = serializers.PrimaryKeyRelatedField(
+        read_only=True,
+        allow_null=True,
+    )
+    shop_address = serializers.SerializerMethodField()
+
+    def get_shop_address(self, obj):
+        if obj.shop:
+            shop = Shop.objects.get(pk=obj.shop)
+            return shop.address
+        else:
+            return
+
+    def get_author_name(self, obj):
+        return str(obj.author)
+        return f"{obj.author.user.first_name} {obj.author.user.last_name}"
 
     class Meta:
         model = SaleDocument
