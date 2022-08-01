@@ -129,6 +129,10 @@ class CashiersSerializer(serializers.ModelSerializer):
         allow_null=True,
     )
     shop_address = serializers.SerializerMethodField()
+    quantity = serializers.SerializerMethodField()
+
+    def get_quantity(self, obj):
+        return str(sum([record.quantity for record in obj.warehouse_records.all()]))
 
     def get_shop_address(self, obj):
         if obj.shop:
@@ -139,7 +143,6 @@ class CashiersSerializer(serializers.ModelSerializer):
 
     def get_author_name(self, obj):
         return str(obj.author)
-        return f"{obj.author.user.first_name} {obj.author.user.last_name}"
 
     class Meta:
         model = SaleDocument

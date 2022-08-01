@@ -204,7 +204,6 @@ class AnaliticsFilter(django_filters.FilterSet):
     shop = django_filters.CharFilter(method="shop_filter")
 
     def shop_filter(self, queryset, name, value):
-        print("filter_shop", value, queryset)
         if not value:
             return queryset
         return queryset.filter(warehouse_records__warehouse__shop_id=value)
