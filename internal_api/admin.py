@@ -262,3 +262,10 @@ class SaleDocumentAdmin(admin.ModelAdmin):
     list_display = [
         "primary_document",
     ]
+
+
+@admin.register(models.WriteOffDocument)
+class WriteOffDocumentAdmin(admin.ModelAdmin):
+    list_display = [
+        "primary_document",
+    ]

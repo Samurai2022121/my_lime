@@ -211,3 +211,9 @@ class AnaliticsFilter(django_filters.FilterSet):
     class Meta:
         model = models.PrimaryDocument
         fields = ("created",)
+
+
+class WriteOffDocumentFilter(AnaliticsFilter):
+    class Meta:
+        model = models.WriteOffDocument
+        fields = ("created",)
