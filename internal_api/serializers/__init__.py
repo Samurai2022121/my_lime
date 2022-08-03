@@ -1,5 +1,6 @@
 from .primary_documents import (  # noqa
     CancelDocumentSerializer,
+    CheckSerializer,
     ConversionDocumentSerializer,
     GraphAnaliticsSerializer,
     InventoryDocumentSerializer,

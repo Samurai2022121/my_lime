@@ -3,6 +3,7 @@ from .primary_documents import (  # noqa
     CancelDocumentViewSet,
     ConversionDocumentViewSet,
     GraphAnalyticsViewSet,
+    GraphCheckAnalyticsViewSet,
     InventoryDocumentViewSet,
     MoveDocumentViewSet,
     PrimaryDocumentRecordViewSet,

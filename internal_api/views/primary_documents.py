@@ -304,13 +304,12 @@ class GraphAnalyticsViewSet(
     filter_backends = (df_filters.DjangoFilterBackend,)
     filterset_class = filters.GraphAnaliticsFilter
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+class GraphCheckAnalyticsViewSet(
+    ReadOnlyModelViewSet,
+):
+    queryset = models.SaleDocument.objects.order_by("created_at", "number")
+    serializer_class = serializers.CheckSerializer
+    lookup_field = "id"
+    filter_backends = (df_filters.DjangoFilterBackend,)
+    filterset_class = filters.GraphAnaliticsFilter

@@ -99,6 +99,8 @@ return_records_router.register(
     "records", views.PrimaryDocumentRecordViewSet, basename="returnrecord"
 )
 docs_router.register("graph-analytics", views.GraphAnalyticsViewSet)
+docs_router.register("graph-check-analytics", views.GraphCheckAnalyticsViewSet)
+
 
 urlpatterns = [
     path("primary-documents/", include(docs_router.urls)),

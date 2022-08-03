@@ -1,7 +1,9 @@
 import calendar
 import datetime
+import statistics
 from collections import OrderedDict
 from decimal import Decimal
+from itertools import chain
 
 from drf_writable_nested import NestedCreateMixin
 from rest_framework import serializers
@@ -715,4 +717,58 @@ class GraphAnaliticsSerializer(serializers.Serializer):
         return result.values()
 
     class Meta:
+        fields = "__all__"
+
+
+class CheckSerializer(serializers.Serializer):
+    # warehouse_records = SaleRecordSerializer(many=True, write_only=True)
+    # warehouse_records_on_read = serializers.HyperlinkedIdentityField(
+    #    read_only=True,
+    #    view_name="internal_api:salerecord-list",
+    #    lookup_url_kwarg="document_id",
+    # )
+    checks = serializers.SerializerMethodField()
+
+    average_check = serializers.SerializerMethodField()
+    number_of_goods = serializers.SerializerMethodField()
+    proceeds = serializers.SerializerMethodField()
+
+    def get_proceeds(self, obj):
+        l = [
+            [
+                (record.cost * record.quantity)
+                for record in document.warehouse_records.all()
+            ]
+            for document in self._args[0]
+        ]
+
+        return sum(list(chain.from_iterable(l)))
+
+    def get_number_of_goods(self, obj):
+        l = [
+            [record.quantity for record in document.warehouse_records.all()]
+            for document in self._args[0]
+        ]
+
+        return sum(list(chain.from_iterable(l)))
+
+    def get_checks(self, obj):
+        return SaleDocumentSerializer(
+            self._args[0], many=True, context=self.context
+        ).data
+
+    def get_average_check(self, obj):
+
+        l = [
+            [
+                (record.cost * record.quantity)
+                for record in document.warehouse_records.all()
+            ]
+            for document in self._args[0]
+        ]
+
+        return statistics.mean(list(chain.from_iterable(l)))
+
+    class Meta:
+        model = models.SaleDocument
         fields = "__all__"
