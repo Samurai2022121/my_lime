@@ -1,3 +1,7 @@
+import calendar
+import datetime
+from calendar import monthrange
+
 import django_filters
 from dal import autocomplete
 from django.db.models import Q
@@ -216,4 +220,55 @@ class AnaliticsFilter(django_filters.FilterSet):
 class WriteOffDocumentFilter(AnaliticsFilter):
     class Meta:
         model = models.WriteOffDocument
+        fields = ("created",)
+
+
+class GraphAnaliticsFilter(AnaliticsFilter):
+    period = django_filters.CharFilter(method="period_filter")
+
+    def period_filter(self, queryset, name, value):
+        DAY = "day"
+        WEEK = "week"
+        MONTH = "month"
+
+        if value not in ("day", "week", "month"):
+            return queryset
+
+        current_date = datetime.datetime.now()
+        year = current_date.year
+        month = current_date.month
+        day = current_date.day
+
+        if value == DAY:
+            print("<<<<<<<<<<<<<<<<<<<<")
+            print(DAY, value, datetime.datetime.now())
+            print("<<<<<<<<<<<<<<<<<<<<")
+            return queryset.filter(created_at=current_date)
+        elif value == WEEK:
+            print(year, month, day)
+            weekday = calendar.weekday(year, month, day)
+            print(calendar.weekday(year, month, day))
+
+            first_week_day_date = current_date - datetime.timedelta(days=weekday)
+            last_week_day_date = current_date + datetime.timedelta(days=(6 - weekday))
+            print("<<<<<<<<<<<<<<<<<<<<")
+            print(WEEK, value, queryset)
+            print("<<<<<<<<<<<<<<<<<<<<")
+            return queryset.filter(
+                created_at__range=[first_week_day_date, last_week_day_date]
+            )
+        else:
+            num_days = monthrange(year, month)[1]  # num_days = 28
+            first_month_day_date = datetime.date(year, month, 1)
+            last_month_day_date = datetime.date(year, month, num_days)
+            print("<<<<<<<<<<<<<<<<<<<<")
+            print(MONTH, value, datetime.datetime.now())
+            print("<<<<<<<<<<<<<<<<<<<<")
+            return queryset.filter(
+                created_at__range=[first_month_day_date, last_month_day_date]
+            )
+        return queryset
+
+    class Meta:
+        model = models.PrimaryDocument
         fields = ("created",)

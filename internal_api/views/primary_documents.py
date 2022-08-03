@@ -3,6 +3,7 @@ from django.utils.decorators import method_decorator
 from django_filters import rest_framework as df_filters
 from rest_framework.exceptions import APIException
 from rest_framework.mixins import CreateModelMixin, DestroyModelMixin
+from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.status import HTTP_409_CONFLICT
 from rest_framework.viewsets import ReadOnlyModelViewSet
@@ -292,3 +293,24 @@ class CancelDocumentViewSet(
                 )
             )
         models.WarehouseRecord.objects.bulk_create(records)
+
+
+class GraphAnalyticsViewSet(
+    ReadOnlyModelViewSet,
+):
+    queryset = models.SaleDocument.objects.order_by("created_at", "number")
+    serializer_class = serializers.GraphAnaliticsSerializer
+    lookup_field = "id"
+    filter_backends = (df_filters.DjangoFilterBackend,)
+    filterset_class = filters.GraphAnaliticsFilter
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)

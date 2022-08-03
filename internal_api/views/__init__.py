@@ -2,6 +2,7 @@ from .autocomplete import Autocomplete
 from .primary_documents import (  # noqa
     CancelDocumentViewSet,
     ConversionDocumentViewSet,
+    GraphAnalyticsViewSet,
     InventoryDocumentViewSet,
     MoveDocumentViewSet,
     PrimaryDocumentRecordViewSet,

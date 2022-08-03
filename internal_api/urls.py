@@ -98,6 +98,7 @@ return_records_router = NestedSimpleRouter(docs_router, "return", lookup="docume
 return_records_router.register(
     "records", views.PrimaryDocumentRecordViewSet, basename="returnrecord"
 )
+docs_router.register("graph-analytics", views.GraphAnalyticsViewSet)
 
 urlpatterns = [
     path("primary-documents/", include(docs_router.urls)),

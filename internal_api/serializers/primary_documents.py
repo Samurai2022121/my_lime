@@ -1,3 +1,5 @@
+import calendar
+import datetime
 from collections import OrderedDict
 from decimal import Decimal
 
@@ -634,4 +636,83 @@ class CancelDocumentSerializer(AuthorMixin, serializers.ModelSerializer):
 
     class Meta:
         model = models.CancelDocument
+        fields = "__all__"
+
+
+class GraphAnaliticsSerializer(serializers.Serializer):
+    sales = serializers.SerializerMethodField()
+
+    def get_previous_data(self, current_date, period):
+        if period in (None, "month", "day"):
+            year, month = calendar._prevmonth(current_date.year, current_date.month)
+            return sum(
+                [
+                    sum(
+                        (record.cost * record.quantity)
+                        for record in doc.warehouse_records.all()
+                    )
+                    for doc in models.SaleDocument.objects.filter(
+                        created_at=datetime.date(year, month, current_date.day)
+                    )
+                ]
+            )
+        else:
+            previous_data = datetime.date(
+                current_date.year, current_date.month, current_date.day
+            ) - datetime.timedelta(days=7)
+            return sum(
+                [
+                    sum(
+                        (record.cost * record.quantity)
+                        for record in doc.warehouse_records.all()
+                    )
+                    for doc in models.SaleDocument.objects.filter(
+                        created_at=previous_data
+                    )
+                ]
+            )
+
+    def get_sales(self, obj):
+        period = self._kwargs.get("context").get("request").query_params.get("period")
+        result = {}
+
+        for document in self._args[0]:
+            if result.get(document.created_at):
+                item = result.get(document.created_at)
+                current = item.get("current")
+                item.update(
+                    {
+                        "current": (
+                            current
+                            + sum(
+                                (record.cost * record.quantity)
+                                for record in document.warehouse_records.all()
+                            )
+                        )
+                    }
+                )
+                result.update({document.created_at: item})
+            else:
+                result.update(
+                    {
+                        str(document.created_at): {
+                            "date": document.created_at,
+                            "weekday": calendar.weekday(
+                                document.created_at.year,
+                                document.created_at.month,
+                                document.created_at.day,
+                            ),
+                            "current": sum(
+                                (record.cost * record.quantity)
+                                for record in document.warehouse_records.all()
+                            ),
+                            "previous": self.get_previous_data(
+                                document.created_at, period
+                            ),
+                        }
+                    }
+                )
+        return result.values()
+
+    class Meta:
         fields = "__all__"
