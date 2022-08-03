@@ -121,6 +121,9 @@ class SaleDocumentSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
         fields = "__all__"
 
 
+from users.serializers import UserSerializer
+
+
 class CashiersSerializer(serializers.ModelSerializer):
     author_name = serializers.SerializerMethodField()
 
@@ -130,6 +133,7 @@ class CashiersSerializer(serializers.ModelSerializer):
     )
     shop_address = serializers.SerializerMethodField()
     quantity = serializers.SerializerMethodField()
+    user = UserSerializer(source="author")
 
     def get_quantity(self, obj):
         return str(sum([record.quantity for record in obj.warehouse_records.all()]))

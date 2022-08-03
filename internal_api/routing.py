@@ -7,5 +7,4 @@ websocket_urlpatterns = [
         r"ws/analytics/(?P<room_name>\w+)/$", consumers.AnalyticsConsumer.as_asgi()
     ),
     path("ws/cashiers/", consumers.AnalyticsCashiersConsumer.as_asgi()),
-    path("ws/write-off/", consumers.WriteOffConsumer.as_asgi()),
 ]

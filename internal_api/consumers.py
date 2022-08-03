@@ -41,26 +41,6 @@ def send_cashiers_function(socker, sale_documents, query, interval):
         time.sleep(interval)
 
 
-def send_write_offs(socker, filter_params, interval):
-    while True:
-        write_off_documents = WriteOffDocumentFilter(
-            data=filter_params, queryset=WriteOffDocument.objects
-        ).qs
-        write_off_value = sum(
-            [
-                sum(
-                    [
-                        (record.quantity * record.cost)
-                        for record in write_off_document.warehouse_records.all()
-                    ]
-                )
-                for write_off_document in write_off_documents
-            ]
-        )
-        socker.send(text_data=json.dumps({"write_off_value": str(write_off_value)}))
-        time.sleep(interval)
-
-
 class AnalyticsConsumer(WebsocketConsumer):
     def connect(self):
         self.accept()
@@ -107,27 +87,5 @@ class AnalyticsCashiersConsumer(WebsocketConsumer):
             target=send_cashiers_function,
             name="cashiers",
             args=(self, sale_documents, query, interval),
-        )
-        x.start()
-
-
-class WriteOffConsumer(WebsocketConsumer):
-    def connect(self):
-        self.accept()
-
-    def disconnect(self, close_code):
-        self.close(close_code)
-
-    def receive(self, text_data):
-        str_io = StringIO(text_data)
-        query_params = json.load(str_io)
-        filter_params = query_params.get("filters")
-
-        interval = int(query_params.get("interval"))
-
-        x = threading.Thread(
-            target=send_write_offs,
-            name="write_off",
-            args=(self, filter_params, interval),
         )
         x.start()
